@@ -616,6 +616,122 @@ All projects undergo rigorous, cross-judge score normalization and Bradley-Terry
     },
   });
 
+  // Project 3 Evaluations
+  await prisma.evaluation.create({
+    data: {
+      eventId: event.id,
+      judgeId: jBalanced.id,
+      projectId: proj3.id,
+      isDraft: false,
+      weightedTotal: 80.0,
+      feedback: 'Great developer tool with high practical utility.',
+      scores: {
+        create: [
+          { criterionId: c0, score: 8 },
+          { criterionId: c1, score: 8 },
+          { criterionId: c2, score: 9 },
+          { criterionId: c3, score: 7 },
+        ],
+      },
+    },
+  });
+
+  await prisma.evaluation.create({
+    data: {
+      eventId: event.id,
+      judgeId: jSpecialist.id,
+      projectId: proj3.id,
+      isDraft: false,
+      weightedTotal: 83.0,
+      feedback: 'Very thoughtful design and resilient query layer.',
+      scores: {
+        create: [
+          { criterionId: c0, score: 9 },
+          { criterionId: c1, score: 8 },
+          { criterionId: c2, score: 8 },
+          { criterionId: c3, score: 8 },
+        ],
+      },
+    },
+  });
+
+  await prisma.evaluation.create({
+    data: {
+      eventId: event.id,
+      judgeId: jLenient.id,
+      projectId: proj3.id,
+      isDraft: false,
+      weightedTotal: 92.0,
+      feedback: 'Love this devtool, huge speedup for workflows!',
+      scores: {
+        create: [
+          { criterionId: c0, score: 9 },
+          { criterionId: c1, score: 9 },
+          { criterionId: c2, score: 10 },
+          { criterionId: c3, score: 9 },
+        ],
+      },
+    },
+  });
+
+  // Project 4 Evaluations
+  await prisma.evaluation.create({
+    data: {
+      eventId: event.id,
+      judgeId: jHarsh.id,
+      projectId: proj4.id,
+      isDraft: false,
+      weightedTotal: 65.0,
+      feedback: 'Hardware prototype is interesting, but deployment at scale is challenging.',
+      scores: {
+        create: [
+          { criterionId: c0, score: 6 },
+          { criterionId: c1, score: 7 },
+          { criterionId: c2, score: 7 },
+          { criterionId: c3, score: 6 },
+        ],
+      },
+    },
+  });
+
+  await prisma.evaluation.create({
+    data: {
+      eventId: event.id,
+      judgeId: jBalanced.id,
+      projectId: proj4.id,
+      isDraft: false,
+      weightedTotal: 75.0,
+      feedback: 'Strong environmental impact potential and well-scoped sensor architecture.',
+      scores: {
+        create: [
+          { criterionId: c0, score: 8 },
+          { criterionId: c1, score: 7 },
+          { criterionId: c2, score: 8 },
+          { criterionId: c3, score: 7 },
+        ],
+      },
+    },
+  });
+
+  await prisma.evaluation.create({
+    data: {
+      eventId: event.id,
+      judgeId: jSpecialist.id,
+      projectId: proj4.id,
+      isDraft: false,
+      weightedTotal: 76.0,
+      feedback: 'Solid IoT protocols and reliable data relay logic.',
+      scores: {
+        create: [
+          { criterionId: c0, score: 8 },
+          { criterionId: c1, score: 8 },
+          { criterionId: c2, score: 7 },
+          { criterionId: c3, score: 7 },
+        ],
+      },
+    },
+  });
+
   // Sample Community Votes
   await prisma.vote.createMany({
     skipDuplicates: true,

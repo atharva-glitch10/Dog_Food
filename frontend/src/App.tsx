@@ -19,10 +19,16 @@ import { ApiDocsPage } from './pages/ApiDocsPage.tsx';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage.tsx';
 import { TermsPage } from './pages/TermsPage.tsx';
 import { NotFoundPage } from './pages/NotFoundPage.tsx';
+import { EmbedWidget } from './components/gallery/EmbedWidget.tsx';
 
 export const App: React.FC = () => {
   return (
     <Routes>
+      {/* Standalone Embed Routes (no platform header/footer) */}
+      <Route path="embed/gallery/:eventId" element={<EmbedWidget />} />
+      <Route path="embed/gallery/:eventSlug" element={<EmbedWidget />} />
+
+      {/* Main Platform Routes with Layout */}
       <Route path="/" element={<Layout />}>
         <Route index element={<HomePage />} />
         <Route path="login" element={<LoginPage />} />
