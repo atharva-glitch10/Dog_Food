@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import api from '../services/api.ts';
+import api, { API_BASE_URL } from '../services/api.ts';
 import { useToast } from '../components/ui/Toast.tsx';
 import {
   Terminal,
@@ -404,19 +404,19 @@ export const OrganizerDashboardPage: React.FC = () => {
             <p className="text-xs text-slate-400">Download sanitized data exports for offline record keeping.</p>
 
             <div className="grid grid-cols-2 gap-2 pt-2 text-xs">
-              <a href={`/api/events/${event.id}/export/participants.csv`} download className="btn-secondary py-2 px-3 text-center">
+              <a href={`${API_BASE_URL}/events/${event.id}/export/participants.csv`} download className="btn-secondary py-2 px-3 text-center">
                 Participants CSV
               </a>
-              <a href={`/api/events/${event.id}/export/teams.csv`} download className="btn-secondary py-2 px-3 text-center">
+              <a href={`${API_BASE_URL}/events/${event.id}/export/teams.csv`} download className="btn-secondary py-2 px-3 text-center">
                 Teams CSV
               </a>
-              <a href={`/api/events/${event.id}/export/projects.csv`} download className="btn-secondary py-2 px-3 text-center">
+              <a href={`${API_BASE_URL}/events/${event.id}/export/projects.csv`} download className="btn-secondary py-2 px-3 text-center">
                 Projects CSV
               </a>
-              <a href={`/api/events/${event.id}/export/scores.csv`} download className="btn-secondary py-2 px-3 text-center">
+              <a href={`${API_BASE_URL}/events/${event.id}/export/scores.csv`} download className="btn-secondary py-2 px-3 text-center">
                 Scores CSV
               </a>
-              <a href={`/api/events/${event.id}/export/results.csv`} download className="btn-primary py-2 px-3 text-center col-span-2">
+              <a href={`${API_BASE_URL}/events/${event.id}/export/results.csv`} download className="btn-primary py-2 px-3 text-center col-span-2">
                 Official Final Results CSV
               </a>
             </div>

@@ -14,6 +14,9 @@ RUN npm ci
 
 COPY src ./src
 
+ARG VITE_API_URL=http://localhost:4000/api
+ENV VITE_API_URL=$VITE_API_URL
+
 RUN npm run build
 
 # Runner stage using lightweight node static server or nginx
