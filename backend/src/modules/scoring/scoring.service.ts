@@ -90,11 +90,42 @@ export class ScoringService {
     // Map criteria for calculation
     const criteriaMap = new Map(event.rubric.criteria.map((c) => [c.id, c]));
 
+    // Reject duplicate criterion IDs in a single submission
+    const submittedCriterionIds = data.scores.map((s) => s.criterionId);
+    const uniqueIds = new Set(submittedCriterionIds);
+    if (uniqueIds.size !== submittedCriterionIds.length) {
+      throw new AppError(
+        'Duplicate criterion IDs detected in submission. Each criterion must appear exactly once.',
+        400,
+        'DUPLICATE_CRITERION'
+      );
+    }
+
+    // Require all rubric criteria to be present
+    const missingCriteria = event.rubric.criteria
+      .filter((c) => !uniqueIds.has(c.id))
+      .map((c) => c.title);
+    if (missingCriteria.length > 0) {
+      throw new AppError(
+        `Missing required criteria: ${missingCriteria.join(', ')}`,
+        400,
+        'MISSING_CRITERIA'
+      );
+    }
+
     let weightedTotal = 0;
     for (const item of data.scores) {
       const criterion = criteriaMap.get(item.criterionId);
       if (!criterion) {
         throw new AppError(`Invalid criterion ID: ${item.criterionId}`, 400, 'INVALID_CRITERION');
+      }
+
+      if (typeof item.score !== 'number' || !isFinite(item.score)) {
+        throw new AppError(
+          `Score for criterion '${criterion.title}' must be a finite number.`,
+          400,
+          'INVALID_SCORE'
+        );
       }
 
       if (item.score < 0 || item.score > criterion.maxScore) {

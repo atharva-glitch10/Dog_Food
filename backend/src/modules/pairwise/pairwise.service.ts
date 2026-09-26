@@ -130,6 +130,7 @@ export class PairwiseService {
     let pi = new Array(n).fill(1.0);
     const maxIterations = 200;
     const tolerance = 1e-6;
+    let converged = false;
 
     for (let iter = 0; iter < maxIterations; iter++) {
       const piNext = new Array(n).fill(0);
@@ -150,14 +151,17 @@ export class PairwiseService {
         piNext[i] = (piNext[i] / sumPi) * n;
       }
 
-      // Check convergence
+      // Check convergence — track actual result
       let maxDiff = 0;
       for (let i = 0; i < n; i++) {
         maxDiff = Math.max(maxDiff, Math.abs(piNext[i] - pi[i]));
       }
 
       pi = piNext;
-      if (maxDiff < tolerance) break;
+      if (maxDiff < tolerance) {
+        converged = true;
+        break;
+      }
     }
 
     // Convert latent skill parameters to 0-100 scale
@@ -181,7 +185,7 @@ export class PairwiseService {
 
     return {
       totalComparisons: comparisons.length,
-      converged: true,
+      converged,  // Fixed: was always hardcoded `true`
       rankings: ranked.map((r, i) => ({ ...r, rank: i + 1 })),
     };
   }

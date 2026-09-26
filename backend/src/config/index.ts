@@ -3,12 +3,25 @@ dotenv.config();
 
 // ---------------------------------------------------------------------------
 // Crash-early guard: required secrets must be explicitly set in production.
-// This prevents the app from starting with public fallback credentials.
+// Known-bad placeholder values are explicitly rejected in production.
 // ---------------------------------------------------------------------------
 const isProd = process.env.NODE_ENV === 'production';
 
+// Secrets that must NEVER be used in production
+const KNOWN_INSECURE_SECRETS = new Set([
+  'dogfood-insecure-secret-key-change-in-prod-2026',
+  'dogfood-cookie-secret-2026',
+  'dogfood-offline-secret-key-2026',  // docker-compose fallback
+  'secret',
+  'changeme',
+  'password',
+  'dev',
+  'development',
+]);
+
 function requireSecret(envKey: string, fallback: string): string {
   const value = process.env[envKey];
+
   if (!value) {
     if (isProd) {
       throw new Error(
@@ -22,6 +35,22 @@ function requireSecret(envKey: string, fallback: string): string {
     );
     return fallback;
   }
+
+  if (isProd && KNOWN_INSECURE_SECRETS.has(value)) {
+    throw new Error(
+      `FATAL: "${envKey}" contains a known insecure placeholder value. ` +
+        `Generate a strong random secret before deploying to production. ` +
+        `Use: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
+    );
+  }
+
+  if (isProd && value.length < 32) {
+    throw new Error(
+      `FATAL: "${envKey}" is too short (${value.length} chars). ` +
+        `Production secrets must be at least 32 characters.`
+    );
+  }
+
   return value;
 }
 

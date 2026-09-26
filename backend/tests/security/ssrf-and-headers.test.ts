@@ -12,7 +12,10 @@ describe('Security Hardening & SSRF Protection Tests', () => {
     expect(res.headers['x-frame-options']).toBe('SAMEORIGIN');
     expect(res.headers['x-xss-protection']).toBe('1; mode=block');
     expect(res.headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
-    expect(res.headers['strict-transport-security']).toBeDefined();
+    // HSTS is intentionally NOT sent in development/test mode.
+    // Sending HSTS over HTTP would permanently poison browser caches.
+    // In production (NODE_ENV=production, over HTTPS) it IS sent.
+    expect(res.headers['strict-transport-security']).toBeUndefined();
   });
 
   it('2. SSRF Protection: Webhook creation should reject private and metadata IP ranges', async () => {

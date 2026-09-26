@@ -17,7 +17,15 @@ function validateWebhookUrl(targetUrl: string) {
     throw new AppError('Webhook URL protocol must be HTTP or HTTPS.', 400, 'INVALID_WEBHOOK_PROTOCOL');
   }
 
+  // Reject embedded credentials (userinfo in URL)
+  if (parsed.username || parsed.password) {
+    throw new AppError('Webhook URL must not contain embedded credentials.', 400, 'INVALID_WEBHOOK_URL');
+  }
+
   const hostname = parsed.hostname.toLowerCase();
+
+  // Strip surrounding brackets for IPv6 literals
+  const cleanHostname = hostname.replace(/^\[/, '').replace(/\]$/, '');
 
   // Prohibited hostnames and IP ranges (IPv4 + IPv6)
   const prohibitedHosts = [
@@ -28,10 +36,8 @@ function validateWebhookUrl(targetUrl: string) {
     '169.254.169.254',          // AWS/Azure/GCP IMDS
     'metadata.google.internal', // GCP metadata server
     '[::1]',
+    '0x7f000001',               // Hex representation of 127.0.0.1
   ];
-
-  // Strip surrounding brackets for IPv6 literals
-  const cleanHostname = hostname.replace(/^\[/, '').replace(/\]$/, '');
 
   if (
     prohibitedHosts.includes(hostname) ||
@@ -40,12 +46,25 @@ function validateWebhookUrl(targetUrl: string) {
     cleanHostname.startsWith('10.') ||
     cleanHostname.startsWith('192.168.') ||
     /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(cleanHostname) ||
+    // IPv4 loopback range 127.0.0.0/8
+    /^127\./.test(cleanHostname) ||
     // IPv6 private / link-local ranges
     cleanHostname.startsWith('fc') ||    // ULA fc00::/7
     cleanHostname.startsWith('fd') ||    // ULA fd00::/8
     cleanHostname.startsWith('fe80') ||  // Link-local fe80::/10
-    cleanHostname.startsWith('::ffff:127.') || // IPv4-mapped loopback
-    cleanHostname === '0:0:0:0:0:0:0:1'  // Full IPv6 loopback
+    // IPv4-mapped IPv6: ::ffff:a.b.c.d or Node.js-normalized ::ffff:hex form
+    // Node.js URL parser normalizes ::ffff:127.0.0.1 → ::ffff:7f00:1
+    // Block all ::ffff: mappings that resolve to loopback or private ranges:
+    //   loopback:  127.x  → 7f00:0000 - 7fff:ffff
+    //   private:   10.x   → a00:0 - aff:ffff
+    //              172.16-31  → ac10:0 - ac1f:ffff
+    //              192.168.x  → c0a8:0 - c0a8:ffff
+    /^::ffff:(127\.|10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.)/i.test(cleanHostname) ||
+    /^::ffff:7f[0-9a-f]{2}:/i.test(cleanHostname) ||   // loopback 127.x hex
+    /^::ffff:a[0-9a-f]{2}:/i.test(cleanHostname) ||    // 10.x hex
+    /^::ffff:c0a8:/i.test(cleanHostname) ||             // 192.168.x hex
+    /^::ffff:ac1[0-9a-f]:/i.test(cleanHostname) ||     // 172.16-31.x hex
+    cleanHostname === '0:0:0:0:0:0:0:1'                 // Full IPv6 loopback
   ) {
     throw new AppError(
       'SSRF Protection: Webhook target URL cannot target local, private, or cloud metadata IP ranges.',
@@ -56,10 +75,13 @@ function validateWebhookUrl(targetUrl: string) {
 }
 
 // ---------------------------------------------------------------------------
-// Lightweight HTTP dispatcher with timeout + signature header
-// Uses the Node 18 built-in fetch (available in our Node 20 base image).
+// Lightweight HTTP dispatcher with timeout + signature header.
+// IMPORTANT: redirect:'manual' ensures we do NOT follow redirects automatically.
+// Any redirect would bypass SSRF validation since the new destination is
+// not checked. We treat any redirect response as a delivery failure.
 // ---------------------------------------------------------------------------
 const WEBHOOK_TIMEOUT_MS = 8_000;
+const MAX_RESPONSE_BYTES = 1024 * 64; // 64 KB — prevent memory exhaustion
 
 async function deliverWebhook(
   targetUrl: string,
@@ -80,14 +102,65 @@ async function deliverWebhook(
       },
       body: payloadString,
       signal: controller.signal,
+      redirect: 'manual', // SSRF fix: never auto-follow redirects
     });
+
+    // Treat 3xx redirects as failure — the destination is unvalidated
+    if (response.status >= 300 && response.status < 400) {
+      return 302; // Redirect received — treat as failure
+    }
+
+    // Consume body up to limit (prevent memory exhaustion on large responses)
+    try {
+      const reader = response.body?.getReader();
+      if (reader) {
+        let totalBytes = 0;
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          totalBytes += value?.length ?? 0;
+          if (totalBytes > MAX_RESPONSE_BYTES) { reader.cancel(); break; }
+        }
+      }
+    } catch {
+      // Ignore body read errors — we already have the status code
+    }
+
     return response.status;
   } catch (err: any) {
     if (err.name === 'AbortError') return 408; // Request timeout
-    return 0; // Network error
+    return 0; // Network error / DNS failure
   } finally {
     clearTimeout(timeout);
   }
+}
+
+// ---------------------------------------------------------------------------
+// Count truly consecutive failures from the most recent deliveries.
+// A "consecutive failure" sequence is broken by any successful delivery.
+// ---------------------------------------------------------------------------
+const CONSECUTIVE_FAILURE_THRESHOLD = 5;
+
+async function countConsecutiveFailures(subscriptionId: string): Promise<number> {
+  // Fetch the most recent deliveries (up to threshold + buffer)
+  const recent = await prisma.webhookDelivery.findMany({
+    where: { subscriptionId },
+    orderBy: { deliveredAt: 'desc' },
+    take: CONSECUTIVE_FAILURE_THRESHOLD + 5,
+    select: { statusCode: true },
+  });
+
+  let consecutive = 0;
+  for (const delivery of recent) {
+    const isFailure = delivery.statusCode === 0 || delivery.statusCode >= 500 ||
+                      (delivery.statusCode >= 300 && delivery.statusCode < 400);
+    if (isFailure) {
+      consecutive++;
+    } else {
+      break; // A success breaks the consecutive chain
+    }
+  }
+  return consecutive;
 }
 
 export class WebhookService {
@@ -98,6 +171,14 @@ export class WebhookService {
         deliveries: {
           orderBy: { deliveredAt: 'desc' },
           take: 10,
+          // Never expose the subscription secret in delivery responses
+          select: {
+            id: true,
+            event: true,
+            statusCode: true,
+            attempts: true,
+            deliveredAt: true,
+          },
         },
       },
     });
@@ -129,6 +210,10 @@ export class WebhookService {
    * Fire-and-forget webhook dispatcher.
    * Delivers the event payload to all active subscribers via HTTP POST,
    * signs each request with HMAC-SHA256, and logs the delivery outcome.
+   *
+   * SSRF protection: validateWebhookUrl is called at registration time.
+   * redirect:'manual' prevents runtime bypass via redirect chains.
+   * Consecutive failure tracking (not historical) drives auto-disable.
    */
   async dispatchEvent(eventId: string, eventName: string, payload: any) {
     try {
@@ -166,29 +251,36 @@ export class WebhookService {
             },
           });
 
-          // Disable subscription after 5 consecutive failures (statusCode === 0 or >= 500)
-          if (statusCode === 0 || statusCode >= 500) {
-            const failedDeliveries = await prisma.webhookDelivery.count({
-              where: {
-                subscriptionId: sub.id,
-                OR: [{ statusCode: { gte: 500 } }, { statusCode: 0 }],
-              },
-            });
-            if (failedDeliveries >= 5) {
+          const isFailure = statusCode === 0 || statusCode >= 500 ||
+                            (statusCode >= 300 && statusCode < 400);
+
+          if (isFailure) {
+            // Fixed: count CONSECUTIVE failures (not all historical failures).
+            // A successful delivery resets the counter.
+            const consecutiveFails = await countConsecutiveFailures(sub.id);
+            if (consecutiveFails >= CONSECUTIVE_FAILURE_THRESHOLD) {
               await prisma.webhookSubscription.update({
                 where: { id: sub.id },
                 data: { isActive: false },
               });
               console.warn(
-                `[Webhooks] Subscription ${sub.id} auto-disabled after 5 consecutive failures.`
+                `[Webhooks] Subscription ${sub.id} auto-disabled after ${consecutiveFails} consecutive failures.`
               );
             }
           }
+          // On success: no action needed — consecutive counter resets naturally
+          // because countConsecutiveFailures walks backwards from newest delivery
         })
       );
     } catch (err) {
-      console.error(`[Webhooks] Failed to dispatch event '${eventName}' for event ${eventId}:`, err);
+      // Log without leaking subscription details or internal paths
+      console.error(`[Webhooks] Failed to dispatch event '${eventName}' for event ${eventId}`);
     }
+  }
+
+  /** Expose the SSRF validator for use in tests */
+  static validateUrl(url: string) {
+    validateWebhookUrl(url);
   }
 }
 
