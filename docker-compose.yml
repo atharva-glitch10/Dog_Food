@@ -27,9 +27,9 @@ services:
       PORT: 4000
       NODE_ENV: production
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/dogfood?schema=public
-      JWT_SECRET: ${JWT_SECRET:-dogfood-offline-secret-key-2026}
+      JWT_SECRET: ${JWT_SECRET:-d09f00d2026_jwt_secret_offline_eval_secure_key_32chars_min}
       JWT_EXPIRES_IN: 7d
-      COOKIE_SECRET: ${COOKIE_SECRET:-dogfood-cookie-secret-2026}
+      COOKIE_SECRET: ${COOKIE_SECRET:-d09f00d2026_cookie_secret_offline_eval_secure_key_32chars}
       CORS_ORIGIN: http://localhost:3000
     ports:
       - "4000:4000"

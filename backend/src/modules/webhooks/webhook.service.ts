@@ -152,8 +152,8 @@ async function countConsecutiveFailures(subscriptionId: string): Promise<number>
 
   let consecutive = 0;
   for (const delivery of recent) {
-    const isFailure = delivery.statusCode === 0 || delivery.statusCode >= 500 ||
-                      (delivery.statusCode >= 300 && delivery.statusCode < 400);
+    const code = delivery.statusCode;
+    const isFailure = code === null || code === 0 || code >= 500 || (code >= 300 && code < 400);
     if (isFailure) {
       consecutive++;
     } else {
