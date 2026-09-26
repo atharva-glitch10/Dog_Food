@@ -1,0 +1,212 @@
+openapi: 3.0.3
+info:
+  title: DOGFOOD 2026 Hackathon Management & Judging Platform API
+  description: Self-hostable, offline-capable REST API for hackathon lifecycles, judging, score normalization, community voting, and exports.
+  version: 1.0.0
+servers:
+  - url: http://localhost:4000/api
+    description: Local Backend Server
+
+paths:
+  /auth/register:
+    post:
+      summary: Register a new user
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, name]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, minLength: 8 }
+                name: { type: string, minLength: 2 }
+                role: { type: string, enum: [PARTICIPANT, JUDGE, ORGANIZER, ADMIN] }
+      responses:
+        '201':
+          description: User registered successfully
+        '400':
+          description: Validation error
+        '409':
+          description: Email already registered
+
+  /auth/login:
+    post:
+      summary: Authenticate user & start session
+      tags: [Authentication]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        '200':
+          description: Login successful, returns JWT and sets session cookie
+        '401':
+          description: Invalid credentials
+
+  /auth/me:
+    get:
+      summary: Get current authenticated profile
+      tags: [Authentication]
+      security:
+        - CookieAuth: []
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User profile and active role
+        '401':
+          description: Unauthenticated
+
+  /events:
+    get:
+      summary: List all active / public events
+      tags: [Events]
+      responses:
+        '200':
+          description: Array of events
+    post:
+      summary: Create a new hackathon event
+      tags: [Events]
+      security:
+        - CookieAuth: []
+      responses:
+        '201':
+          description: Event created
+        '403':
+          description: Forbidden (Organizer/Admin only)
+
+  /events/{eventId}/gallery:
+    get:
+      summary: Browse searchable/filterable project gallery
+      tags: [Submissions]
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: trackId
+          in: query
+          schema: { type: string, format: uuid }
+        - name: sort
+          in: query
+          schema: { type: string, enum: [title, date, randomized] }
+      responses:
+        '200':
+          description: List of submitted/finalized projects
+
+  /events/{eventId}/judges/assign/auto:
+    post:
+      summary: Execute deterministic judge assignment
+      tags: [Judging]
+      security:
+        - CookieAuth: []
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                seed: { type: integer, default: 42 }
+      responses:
+        '200':
+          description: Assignments generated with workload statistics
+
+  /evaluations:
+    post:
+      summary: Submit evaluation scores for an assigned project
+      tags: [Judging]
+      security:
+        - CookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [eventId, projectId, scores]
+              properties:
+                eventId: { type: string, format: uuid }
+                projectId: { type: string, format: uuid }
+                isDraft: { type: boolean, default: false }
+                feedback: { type: string }
+                scores:
+                  type: array
+                  items:
+                    type: object
+                    required: [criterionId, score]
+                    properties:
+                      criterionId: { type: string, format: uuid }
+                      score: { type: number }
+      responses:
+        '201':
+          description: Evaluation saved or finalized
+        '403':
+          description: Forbidden (Judge not assigned to this project)
+
+  /events/{eventId}/judging/normalize:
+    post:
+      summary: Execute score normalization and ranking computation
+      tags: [Scoring & Normalization]
+      security:
+        - CookieAuth: []
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Normalization completed, returns ranking summary
+
+  /events/{eventId}/export/{resource}.csv:
+    get:
+      summary: Export event data in RFC 4180 CSV format
+      tags: [Exports]
+      security:
+        - CookieAuth: []
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: resource
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [participants, teams, projects, judges, scores, results]
+      responses:
+        '200':
+          description: Streamed CSV file
+          content:
+            text/csv:
+              schema:
+                type: string
+
+components:
+  securitySchemes:
+    CookieAuth:
+      type: apiKey
+      in: cookie
+      name: dogfood_session
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

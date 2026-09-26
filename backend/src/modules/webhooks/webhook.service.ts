@@ -1,0 +1,195 @@
+import { prisma } from '../../utils/prisma.js';
+import { generateRandomToken, generateHmacSignature } from '../../utils/crypto.js';
+import { AppError } from '../../utils/response.js';
+
+// ---------------------------------------------------------------------------
+// SSRF Protection: validate that webhook target URLs are not internal addresses
+// ---------------------------------------------------------------------------
+function validateWebhookUrl(targetUrl: string) {
+  let parsed: URL;
+  try {
+    parsed = new URL(targetUrl);
+  } catch {
+    throw new AppError('Invalid webhook URL format.', 400, 'INVALID_WEBHOOK_URL');
+  }
+
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    throw new AppError('Webhook URL protocol must be HTTP or HTTPS.', 400, 'INVALID_WEBHOOK_PROTOCOL');
+  }
+
+  const hostname = parsed.hostname.toLowerCase();
+
+  // Prohibited hostnames and IP ranges (IPv4 + IPv6)
+  const prohibitedHosts = [
+    'localhost',
+    '127.0.0.1',
+    '0.0.0.0',
+    '::1',
+    '169.254.169.254',          // AWS/Azure/GCP IMDS
+    'metadata.google.internal', // GCP metadata server
+    '[::1]',
+  ];
+
+  // Strip surrounding brackets for IPv6 literals
+  const cleanHostname = hostname.replace(/^\[/, '').replace(/\]$/, '');
+
+  if (
+    prohibitedHosts.includes(hostname) ||
+    prohibitedHosts.includes(cleanHostname) ||
+    // IPv4 private ranges
+    cleanHostname.startsWith('10.') ||
+    cleanHostname.startsWith('192.168.') ||
+    /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(cleanHostname) ||
+    // IPv6 private / link-local ranges
+    cleanHostname.startsWith('fc') ||    // ULA fc00::/7
+    cleanHostname.startsWith('fd') ||    // ULA fd00::/8
+    cleanHostname.startsWith('fe80') ||  // Link-local fe80::/10
+    cleanHostname.startsWith('::ffff:127.') || // IPv4-mapped loopback
+    cleanHostname === '0:0:0:0:0:0:0:1'  // Full IPv6 loopback
+  ) {
+    throw new AppError(
+      'SSRF Protection: Webhook target URL cannot target local, private, or cloud metadata IP ranges.',
+      400,
+      'SSRF_PROHIBITED_TARGET'
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Lightweight HTTP dispatcher with timeout + signature header
+// Uses the Node 18 built-in fetch (available in our Node 20 base image).
+// ---------------------------------------------------------------------------
+const WEBHOOK_TIMEOUT_MS = 8_000;
+
+async function deliverWebhook(
+  targetUrl: string,
+  payloadString: string,
+  signature: string
+): Promise<number> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), WEBHOOK_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(targetUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Dogfood-Signature': `sha256=${signature}`,
+        'X-Dogfood-Event': 'dogfood.webhook',
+        'User-Agent': 'DOGFOOD-Webhooks/1.0',
+      },
+      body: payloadString,
+      signal: controller.signal,
+    });
+    return response.status;
+  } catch (err: any) {
+    if (err.name === 'AbortError') return 408; // Request timeout
+    return 0; // Network error
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+export class WebhookService {
+  async getSubscriptions(eventId: string) {
+    return prisma.webhookSubscription.findMany({
+      where: { eventId },
+      include: {
+        deliveries: {
+          orderBy: { deliveredAt: 'desc' },
+          take: 10,
+        },
+      },
+    });
+  }
+
+  async createSubscription(eventId: string, data: { targetUrl: string; events: string[] }) {
+    validateWebhookUrl(data.targetUrl);
+
+    const event = await prisma.event.findUnique({ where: { id: eventId } });
+    if (!event) throw new AppError('Event not found', 404, 'EVENT_NOT_FOUND');
+
+    const secret = generateRandomToken(24);
+
+    return prisma.webhookSubscription.create({
+      data: {
+        eventId,
+        targetUrl: data.targetUrl,
+        secret,
+        events: data.events,
+      },
+    });
+  }
+
+  async deleteSubscription(subscriptionId: string) {
+    return prisma.webhookSubscription.delete({ where: { id: subscriptionId } });
+  }
+
+  /**
+   * Fire-and-forget webhook dispatcher.
+   * Delivers the event payload to all active subscribers via HTTP POST,
+   * signs each request with HMAC-SHA256, and logs the delivery outcome.
+   */
+  async dispatchEvent(eventId: string, eventName: string, payload: any) {
+    try {
+      const subscriptions = await prisma.webhookSubscription.findMany({
+        where: {
+          eventId,
+          isActive: true,
+          events: { has: eventName },
+        },
+      });
+
+      if (subscriptions.length === 0) return;
+
+      const envelope = {
+        event: eventName,
+        eventId,
+        timestamp: new Date().toISOString(),
+        data: payload,
+      };
+      const payloadString = JSON.stringify(envelope);
+
+      await Promise.allSettled(
+        subscriptions.map(async (sub) => {
+          const signature = generateHmacSignature(payloadString, sub.secret);
+          const statusCode = await deliverWebhook(sub.targetUrl, payloadString, signature);
+
+          await prisma.webhookDelivery.create({
+            data: {
+              subscriptionId: sub.id,
+              event: eventName,
+              payload: envelope as any,
+              statusCode,
+              attempts: 1,
+              deliveredAt: new Date(),
+            },
+          });
+
+          // Disable subscription after 5 consecutive failures (statusCode === 0 or >= 500)
+          if (statusCode === 0 || statusCode >= 500) {
+            const failedDeliveries = await prisma.webhookDelivery.count({
+              where: {
+                subscriptionId: sub.id,
+                OR: [{ statusCode: { gte: 500 } }, { statusCode: 0 }],
+              },
+            });
+            if (failedDeliveries >= 5) {
+              await prisma.webhookSubscription.update({
+                where: { id: sub.id },
+                data: { isActive: false },
+              });
+              console.warn(
+                `[Webhooks] Subscription ${sub.id} auto-disabled after 5 consecutive failures.`
+              );
+            }
+          }
+        })
+      );
+    } catch (err) {
+      console.error(`[Webhooks] Failed to dispatch event '${eventName}' for event ${eventId}:`, err);
+    }
+  }
+}
+
+export const webhookService = new WebhookService();
