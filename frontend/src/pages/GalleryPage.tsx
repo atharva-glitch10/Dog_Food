@@ -93,8 +93,8 @@ export const GalleryPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
         <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
-            <Layers className="w-7 h-7 text-violet-400" />
+          <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
+            <Layers className="w-6 h-6 text-slate-300" />
             Project Gallery
           </h1>
           <p className="text-sm text-slate-400">
@@ -104,7 +104,7 @@ export const GalleryPage: React.FC = () => {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="glass-card p-4 rounded-2xl border border-slate-800 flex flex-col md:flex-row items-center gap-4">
+      <div className="bg-slate-900 border border-slate-800 p-4 rounded-lg flex flex-col md:flex-row items-center gap-4">
         <form onSubmit={handleSearchSubmit} className="relative flex-1 w-full">
           <input
             type="text"
@@ -142,27 +142,27 @@ export const GalleryPage: React.FC = () => {
 
       {/* Project Cards Grid */}
       {loading ? (
-        <div className="text-center py-20 text-slate-400">Loading gallery submissions...</div>
+        <div className="text-center py-20 text-slate-400 text-sm">Loading gallery submissions...</div>
       ) : projects.length === 0 ? (
-        <div className="glass-card p-12 text-center rounded-2xl text-slate-400 space-y-2">
-          <p className="text-lg font-bold text-slate-300">No submitted projects match your query.</p>
+        <div className="bg-slate-900 border border-slate-800 p-12 text-center rounded-lg text-slate-400 space-y-2">
+          <p className="text-base font-semibold text-slate-300">No submitted projects match your query.</p>
           <p className="text-xs text-slate-500">Try adjusting your filters or search keywords.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {projects.map((project) => {
             const hasVoted = votedProjects.has(project.id);
             return (
               <div
                 key={project.id}
-                className="glass-card-hover rounded-2xl border border-slate-800 flex flex-col justify-between overflow-hidden"
+                className="bg-slate-900 border border-slate-800 rounded-lg flex flex-col justify-between overflow-hidden hover:border-slate-700 transition-colors"
               >
                 <div className="p-6 space-y-4">
                   {/* Track pill & Status */}
                   <div className="flex items-center justify-between">
                     {project.track ? (
                       <span
-                        className="text-[11px] font-bold px-2.5 py-0.5 rounded-full"
+                        className="text-[11px] font-semibold px-2 py-0.5 rounded"
                         style={{
                           backgroundColor: `${project.track.colorHex}20`,
                           color: project.track.colorHex,
@@ -172,7 +172,7 @@ export const GalleryPage: React.FC = () => {
                         {project.track.name}
                       </span>
                     ) : (
-                      <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
+                      <span className="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
                         General
                       </span>
                     )}
@@ -182,7 +182,7 @@ export const GalleryPage: React.FC = () => {
                   </div>
 
                   <div className="space-y-1.5">
-                    <h3 className="text-lg font-bold text-white hover:text-violet-400 transition-colors">
+                    <h3 className="text-base font-bold text-white hover:text-blue-400 transition-colors">
                       <Link to={`/project/${project.id}`}>{project.title}</Link>
                     </h3>
                     <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed">
@@ -194,12 +194,12 @@ export const GalleryPage: React.FC = () => {
                   {project.technologies && project.technologies.length > 0 && (
                     <div className="flex flex-wrap gap-1">
                       {project.technologies.slice(0, 4).map((tech, idx) => (
-                        <span key={idx} className="text-[10px] px-1.5 py-0.5 bg-slate-900 text-slate-400 rounded border border-slate-800">
+                        <span key={idx} className="text-[10px] px-1.5 py-0.5 bg-slate-950 text-slate-400 rounded border border-slate-800">
                           {tech}
                         </span>
                       ))}
                       {project.technologies.length > 4 && (
-                        <span className="text-[10px] px-1.5 py-0.5 bg-slate-900 text-slate-500 rounded">
+                        <span className="text-[10px] px-1.5 py-0.5 bg-slate-950 text-slate-500 rounded">
                           +{project.technologies.length - 4}
                         </span>
                       )}
@@ -208,7 +208,7 @@ export const GalleryPage: React.FC = () => {
                 </div>
 
                 {/* Card Footer Actions */}
-                <div className="px-6 py-3.5 bg-slate-900/60 border-t border-slate-800/80 flex items-center justify-between text-xs">
+                <div className="px-6 py-3 bg-slate-950 border-t border-slate-800 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-3">
                     {project.repoUrl && (
                       <a href={project.repoUrl} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white" title="Repository">
@@ -226,10 +226,10 @@ export const GalleryPage: React.FC = () => {
                     <button
                       onClick={(e) => handleVote(project.id, e)}
                       disabled={hasVoted || votingLoading === project.id}
-                      className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                      className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors ${
                         hasVoted
                           ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                          : 'bg-violet-600/20 text-violet-300 hover:bg-violet-600/30 border border-violet-500/30'
+                          : 'bg-blue-600 hover:bg-blue-500 text-white'
                       }`}
                     >
                       <ThumbsUp className="w-3.5 h-3.5" />

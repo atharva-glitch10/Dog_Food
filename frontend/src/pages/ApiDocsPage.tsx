@@ -1,12 +1,12 @@
 import React from 'react';
-import { Terminal, ExternalLink, Code, Database, Shield, Cpu } from 'lucide-react';
+import { Terminal, ExternalLink, Code } from 'lucide-react';
 
 export const ApiDocsPage: React.FC = () => {
   return (
-    <div className="max-w-4xl mx-auto space-y-8 py-4">
+    <div className="max-w-4xl mx-auto space-y-6 py-4">
       <div className="border-b border-slate-800 pb-4 space-y-1">
-        <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
-          <Code className="w-7 h-7 text-violet-400" />
+        <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
+          <Code className="w-6 h-6 text-slate-300" />
           REST API & Swagger Documentation
         </h1>
         <p className="text-xs text-slate-400">
@@ -14,9 +14,9 @@ export const ApiDocsPage: React.FC = () => {
         </p>
       </div>
 
-      <div className="glass-card p-6 rounded-2xl border border-slate-800 space-y-4">
-        <h2 className="text-lg font-bold text-white flex items-center gap-2">
-          <Terminal className="w-5 h-5 text-violet-400" />
+      <div className="bg-slate-900 border border-slate-800 p-6 rounded-lg space-y-3">
+        <h2 className="text-base font-semibold text-white flex items-center gap-2">
+          <Terminal className="w-4 h-4 text-slate-300" />
           Interactive OpenAPI / Swagger UI
         </h2>
         <p className="text-xs text-slate-300 leading-relaxed">
@@ -26,28 +26,28 @@ export const ApiDocsPage: React.FC = () => {
           href="http://localhost:4000/api/docs"
           target="_blank"
           rel="noopener noreferrer"
-          className="btn-primary text-xs py-2.5 px-4 inline-flex items-center gap-2 font-bold"
+          className="btn-primary text-xs py-2 px-3 inline-flex items-center gap-2 font-semibold"
         >
           Open Swagger UI Documentation (Port 4000)
-          <ExternalLink className="w-4 h-4" />
+          <ExternalLink className="w-3.5 h-3.5" />
         </a>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-        <div className="glass-card p-5 rounded-xl border border-slate-800 space-y-2">
-          <span className="font-bold text-violet-400 block font-mono">Authentication & RBAC</span>
+        <div className="bg-slate-900 border border-slate-800 p-5 rounded-lg space-y-1.5">
+          <span className="font-semibold text-slate-200 block font-mono">Authentication & RBAC</span>
           <p className="text-slate-400">JWT and HTTP-only cookie sessions with server-side role validation on every route.</p>
         </div>
-        <div className="glass-card p-5 rounded-xl border border-slate-800 space-y-2">
-          <span className="font-bold text-purple-400 block font-mono">Statistical Judging & Normalization</span>
+        <div className="bg-slate-900 border border-slate-800 p-5 rounded-lg space-y-1.5">
+          <span className="font-semibold text-slate-200 block font-mono">Statistical Judging & Normalization</span>
           <p className="text-slate-400">Cross-judge Z-score transformation, Bayesian shrinkage, and Bradley-Terry MLE ranking.</p>
         </div>
-        <div className="glass-card p-5 rounded-xl border border-slate-800 space-y-2">
-          <span className="font-bold text-emerald-400 block font-mono">Rate Limiting & Anti-Abuse</span>
+        <div className="bg-slate-900 border border-slate-800 p-5 rounded-lg space-y-1.5">
+          <span className="font-semibold text-emerald-400 block font-mono">Rate Limiting & Anti-Abuse</span>
           <p className="text-slate-400">Sliding-window token bucket limiters on auth and voting routes preventing Sybil attacks.</p>
         </div>
-        <div className="glass-card p-5 rounded-xl border border-slate-800 space-y-2">
-          <span className="font-bold text-amber-400 block font-mono">Data Import / Export & Webhooks</span>
+        <div className="bg-slate-900 border border-slate-800 p-5 rounded-lg space-y-1.5">
+          <span className="font-semibold text-amber-400 block font-mono">Data Import / Export & Webhooks</span>
           <p className="text-slate-400">RFC 4180 CSV streams, HMAC-signed webhooks, and cryptographic participation verification.</p>
         </div>
       </div>

@@ -16,6 +16,8 @@ import { OrganizerDashboardPage } from './pages/OrganizerDashboardPage.tsx';
 import { ResultsPage } from './pages/ResultsPage.tsx';
 import { CertificateVerifyPage } from './pages/CertificateVerifyPage.tsx';
 import { ApiDocsPage } from './pages/ApiDocsPage.tsx';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage.tsx';
+import { TermsPage } from './pages/TermsPage.tsx';
 import { NotFoundPage } from './pages/NotFoundPage.tsx';
 
 export const App: React.FC = () => {
@@ -37,6 +39,8 @@ export const App: React.FC = () => {
         <Route path="results/:eventSlug" element={<ResultsPage />} />
         <Route path="verify" element={<CertificateVerifyPage />} />
         <Route path="api-docs" element={<ApiDocsPage />} />
+        <Route path="privacy" element={<PrivacyPolicyPage />} />
+        <Route path="terms" element={<TermsPage />} />
         {/* Catch-all: renders a proper 404 page instead of a blank screen */}
         <Route path="*" element={<NotFoundPage />} />
       </Route>

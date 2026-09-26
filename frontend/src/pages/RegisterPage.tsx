@@ -37,7 +37,7 @@ export const RegisterPage: React.FC = () => {
         <p className="text-sm text-slate-400">Join the hackathon, build teams, or judge submissions.</p>
       </div>
 
-      <div className="glass-card p-6 sm:p-8 rounded-2xl border border-slate-800/80 shadow-xl space-y-6">
+      <div className="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-lg space-y-6">
         {error && (
           <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-lg flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
@@ -129,7 +129,7 @@ export const RegisterPage: React.FC = () => {
 
       <p className="text-center text-xs text-slate-400">
         Already have an account?{' '}
-        <Link to="/login" className="text-violet-400 hover:underline font-semibold">
+        <Link to="/login" className="text-blue-400 hover:underline font-semibold">
           Sign In
         </Link>
       </p>

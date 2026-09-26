@@ -34,18 +34,18 @@ export const JudgeDashboardPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
         <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
-            <Shield className="w-7 h-7 text-purple-400" />
+          <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
+            <Shield className="w-6 h-6 text-slate-300" />
             Judge Evaluation Portal
           </h1>
-          <p className="text-sm text-slate-400">
-            Event: <strong className="text-slate-200">{event?.name}</strong>
+          <p className="text-xs text-slate-400">
+            Event: <strong className="text-slate-200">{event?.name?.replace(/—/g, ':')}</strong>
           </p>
         </div>
 
         <Link
           to={`/dashboard/pairwise/${eventSlug}`}
-          className="btn-secondary text-xs py-2 px-4 flex items-center gap-1.5 border-purple-500/40 text-purple-300"
+          className="btn-secondary text-xs py-2 px-3 flex items-center gap-1.5"
         >
           <GitCompare className="w-4 h-4" />
           Bradley-Terry Pairwise Mode
@@ -53,14 +53,14 @@ export const JudgeDashboardPage: React.FC = () => {
       </div>
 
       {/* Progress Bar Card */}
-      <div className="glass-card p-6 rounded-2xl border border-slate-800 space-y-3">
+      <div className="bg-slate-900 border border-slate-800 p-5 rounded-lg space-y-2.5">
         <div className="flex items-center justify-between text-xs">
           <span className="font-semibold text-slate-300">Your Evaluation Completion Progress</span>
-          <span className="font-bold text-purple-400 font-mono">{completedCount} of {totalCount} Completed ({progressPercent}%)</span>
+          <span className="font-semibold text-slate-200 font-mono">{completedCount} of {totalCount} Completed ({progressPercent}%)</span>
         </div>
-        <div className="w-full h-3 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800">
+        <div className="w-full h-2.5 bg-slate-950 rounded overflow-hidden border border-slate-800">
           <div
-            className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full transition-all duration-500"
+            className="h-full bg-blue-600 rounded transition-all"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
@@ -68,13 +68,13 @@ export const JudgeDashboardPage: React.FC = () => {
 
       {/* Assignments List */}
       <div className="space-y-4">
-        <h2 className="text-lg font-bold text-white flex items-center gap-2">
-          <Award className="w-5 h-5 text-violet-400" />
+        <h2 className="text-base font-bold text-white flex items-center gap-2">
+          <Award className="w-4 h-4 text-slate-300" />
           Assigned Projects to Evaluate
         </h2>
 
         {assignments.length === 0 ? (
-          <div className="glass-card p-12 text-center rounded-2xl text-slate-400">
+          <div className="bg-slate-900 border border-slate-800 p-12 text-center rounded-lg text-slate-400 text-sm">
             No projects currently assigned to you for this event.
           </div>
         ) : (
@@ -82,21 +82,21 @@ export const JudgeDashboardPage: React.FC = () => {
             {assignments.map((item) => (
               <div
                 key={item.assignmentId}
-                className="glass-card-hover p-6 rounded-2xl border border-slate-800 flex flex-col justify-between space-y-4"
+                className="bg-slate-900 border border-slate-800 p-5 rounded-lg flex flex-col justify-between space-y-4 hover:border-slate-700 transition-colors"
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400">
+                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
                       {item.project.track?.name || 'General Track'}
                     </span>
                     {item.isCompleted ? (
                       <span className="flex items-center gap-1 text-xs font-semibold text-emerald-400">
-                        <CheckCircle2 className="w-4 h-4" />
+                        <CheckCircle2 className="w-3.5 h-3.5" />
                         Completed (Score: {item.evaluation?.weightedTotal})
                       </span>
                     ) : (
                       <span className="flex items-center gap-1 text-xs font-semibold text-amber-400">
-                        <Clock className="w-4 h-4" />
+                        <Clock className="w-3.5 h-3.5" />
                         Pending Evaluation
                       </span>
                     )}

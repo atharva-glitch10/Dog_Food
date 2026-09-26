@@ -30,16 +30,16 @@ export const CertificateVerifyPage: React.FC = () => {
   return (
     <div className="max-w-2xl mx-auto py-8 space-y-8">
       <div className="text-center space-y-2">
-        <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">
-          <ShieldCheck className="w-6 h-6" />
+        <div className="w-10 h-10 rounded bg-slate-800 border border-slate-700 text-emerald-400 flex items-center justify-center mx-auto">
+          <ShieldCheck className="w-5 h-5" />
         </div>
-        <h1 className="text-3xl font-extrabold text-white">Certificate Verification Portal</h1>
-        <p className="text-sm text-slate-400">
+        <h1 className="text-2xl font-bold text-white tracking-tight">Certificate Verification Portal</h1>
+        <p className="text-xs text-slate-400">
           Verify the authenticity of participation, judging, and winner certificates using HMAC-SHA256 signatures.
         </p>
       </div>
 
-      <div className="glass-card p-6 sm:p-8 rounded-2xl border border-slate-800 space-y-6 shadow-xl">
+      <div className="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-lg space-y-6">
         <form onSubmit={handleVerify} className="space-y-4">
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-300">Certificate Verification Code</label>
@@ -99,7 +99,7 @@ export const CertificateVerifyPage: React.FC = () => {
               </div>
               <div className="flex justify-between py-1 border-b border-slate-800">
                 <span className="text-slate-500">Cryptographic Signature:</span>
-                <span className="font-mono text-[10px] text-violet-400 truncate max-w-xs">{result.certificate.signature}</span>
+                <span className="font-mono text-[10px] text-slate-200 truncate max-w-xs">{result.certificate.signature}</span>
               </div>
             </div>
           </div>

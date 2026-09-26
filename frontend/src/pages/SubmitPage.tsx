@@ -115,8 +115,8 @@ export const SubmitPage: React.FC = () => {
       </Link>
 
       <div className="border-b border-slate-800 pb-4 space-y-1">
-        <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
-          <FileText className="w-7 h-7 text-violet-400" />
+        <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
+          <FileText className="w-6 h-6 text-slate-300" />
           {project ? 'Edit Project Submission' : 'Create Project Submission'}
         </h1>
         <p className="text-xs text-slate-400">
@@ -125,13 +125,13 @@ export const SubmitPage: React.FC = () => {
       </div>
 
       {error && (
-        <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl flex items-center gap-2">
+        <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded flex items-center gap-2">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
-      <form onSubmit={handleSaveDraft} className="glass-card p-6 sm:p-8 rounded-2xl border border-slate-800 space-y-6">
+      <form onSubmit={handleSaveDraft} className="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-lg space-y-6">
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-slate-300">Project Title *</label>
           <input

@@ -179,7 +179,7 @@ async function main() {
   const event = await prisma.event.create({
     data: {
       slug: 'dogfood-2026',
-      name: 'Dogfood 2026 — 72-Hour Open Source Hackathon',
+      name: 'Dogfood 2026: 72-Hour Open Source Hackathon',
       tagline: 'Build, evaluate, and self-host the future of developer tooling & decentralized systems.',
       description: `Welcome to **Dogfood 2026**, the premier offline-capable, self-hostable hackathon.
 

@@ -148,16 +148,16 @@ export const OrganizerDashboardPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-bold bg-violet-500/10 text-violet-400 border border-violet-500/20">
+          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">
             Organizer Command Hub
           </div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">{event?.name}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">{event?.name?.replace(/—/g, ':')}</h1>
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={handlePublishResults}
-            className="btn-primary text-xs py-2 px-4 flex items-center gap-1.5 font-bold shadow-violet-600/30"
+            className="btn-primary text-xs py-2 px-4 flex items-center gap-1.5 font-semibold"
           >
             <Trophy className="w-4 h-4 text-amber-300" />
             Publish Official Results
@@ -171,7 +171,7 @@ export const OrganizerDashboardPage: React.FC = () => {
           onClick={() => setActiveTab('overview')}
           className={`py-3 px-4 border-b-2 flex items-center gap-2 transition-colors ${
             activeTab === 'overview'
-              ? 'border-violet-500 text-violet-400 bg-violet-500/5'
+              ? 'border-blue-500 text-white bg-blue-500/10'
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
@@ -181,7 +181,7 @@ export const OrganizerDashboardPage: React.FC = () => {
           onClick={() => setActiveTab('assignments')}
           className={`py-3 px-4 border-b-2 flex items-center gap-2 transition-colors ${
             activeTab === 'assignments'
-              ? 'border-violet-500 text-violet-400 bg-violet-500/5'
+              ? 'border-blue-500 text-white bg-blue-500/10'
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
@@ -191,7 +191,7 @@ export const OrganizerDashboardPage: React.FC = () => {
           onClick={() => setActiveTab('normalization')}
           className={`py-3 px-4 border-b-2 flex items-center gap-2 transition-colors ${
             activeTab === 'normalization'
-              ? 'border-violet-500 text-violet-400 bg-violet-500/5'
+              ? 'border-blue-500 text-white bg-blue-500/10'
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
@@ -201,7 +201,7 @@ export const OrganizerDashboardPage: React.FC = () => {
           onClick={() => setActiveTab('exports')}
           className={`py-3 px-4 border-b-2 flex items-center gap-2 transition-colors ${
             activeTab === 'exports'
-              ? 'border-violet-500 text-violet-400 bg-violet-500/5'
+              ? 'border-blue-500 text-white bg-blue-500/10'
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
@@ -211,7 +211,7 @@ export const OrganizerDashboardPage: React.FC = () => {
           onClick={() => setActiveTab('audit')}
           className={`py-3 px-4 border-b-2 flex items-center gap-2 transition-colors ${
             activeTab === 'audit'
-              ? 'border-violet-500 text-violet-400 bg-violet-500/5'
+              ? 'border-blue-500 text-white bg-blue-500/10'
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
@@ -224,28 +224,28 @@ export const OrganizerDashboardPage: React.FC = () => {
         <div className="space-y-6">
           {/* Key Metric Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="glass-card p-5 rounded-2xl border border-slate-800 space-y-1">
+            <div className="bg-slate-900 border border-slate-800 p-4 rounded-lg space-y-1">
               <span className="text-xs text-slate-400">Total Submitted Projects</span>
-              <p className="text-2xl font-black text-white">{stats?.totalProjects || 0}</p>
+              <p className="text-xl font-bold text-white">{stats?.totalProjects || 0}</p>
             </div>
-            <div className="glass-card p-5 rounded-2xl border border-slate-800 space-y-1">
+            <div className="bg-slate-900 border border-slate-800 p-4 rounded-lg space-y-1">
               <span className="text-xs text-slate-400">Enlisted Judges</span>
-              <p className="text-2xl font-black text-purple-400">{stats?.totalJudges || 0}</p>
+              <p className="text-xl font-bold text-slate-200">{stats?.totalJudges || 0}</p>
             </div>
-            <div className="glass-card p-5 rounded-2xl border border-slate-800 space-y-1">
+            <div className="bg-slate-900 border border-slate-800 p-4 rounded-lg space-y-1">
               <span className="text-xs text-slate-400">Evaluations Completed</span>
-              <p className="text-2xl font-black text-emerald-400">{stats?.completedEvaluations || 0} / {stats?.totalAssignments || 0}</p>
+              <p className="text-xl font-bold text-emerald-400">{stats?.completedEvaluations || 0} / {stats?.totalAssignments || 0}</p>
             </div>
-            <div className="glass-card p-5 rounded-2xl border border-slate-800 space-y-1">
+            <div className="bg-slate-900 border border-slate-800 p-4 rounded-lg space-y-1">
               <span className="text-xs text-slate-400">Completion Rate</span>
-              <p className="text-2xl font-black text-violet-400">{stats?.completionRate || 0}%</p>
+              <p className="text-xl font-bold text-slate-200">{stats?.completionRate || 0}%</p>
             </div>
           </div>
 
-          <div className="glass-card p-6 rounded-2xl border border-slate-800 space-y-4">
-            <h3 className="text-base font-bold text-white">Event Lifecycle Status</h3>
+          <div className="bg-slate-900 border border-slate-800 p-5 rounded-lg space-y-2">
+            <h3 className="text-sm font-bold text-white">Event Lifecycle Status</h3>
             <p className="text-xs text-slate-300">
-              Current state is <strong className="text-violet-400 font-mono">{event.status}</strong>.
+              Current state is <strong className="text-slate-200 font-mono">{event.status}</strong>.
               Submissions due on {new Date(event.submissionDeadline).toLocaleString()}, judging closes on {new Date(event.judgingDeadline).toLocaleString()}.
             </p>
           </div>
@@ -254,10 +254,10 @@ export const OrganizerDashboardPage: React.FC = () => {
 
       {/* Tab: Deterministic Assignment */}
       {activeTab === 'assignments' && (
-        <div className="glass-card p-6 sm:p-8 rounded-2xl border border-slate-800 space-y-6">
+        <div className="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-lg space-y-6">
           <div className="space-y-1">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <Shield className="w-5 h-5 text-violet-400" />
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <Shield className="w-5 h-5 text-slate-300" />
               Deterministic Mulberry32 Judge Assignment Engine
             </h2>
             <p className="text-xs text-slate-400">
@@ -265,7 +265,7 @@ export const OrganizerDashboardPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="p-4 bg-slate-900/80 rounded-xl border border-slate-800 flex flex-col sm:flex-row items-center gap-4">
+          <div className="p-4 bg-slate-950 rounded border border-slate-800 flex flex-col sm:flex-row items-center gap-4">
             <div className="space-y-1 w-full sm:w-auto">
               <label className="text-xs font-semibold text-slate-300 block">PRNG Integer Seed</label>
               <input
@@ -295,12 +295,12 @@ export const OrganizerDashboardPage: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
                 {assignResult.judgeWorkloads.map((jw: any) => (
-                  <div key={jw.judgeId} className="p-3 bg-slate-900 rounded-lg border border-slate-800 flex justify-between items-center">
+                  <div key={jw.judgeId} className="p-3 bg-slate-950 rounded border border-slate-800 flex justify-between items-center">
                     <div>
                       <span className="font-semibold text-slate-200 block">{jw.name}</span>
                       <span className="text-slate-500 text-[11px]">{jw.email}</span>
                     </div>
-                    <span className="font-mono font-bold text-violet-400">
+                    <span className="font-mono font-bold text-slate-200">
                       {jw.assignedCount} / {jw.capacity}
                     </span>
                   </div>
@@ -314,11 +314,11 @@ export const OrganizerDashboardPage: React.FC = () => {
       {/* Tab: Normalization */}
       {activeTab === 'normalization' && (
         <div className="space-y-6">
-          <div className="glass-card p-6 sm:p-8 rounded-2xl border border-slate-800 space-y-6">
+          <div className="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-lg space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="space-y-1">
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                  <Cpu className="w-5 h-5 text-violet-400" />
+                <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                  <Cpu className="w-5 h-5 text-slate-300" />
                   Cross-Judge Score Normalization Pipeline
                 </h2>
                 <p className="text-xs text-slate-400">
@@ -340,17 +340,17 @@ export const OrganizerDashboardPage: React.FC = () => {
               <div className="space-y-6 pt-4 border-t border-slate-800">
                 {/* Global stats */}
                 <div className="grid grid-cols-3 gap-4 text-xs">
-                  <div className="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                  <div className="p-3 bg-slate-950 rounded border border-slate-800">
                     <span className="text-slate-500 block">Total Evaluations</span>
-                    <strong className="text-base text-white">{normResult.globalStats.totalEvaluations}</strong>
+                    <strong className="text-sm text-white">{normResult.globalStats.totalEvaluations}</strong>
                   </div>
-                  <div className="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                  <div className="p-3 bg-slate-950 rounded border border-slate-800">
                     <span className="text-slate-500 block">Global Mean Score</span>
-                    <strong className="text-base text-violet-400">{normResult.globalStats.globalMean}</strong>
+                    <strong className="text-sm text-slate-200">{normResult.globalStats.globalMean}</strong>
                   </div>
-                  <div className="p-3 bg-slate-900 rounded-lg border border-slate-800">
+                  <div className="p-3 bg-slate-950 rounded border border-slate-800">
                     <span className="text-slate-500 block">Global Std Deviation</span>
-                    <strong className="text-base text-indigo-400">{normResult.globalStats.globalStdDev}</strong>
+                    <strong className="text-sm text-slate-200">{normResult.globalStats.globalStdDev}</strong>
                   </div>
                 </div>
 
@@ -372,12 +372,12 @@ export const OrganizerDashboardPage: React.FC = () => {
                       </thead>
                       <tbody className="divide-y divide-slate-800">
                         {normResult.rankings.map((r: any) => (
-                          <tr key={r.projectId} className="hover:bg-slate-900/40">
+                          <tr key={r.projectId} className="hover:bg-slate-800/40">
                             <td className="py-2.5 px-3 font-bold text-amber-400 font-mono">#{r.finalRank}</td>
                             <td className="py-2.5 px-3 font-semibold text-slate-200">{r.title}</td>
                             <td className="py-2.5 px-3 text-slate-400">{r.teamName}</td>
                             <td className="py-2.5 px-3 text-slate-400">{r.trackName || 'General'}</td>
-                            <td className="py-2.5 px-3 font-mono font-bold text-violet-400">{r.normalizedScore}</td>
+                            <td className="py-2.5 px-3 font-mono font-bold text-slate-200">{r.normalizedScore}</td>
                             <td className="py-2.5 px-3 font-mono text-slate-400">{r.rawScore}</td>
                             <td className="py-2.5 px-3 font-mono text-slate-400">{r.evaluationsCount}</td>
                           </tr>
@@ -396,9 +396,9 @@ export const OrganizerDashboardPage: React.FC = () => {
       {activeTab === 'exports' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* CSV Exports */}
-          <div className="glass-card p-6 rounded-2xl border border-slate-800 space-y-4">
+          <div className="bg-slate-900 border border-slate-800 p-6 rounded-lg space-y-4">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Download className="w-5 h-5 text-violet-400" />
+              <Download className="w-4 h-4 text-slate-300" />
               RFC 4180 CSV Data Exports
             </h3>
             <p className="text-xs text-slate-400">Download sanitized data exports for offline record keeping.</p>
@@ -423,7 +423,7 @@ export const OrganizerDashboardPage: React.FC = () => {
           </div>
 
           {/* Certificates Generation */}
-          <div className="glass-card p-6 rounded-2xl border border-slate-800 space-y-4">
+          <div className="bg-slate-900 border border-slate-800 p-6 rounded-lg space-y-4">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
               <FileCheck className="w-5 h-5 text-emerald-400" />
               HMAC Signed Certificates
@@ -452,7 +452,7 @@ export const OrganizerDashboardPage: React.FC = () => {
             </div>
 
             {certMsg && (
-              <p className="text-xs text-emerald-400 bg-emerald-500/10 p-2.5 rounded-lg border border-emerald-500/20">
+              <p className="text-xs text-emerald-400 bg-emerald-500/10 p-2.5 rounded border border-emerald-500/20">
                 {certMsg}
               </p>
             )}
@@ -462,10 +462,10 @@ export const OrganizerDashboardPage: React.FC = () => {
 
       {/* Tab: Audit Trails */}
       {activeTab === 'audit' && (
-        <div className="glass-card p-6 sm:p-8 rounded-2xl border border-slate-800 space-y-4">
+        <div className="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-lg space-y-4">
           <div className="space-y-1">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <History className="w-5 h-5 text-violet-400" />
+              <History className="w-4 h-4 text-slate-300" />
               Immutable Audit Log Records
             </h3>
             <p className="text-xs text-slate-400">Complete tamper-evident log of all mutations.</p>
@@ -484,9 +484,9 @@ export const OrganizerDashboardPage: React.FC = () => {
               </thead>
               <tbody className="divide-y divide-slate-800">
                 {auditLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-900/40">
+                  <tr key={log.id} className="hover:bg-slate-800/40">
                     <td className="py-2 px-3 text-slate-400 font-mono">{new Date(log.createdAt).toLocaleString()}</td>
-                    <td className="py-2 px-3 font-semibold text-violet-400">{log.action}</td>
+                    <td className="py-2 px-3 font-semibold text-slate-200">{log.action}</td>
                     <td className="py-2 px-3 text-slate-300">{log.user?.name || 'System / Anon'}</td>
                     <td className="py-2 px-3 text-slate-400">{log.entityType} ({log.entityId || 'N/A'})</td>
                     <td className="py-2 px-3 font-mono text-slate-500">{log.ipAddress || '127.0.0.1'}</td>

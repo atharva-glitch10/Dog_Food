@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.tsx';
-import { LogIn, KeyRound, Mail, AlertCircle, Sparkles } from 'lucide-react';
+import { LogIn, KeyRound, Mail, AlertCircle, Terminal, Users, Shield } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
@@ -34,13 +34,13 @@ export const LoginPage: React.FC = () => {
   return (
     <div className="max-w-md mx-auto py-8 space-y-6">
       <div className="text-center space-y-2">
-        <h1 className="text-3xl font-extrabold text-white">Welcome Back</h1>
-        <p className="text-sm text-slate-400">Log in to manage your teams, projects, or evaluations.</p>
+        <h1 className="text-2xl font-bold text-white tracking-tight">Account Login</h1>
+        <p className="text-xs text-slate-400">Authenticate to access team submissions, judging, or event management.</p>
       </div>
 
-      <div className="glass-card p-6 sm:p-8 rounded-2xl border border-slate-800/80 shadow-xl space-y-6">
+      <div className="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-lg space-y-6">
         {error && (
-          <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-lg flex items-center gap-2">
+          <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
@@ -48,86 +48,86 @@ export const LoginPage: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Email Address</label>
+            <label className="text-xs font-semibold text-slate-300 block">Email Address</label>
             <div className="relative">
+              <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@dogfood.local"
-                className="input-field pl-9"
+                placeholder="name@example.com"
+                className="input-field pl-9 text-sm"
               />
-              <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Password</label>
+            <label className="text-xs font-semibold text-slate-300 block">Password</label>
             <div className="relative">
+              <KeyRound className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="input-field pl-9"
+                placeholder="••••••••••••"
+                className="input-field pl-9 text-sm"
               />
-              <KeyRound className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
             </div>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="btn-primary w-full py-2.5 text-sm flex items-center justify-center gap-2 font-semibold"
+            className="btn-primary w-full py-2.5 text-sm font-semibold flex items-center justify-center gap-2 mt-2"
           >
             <LogIn className="w-4 h-4" />
-            {loading ? 'Authenticating...' : 'Sign In'}
+            <span>{loading ? 'Authenticating...' : 'Sign In'}</span>
           </button>
         </form>
 
         {/* Demo Quick Logins */}
-        <div className="pt-4 border-t border-slate-800/80 space-y-3">
-          <div className="flex items-center gap-1.5 text-xs text-violet-400 font-semibold">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>One-Click Demo Credentials:</span>
+        <div className="pt-4 border-t border-slate-800 space-y-3">
+          <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">
+            <Terminal className="w-3.5 h-3.5 text-slate-400" />
+            <span>Select Demo Account:</span>
           </div>
           <div className="grid grid-cols-2 gap-2 text-xs">
             <button
               type="button"
               onClick={() => fillDemoAccount('admin@dogfood.local')}
-              className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded border border-slate-700/60 text-left transition-colors"
+              className="px-2.5 py-1.5 bg-slate-850 hover:bg-slate-800 text-slate-300 rounded border border-slate-750 text-left transition-colors font-mono"
             >
-              👑 <strong className="text-slate-200">Admin</strong>
+              [Admin]
             </button>
             <button
               type="button"
               onClick={() => fillDemoAccount('organizer@dogfood.local')}
-              className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded border border-slate-700/60 text-left transition-colors"
+              className="px-2.5 py-1.5 bg-slate-850 hover:bg-slate-800 text-slate-300 rounded border border-slate-750 text-left transition-colors font-mono"
             >
-              📋 <strong className="text-slate-200">Organizer</strong>
+              [Organizer]
             </button>
             <button
               type="button"
               onClick={() => fillDemoAccount('judge.harsh@dogfood.local')}
-              className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded border border-slate-700/60 text-left transition-colors"
+              className="px-2.5 py-1.5 bg-slate-850 hover:bg-slate-800 text-slate-300 rounded border border-slate-750 text-left transition-colors font-mono"
             >
-              ⚖️ <strong className="text-slate-200">Judge (Harsh)</strong>
+              [Judge: Strict]
             </button>
             <button
               type="button"
               onClick={() => fillDemoAccount('judge.lenient@dogfood.local')}
-              className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded border border-slate-700/60 text-left transition-colors"
+              className="px-2.5 py-1.5 bg-slate-850 hover:bg-slate-800 text-slate-300 rounded border border-slate-750 text-left transition-colors font-mono"
             >
-              ✨ <strong className="text-slate-200">Judge (Lenient)</strong>
+              [Judge: Lenient]
             </button>
             <button
               type="button"
               onClick={() => fillDemoAccount('alice@dogfood.local')}
-              className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded border border-slate-700/60 text-left transition-colors col-span-2"
+              className="px-2.5 py-1.5 bg-slate-850 hover:bg-slate-800 text-slate-300 rounded border border-slate-750 text-left transition-colors col-span-2 font-mono"
             >
-              🚀 <strong className="text-slate-200">Participant Alice (Team Captain)</strong>
+              [Participant: Alice (Team Lead)]
             </button>
           </div>
         </div>
@@ -135,7 +135,7 @@ export const LoginPage: React.FC = () => {
 
       <p className="text-center text-xs text-slate-400">
         Don't have an account yet?{' '}
-        <Link to="/register" className="text-violet-400 hover:underline font-semibold">
+        <Link to="/register" className="text-blue-400 hover:underline font-semibold">
           Create account
         </Link>
       </p>

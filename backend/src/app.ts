@@ -34,10 +34,26 @@ import mediaRoutes from './modules/media/media.routes.js';
 export function createApp() {
   const app = express();
 
-  // Basic security and parsing
+  // Comma-separated CORS origins and optional CUSTOM_DOMAIN support
+  const envOrigins = (config.corsOrigin || '')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+  const customDomain = process.env.CUSTOM_DOMAIN
+    ? [`http://${process.env.CUSTOM_DOMAIN}`, `https://${process.env.CUSTOM_DOMAIN}`]
+    : [];
+  const allowedOrigins = Array.from(
+    new Set([
+      ...envOrigins,
+      ...customDomain,
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+    ])
+  );
+
   app.use(
     cors({
-      origin: [config.corsOrigin, 'http://localhost:3000', 'http://127.0.0.1:3000'],
+      origin: allowedOrigins,
       credentials: true,
     })
   );

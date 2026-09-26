@@ -75,7 +75,7 @@ export const JudgePairwisePage: React.FC = () => {
 
       <div className="border-b border-slate-800 pb-4 space-y-1">
         <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
-          <GitCompare className="w-7 h-7 text-purple-400" />
+          <GitCompare className="w-6 h-6 text-slate-300" />
           Bradley-Terry Pairwise Project Comparison
         </h1>
         <p className="text-xs text-slate-400">
@@ -93,21 +93,21 @@ export const JudgePairwisePage: React.FC = () => {
       {loading ? (
         <div className="text-center py-20 text-slate-400">Loading next project pair...</div>
       ) : !pair ? (
-        <div className="glass-card p-12 text-center rounded-2xl text-slate-400">
+        <div className="bg-slate-900 border border-slate-800 p-12 text-center rounded-lg text-slate-400">
           Not enough projects available for pairwise comparison.
         </div>
       ) : (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Project A Card */}
-            <div className="glass-card-hover p-6 rounded-2xl border border-slate-800 flex flex-col justify-between space-y-4">
+            <div className="bg-slate-900 border border-slate-800 p-6 rounded-lg flex flex-col justify-between space-y-4">
               <div className="space-y-3">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-violet-500/20 text-violet-300">
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
                   Project A
                 </span>
-                <h3 className="text-xl font-bold text-white">{pair.projectA.title}</h3>
+                <h3 className="text-lg font-bold text-white">{pair.projectA.title}</h3>
                 <p className="text-xs text-slate-300 leading-relaxed">{pair.projectA.problemStatement}</p>
-                <div className="p-3 bg-slate-900/80 rounded-lg text-xs text-slate-400 space-y-1">
+                <div className="p-3 bg-slate-950 rounded border border-slate-800 text-xs text-slate-400 space-y-1">
                   <strong className="text-slate-300 block">Solution:</strong>
                   <p>{pair.projectA.solutionDescription}</p>
                 </div>
@@ -116,22 +116,22 @@ export const JudgePairwisePage: React.FC = () => {
               <button
                 disabled={submitting}
                 onClick={() => handleVoteWinner(pair.projectA.id)}
-                className="btn-primary w-full py-2.5 text-xs font-bold flex items-center justify-center gap-2"
+                className="btn-primary w-full py-2 text-xs font-semibold flex items-center justify-center gap-2"
               >
-                <Trophy className="w-4 h-4 text-amber-300" />
+                <Trophy className="w-3.5 h-3.5 text-amber-300" />
                 Select Project A as Winner
               </button>
             </div>
 
             {/* Project B Card */}
-            <div className="glass-card-hover p-6 rounded-2xl border border-slate-800 flex flex-col justify-between space-y-4">
+            <div className="bg-slate-900 border border-slate-800 p-6 rounded-lg flex flex-col justify-between space-y-4">
               <div className="space-y-3">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300">
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
                   Project B
                 </span>
-                <h3 className="text-xl font-bold text-white">{pair.projectB.title}</h3>
+                <h3 className="text-lg font-bold text-white">{pair.projectB.title}</h3>
                 <p className="text-xs text-slate-300 leading-relaxed">{pair.projectB.problemStatement}</p>
-                <div className="p-3 bg-slate-900/80 rounded-lg text-xs text-slate-400 space-y-1">
+                <div className="p-3 bg-slate-950 rounded border border-slate-800 text-xs text-slate-400 space-y-1">
                   <strong className="text-slate-300 block">Solution:</strong>
                   <p>{pair.projectB.solutionDescription}</p>
                 </div>
@@ -140,9 +140,9 @@ export const JudgePairwisePage: React.FC = () => {
               <button
                 disabled={submitting}
                 onClick={() => handleVoteWinner(pair.projectB.id)}
-                className="btn-primary w-full py-2.5 text-xs font-bold flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-blue-600"
+                className="btn-primary w-full py-2 text-xs font-semibold flex items-center justify-center gap-2"
               >
-                <Trophy className="w-4 h-4 text-amber-300" />
+                <Trophy className="w-3.5 h-3.5 text-amber-300" />
                 Select Project B as Winner
               </button>
             </div>
