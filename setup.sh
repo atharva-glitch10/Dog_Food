@@ -20,9 +20,24 @@ echo -e "${BLUE}================================================================
 echo ""
 
 # 1. Environment Config Setup
+gen_secret() {
+    if command -v openssl >/dev/null 2>&1; then
+        openssl rand -hex 48
+    elif command -v node >/dev/null 2>&1; then
+        node -e "process.stdout.write(require('crypto').randomBytes(48).toString('hex'))"
+    else
+        head -c 48 /dev/urandom | od -An -tx1 | tr -d ' \n'
+    fi
+}
+
 if [ ! -f ".env" ]; then
-    echo -e "${YELLOW}[1/4] Generating .env from .env.example...${NC}"
-    cp .env.example .env
+    echo -e "${YELLOW}[1/4] Generating .env from .env.example with random secrets...${NC}"
+    JWT_VALUE="$(gen_secret)"
+    COOKIE_VALUE="$(gen_secret)"
+    sed -e "s/^JWT_SECRET=.*/JWT_SECRET=${JWT_VALUE}/" \
+        -e "s/^COOKIE_SECRET=.*/COOKIE_SECRET=${COOKIE_VALUE}/" \
+        .env.example > .env
+    chmod 600 .env
 else
     echo -e "${GREEN}[1/4] .env configuration detected.${NC}"
 fi
@@ -44,8 +59,8 @@ if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
     fi
 
     echo -e "${BLUE}[3/4] Building and launching containers in detached mode...${NC}"
-    $COMPOSE_CMD down -v --remove-orphans 2>/dev/null || true
-    $COMPOSE_CMD up --build -d
+    # Data volumes are kept; run '$COMPOSE_CMD down -v' yourself for a full reset.
+    $COMPOSE_CMD up --build -d --remove-orphans
 
     echo -e "${YELLOW}[4/4] Waiting for services to reach healthy status...${NC}"
     
@@ -101,16 +116,14 @@ echo ""
 echo -e "${BLUE}Endpoint URLs:${NC}"
 echo -e "  • Frontend Web UI:        ${GREEN}http://localhost:3000${NC}"
 echo -e "  • Backend REST API:       ${GREEN}http://localhost:4000/api${NC}"
-echo -e "  • Interactive Swagger:    ${GREEN}http://localhost:4000/api/docs${NC}"
+echo -e "  • Interactive Swagger:    ${GREEN}http://localhost:4000/api/docs${NC} (also via http://localhost:3000/api/docs)"
 echo -e "  • Health Check:           ${GREEN}http://localhost:4000/api/health${NC}"
 echo ""
 echo -e "${BLUE}Demo User Credentials (Password for all: 'Dogfood2026!'):${NC}"
 echo -e "  • Admin Superuser:        ${YELLOW}admin@dogfood.local${NC}"
 echo -e "  • Organizer Director:     ${YELLOW}organizer@dogfood.local${NC}"
-echo -e "  • Harsh Judge:            ${YELLOW}judge.harsh@dogfood.local${NC}"
-echo -e "  • Lenient Judge:          ${YELLOW}judge.lenient@dogfood.local${NC}"
-echo -e "  • Team Alpha Lead:        ${YELLOW}lead.alice@dogfood.local${NC}"
-echo -e "  • Team Beta Lead:         ${YELLOW}lead.carol@dogfood.local${NC}"
+echo -e "  • Judges:                 ${YELLOW}judge.harsh@ / judge.lenient@ / judge.balanced@ / judge.specialist@dogfood.local${NC}"
+echo -e "  • Participants:           ${YELLOW}alice@dogfood.local, carol@dogfood.local (team leads), bob@, dave@, eve@ ...${NC}"
 echo ""
 echo -e "To view live logs:    ${YELLOW}docker compose logs -f${NC}"
 echo -e "To stop the stack:    ${YELLOW}docker compose down${NC}"

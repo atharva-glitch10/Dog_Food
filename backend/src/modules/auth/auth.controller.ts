@@ -10,7 +10,7 @@ export class AuthController {
 
       res.cookie(config.cookieName, result.token, {
         httpOnly: true,
-        secure: config.nodeEnv === 'production',
+        secure: isSecureCookie(req),
         sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
@@ -34,7 +34,7 @@ export class AuthController {
 
       res.cookie(config.cookieName, result.token, {
         httpOnly: true,
-        secure: config.nodeEnv === 'production',
+        secure: isSecureCookie(req),
         sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
@@ -72,6 +72,15 @@ export class AuthController {
       next(err);
     }
   }
+}
+
+// "auto" (default) marks the cookie Secure only when the request arrived over
+// HTTPS (honouring X-Forwarded-Proto from a trusted proxy), so plain-HTTP LAN
+// access keeps working while HTTPS deployments get Secure cookies.
+function isSecureCookie(req: Request): boolean {
+  if (config.cookieSecure === 'true') return true;
+  if (config.cookieSecure === 'false') return false;
+  return req.secure;
 }
 
 export const authController = new AuthController();

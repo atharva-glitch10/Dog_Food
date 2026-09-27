@@ -1,5 +1,6 @@
 import React from 'react';
 import { Terminal, ExternalLink, Code } from 'lucide-react';
+import { API_BASE_URL } from '../services/api.ts';
 
 export const ApiDocsPage: React.FC = () => {
   return (
@@ -23,12 +24,12 @@ export const ApiDocsPage: React.FC = () => {
           You can test every endpoint directly using the interactive Swagger UI served locally by the backend.
         </p>
         <a
-          href="http://localhost:4000/api/docs"
+          href={`${API_BASE_URL}/docs/`}
           target="_blank"
           rel="noopener noreferrer"
           className="btn-primary text-xs py-2 px-3 inline-flex items-center gap-2 font-semibold"
         >
-          Open Swagger UI Documentation (Port 4000)
+          Open Swagger UI Documentation
           <ExternalLink className="w-3.5 h-3.5" />
         </a>
       </div>

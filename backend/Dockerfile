@@ -35,10 +35,12 @@ RUN npm ci --omit=dev
 RUN npx prisma generate
 
 COPY --from=builder /app/dist ./dist
+# OpenAPI spec served by Swagger UI at /api/docs (resolved relative to dist/)
+COPY docs ./docs
 COPY docker-entrypoint.sh /app/docker-entrypoint.sh
 
-# Ensure uploads directory exists and prepare entrypoint permissions
-RUN mkdir -p /app/uploads && \
+# Ensure uploads/secrets directories exist and prepare entrypoint permissions
+RUN mkdir -p /app/uploads /app/secrets && \
     chown -R node:node /app && \
     sed -i 's/\r$//' /app/docker-entrypoint.sh && \
     chmod +x /app/docker-entrypoint.sh

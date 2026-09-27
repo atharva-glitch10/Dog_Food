@@ -11,7 +11,11 @@ const isProd = process.env.NODE_ENV === 'production';
 const KNOWN_INSECURE_SECRETS = new Set([
   'dogfood-insecure-secret-key-change-in-prod-2026',
   'dogfood-cookie-secret-2026',
-  'dogfood-offline-secret-key-2026',  // docker-compose fallback
+  'dogfood-offline-secret-key-2026',  // old docker-compose fallback
+  // Former docker-compose / .env.example fallbacks (publicly known, never valid)
+  'd09f00d2026_jwt_secret_offline_eval_secure_key_32chars_min',
+  'd09f00d2026_cookie_secret_offline_eval_secure_key_32chars',
+  'd09f00d2026_cookie_secret_offline_eval_secure_key_32chars_min',
   'secret',
   'changeme',
   'password',
@@ -54,6 +58,20 @@ function requireSecret(envKey: string, fallback: string): string {
   return value;
 }
 
+/**
+ * Express "trust proxy" setting. Unset/"false" disables it (direct connections).
+ * A number trusts that many hops; any other value is passed through as a
+ * comma-separated list of addresses/subnets or presets such as
+ * "loopback, linklocal, uniquelocal".
+ */
+function parseTrustProxy(raw: string | undefined): boolean | number | string {
+  const value = (raw ?? '').trim();
+  if (!value || value.toLowerCase() === 'false') return false;
+  if (value.toLowerCase() === 'true') return true;
+  if (/^\d+$/.test(value)) return parseInt(value, 10);
+  return value;
+}
+
 export const config = {
   port: parseInt(process.env.PORT || '4000', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
@@ -62,6 +80,9 @@ export const config = {
   cookieName: 'dogfood_session',
   cookieSecret: requireSecret('COOKIE_SECRET', 'dogfood-cookie-secret-2026'),
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  trustProxy: parseTrustProxy(process.env.TRUST_PROXY),
+  /** Session cookie Secure flag: "auto" (follow request protocol), "true" or "false". */
+  cookieSecure: (process.env.COOKIE_SECURE || 'auto').toLowerCase(),
   databaseUrl:
     process.env.DATABASE_URL ||
     'postgresql://postgres:postgres@localhost:5432/dogfood?schema=public',

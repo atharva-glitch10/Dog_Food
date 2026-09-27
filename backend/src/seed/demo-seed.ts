@@ -9,7 +9,7 @@ import {
   CertificateType,
 } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import { normalizationService } from '../src/modules/normalization/normalization.service.js';
+import { normalizationService } from '../modules/normalization/normalization.service.js';
 
 const prisma = new PrismaClient();
 
@@ -18,7 +18,35 @@ async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, salt);
 }
 
+/**
+ * Demo data seeder.
+ *
+ * Runs on every container start, but only writes data when the database is
+ * empty (no ADMIN user exists). It never deletes or overwrites existing rows,
+ * so data created through the UI survives restarts.
+ *
+ * Set SEED_DEMO_DATA=false to skip seeding entirely.
+ */
+function seedingEnabled(): boolean {
+  const flag = (process.env.SEED_DEMO_DATA ?? 'true').trim().toLowerCase();
+  return !['false', '0', 'no', 'off'].includes(flag);
+}
+
 async function main() {
+  if (!seedingEnabled()) {
+    console.log('🌱 SEED_DEMO_DATA is disabled; skipping demo data seed.');
+    return;
+  }
+
+  const [existingAdmin, existingEvent] = await Promise.all([
+    prisma.user.findFirst({ where: { role: Role.ADMIN }, select: { id: true } }),
+    prisma.event.findUnique({ where: { slug: 'dogfood-2026' }, select: { id: true } }),
+  ]);
+  if (existingAdmin || existingEvent) {
+    console.log('🌱 Database already initialized; skipping demo data seed (existing data is never modified).');
+    return;
+  }
+
   console.log('🌱 Seeding DOGFOOD 2026 Database with comprehensive end-to-end fixture data...');
 
   const passwordHash = await hashPassword('Dogfood2026!');
@@ -26,7 +54,7 @@ async function main() {
   // 1. Create Core Users Across All Distinct Roles
   const adminUser = await prisma.user.upsert({
     where: { email: 'admin@dogfood.local' },
-    update: { passwordHash },
+    update: {},
     create: {
       email: 'admin@dogfood.local',
       name: 'System Admin',
@@ -38,7 +66,7 @@ async function main() {
 
   const organizerUser = await prisma.user.upsert({
     where: { email: 'organizer@dogfood.local' },
-    update: { passwordHash },
+    update: {},
     create: {
       email: 'organizer@dogfood.local',
       name: 'Olivia Organizer',
@@ -51,7 +79,7 @@ async function main() {
   // Judges
   const judgeHarsh = await prisma.user.upsert({
     where: { email: 'judge.harsh@dogfood.local' },
-    update: { passwordHash },
+    update: {},
     create: {
       email: 'judge.harsh@dogfood.local',
       name: 'Dr. Strict Scaler (Harsh Grader)',
@@ -63,7 +91,7 @@ async function main() {
 
   const judgeLenient = await prisma.user.upsert({
     where: { email: 'judge.lenient@dogfood.local' },
-    update: { passwordHash },
+    update: {},
     create: {
       email: 'judge.lenient@dogfood.local',
       name: 'Dr. Larry Lenient (Generous Grader)',
@@ -75,7 +103,7 @@ async function main() {
 
   const judgeBalanced = await prisma.user.upsert({
     where: { email: 'judge.balanced@dogfood.local' },
-    update: { passwordHash },
+    update: {},
     create: {
       email: 'judge.balanced@dogfood.local',
       name: 'Barbara Balanced (Median Grader)',
@@ -87,7 +115,7 @@ async function main() {
 
   const judgeSpecialist = await prisma.user.upsert({
     where: { email: 'judge.specialist@dogfood.local' },
-    update: { passwordHash },
+    update: {},
     create: {
       email: 'judge.specialist@dogfood.local',
       name: 'Sam Specialist (Judge & Team Member)',
@@ -100,7 +128,7 @@ async function main() {
   // Participants
   const alice = await prisma.user.upsert({
     where: { email: 'alice@dogfood.local' },
-    update: { passwordHash },
+    update: {},
     create: {
       email: 'alice@dogfood.local',
       name: 'Alice Chen',
@@ -112,7 +140,7 @@ async function main() {
 
   const bob = await prisma.user.upsert({
     where: { email: 'bob@dogfood.local' },
-    update: { passwordHash },
+    update: {},
     create: {
       email: 'bob@dogfood.local',
       name: 'Bob Miller',
@@ -124,7 +152,7 @@ async function main() {
 
   const carol = await prisma.user.upsert({
     where: { email: 'carol@dogfood.local' },
-    update: { passwordHash },
+    update: {},
     create: {
       email: 'carol@dogfood.local',
       name: 'Carol Davis',
@@ -136,7 +164,7 @@ async function main() {
 
   const dave = await prisma.user.upsert({
     where: { email: 'dave@dogfood.local' },
-    update: { passwordHash },
+    update: {},
     create: {
       email: 'dave@dogfood.local',
       name: 'Dave Wilson',
@@ -148,7 +176,7 @@ async function main() {
 
   const eve = await prisma.user.upsert({
     where: { email: 'eve@dogfood.local' },
-    update: { passwordHash },
+    update: {},
     create: {
       email: 'eve@dogfood.local',
       name: 'Eve Johnson',
@@ -160,7 +188,7 @@ async function main() {
 
   const frank = await prisma.user.upsert({
     where: { email: 'frank@dogfood.local' },
-    update: { passwordHash },
+    update: {},
     create: {
       email: 'frank@dogfood.local',
       name: 'Frank Martinez',
@@ -172,7 +200,7 @@ async function main() {
 
   const grace = await prisma.user.upsert({
     where: { email: 'grace@dogfood.local' },
-    update: { passwordHash },
+    update: {},
     create: {
       email: 'grace@dogfood.local',
       name: 'Grace Hopper',
@@ -184,7 +212,7 @@ async function main() {
 
   const liam = await prisma.user.upsert({
     where: { email: 'liam@dogfood.local' },
-    update: { passwordHash },
+    update: {},
     create: {
       email: 'liam@dogfood.local',
       name: 'Liam Vance',
@@ -196,7 +224,7 @@ async function main() {
 
   const zack = await prisma.user.upsert({
     where: { email: 'zack@dogfood.local' },
-    update: { passwordHash },
+    update: {},
     create: {
       email: 'zack@dogfood.local',
       name: 'Zack Taylor',
@@ -209,10 +237,6 @@ async function main() {
   console.log('✅ Core users created.');
 
   // 2. Create Flagship Event in JUDGING_ACTIVE state
-  await prisma.event.deleteMany({
-    where: { slug: 'dogfood-2026' },
-  });
-
   const now = new Date();
   const regStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const regEnd = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);

@@ -7,12 +7,15 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-dogfood}
-    ports:
-      - "5432:5432"
+    # Postgres is only reachable by the backend on the internal Compose network.
+    # For local development against the containerised DB, uncomment:
+    # ports:
+    #   - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d dogfood"]
+      # $$ defers expansion to the container shell, which has these variables set.
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 3s
       timeout: 5s
       retries: 15
@@ -26,20 +29,28 @@ services:
     environment:
       PORT: 4000
       NODE_ENV: production
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/dogfood?schema=public
-      JWT_SECRET: ${JWT_SECRET:-d09f00d2026_jwt_secret_offline_eval_secure_key_32chars_min}
-      JWT_EXPIRES_IN: 7d
-      COOKIE_SECRET: ${COOKIE_SECRET:-d09f00d2026_cookie_secret_offline_eval_secure_key_32chars}
-      CORS_ORIGIN: http://localhost:3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-dogfood}?schema=public
+      # Leave empty to have the entrypoint generate random secrets on first boot
+      # (persisted in the backend_secrets volume). Set them in .env to override.
+      JWT_SECRET: ${JWT_SECRET:-}
+      COOKIE_SECRET: ${COOKIE_SECRET:-}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      # Requests arrive through the Nginx container on the private Compose network.
+      TRUST_PROXY: ${TRUST_PROXY:-loopback, linklocal, uniquelocal}
+      # Session cookie Secure flag: auto = only when the request came in over HTTPS.
+      COOKIE_SECURE: ${COOKIE_SECURE:-auto}
+      # Seed demo users/event when the database is empty. Existing data is never touched.
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-true}
+    # Kept published for direct API access and Swagger UI (http://localhost:4000/api/docs).
     ports:
       - "4000:4000"
     volumes:
       - uploads_data:/app/uploads
+      - backend_secrets:/app/secrets
     depends_on:
       postgres:
         condition: service_healthy
-    command: >
-      sh -c "npx prisma db push --skip-generate && npx tsx prisma/seed.ts && node dist/server.js"
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:4000/api/health || exit 1"]
       interval: 10s
@@ -52,16 +63,20 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: ${VITE_API_URL:-http://localhost:4000/api}
+        # Same-origin path; Nginx proxies /api and /uploads to the backend.
+        VITE_API_URL: ${VITE_API_URL:-/api}
     container_name: dogfood_frontend
     restart: unless-stopped
     ports:
       - "3000:3000"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
 volumes:
   pgdata:
     driver: local
   uploads_data:
+    driver: local
+  backend_secrets:
     driver: local

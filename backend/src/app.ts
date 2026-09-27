@@ -34,6 +34,12 @@ import mediaRoutes from './modules/media/media.routes.js';
 export function createApp() {
   const app = express();
 
+  // Behind the Nginx reverse proxy, req.ip must come from X-Forwarded-For so the
+  // rate limiter, vote IP tracking and audit log see the real client address.
+  if (config.trustProxy !== false) {
+    app.set('trust proxy', config.trustProxy);
+  }
+
   // Comma-separated CORS origins and optional CUSTOM_DOMAIN support
   const envOrigins = (config.corsOrigin || '')
     .split(',')
@@ -109,10 +115,11 @@ export function createApp() {
     });
   });
 
-  // Swagger OpenAPI UI
-  const swaggerPath = path.join(process.cwd(), '..', 'docs', 'openapi.yaml');
-  const localSwaggerPath = path.join(process.cwd(), 'docs', 'openapi.yaml');
-  const chosenPath = fs.existsSync(swaggerPath) ? swaggerPath : fs.existsSync(localSwaggerPath) ? localSwaggerPath : null;
+  // Swagger OpenAPI UI. The spec lives in backend/docs/openapi.yaml; resolve it
+  // relative to this module (src/ in dev, dist/ in the Docker image) so it
+  // does not depend on the process working directory.
+  const swaggerPath = path.resolve(__dirname, '..', 'docs', 'openapi.yaml');
+  const chosenPath = fs.existsSync(swaggerPath) ? swaggerPath : null;
 
   if (chosenPath) {
     try {
