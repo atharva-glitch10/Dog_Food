@@ -1,0 +1,11 @@
+node_modules
+dist
+tests
+coverage
+uploads
+.env
+.env.*
+*.log
+vitest*.config.ts
+Dockerfile
+.dockerignore

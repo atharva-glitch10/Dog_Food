@@ -1,12 +1,14 @@
+import os from 'os';
 import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
 const url = process.argv[2] || 'http://localhost:3000/';
-const outputPath = process.argv[3] || 'screenshot.png';
+const outputPath = process.argv[3] || 'docs/screenshots/screenshot.png';
 
 const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-const userDataDir = path.resolve('chrome-cdp-profile');
+// Browser profile lives in the OS temp dir, never inside the repository.
+const userDataDir = path.join(os.tmpdir(), 'dogfood-chrome-cdp-profile');
 
 if (!fs.existsSync(userDataDir)) {
   fs.mkdirSync(userDataDir, { recursive: true });

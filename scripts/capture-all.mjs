@@ -1,9 +1,11 @@
+import os from 'os';
 import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
 const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-const userDataDir = path.resolve('chrome-cdp-all-screens');
+// Browser profile lives in the OS temp dir, never inside the repository.
+const userDataDir = path.join(os.tmpdir(), 'dogfood-chrome-cdp-all-screens');
 
 if (!fs.existsSync(userDataDir)) {
   fs.mkdirSync(userDataDir, { recursive: true });
@@ -132,7 +134,7 @@ async function run() {
       });
 
       const buffer = Buffer.from(shot.data, 'base64');
-      fs.writeFileSync(screen.name, buffer);
+      fs.writeFileSync(path.join('docs/screenshots', screen.name), buffer);
       console.log(`Saved screenshot: ${screen.name} (${buffer.length} bytes)`);
     }
 

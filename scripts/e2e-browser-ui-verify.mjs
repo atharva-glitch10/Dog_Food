@@ -1,10 +1,11 @@
+import os from 'os';
 import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
 const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-const userDataDir = path.resolve('chrome-cdp-ui-verify');
-const screenshotsDir = path.resolve('ui-audit-screenshots');
+const userDataDir = path.join(os.tmpdir(), 'dogfood-chrome-cdp-ui-verify');
+const screenshotsDir = path.resolve('docs/screenshots/ui-audit');
 
 if (!fs.existsSync(userDataDir)) fs.mkdirSync(userDataDir, { recursive: true });
 if (!fs.existsSync(screenshotsDir)) fs.mkdirSync(screenshotsDir, { recursive: true });

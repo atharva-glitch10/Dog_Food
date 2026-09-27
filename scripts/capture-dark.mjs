@@ -1,9 +1,11 @@
+import os from 'os';
 import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
 const chromePath = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-const userDataDir = path.resolve('chrome-cdp-dark-dir');
+// Browser profile lives in the OS temp dir, never inside the repository.
+const userDataDir = path.join(os.tmpdir(), 'dogfood-chrome-cdp-dark-dir');
 
 if (!fs.existsSync(userDataDir)) {
   fs.mkdirSync(userDataDir, { recursive: true });
@@ -94,7 +96,7 @@ async function run() {
     await sleep(3000);
 
     const shot = await sendSession('Page.captureScreenshot', { format: 'png' });
-    fs.writeFileSync('settings_dark.png', Buffer.from(shot.data, 'base64'));
+    fs.writeFileSync('docs/screenshots/settings_dark.png', Buffer.from(shot.data, 'base64'));
     console.log('DARK_SETTINGS_SUCCESS');
     ws.close();
     chrome.kill();
