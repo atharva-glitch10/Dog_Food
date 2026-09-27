@@ -1,6 +1,15 @@
 import 'dotenv/config';
-import { PrismaClient, Role, EventStatus, ProjectStatus, TeamRole, VotingEligibility, CertificateType } from '@prisma/client';
+import {
+  PrismaClient,
+  Role,
+  EventStatus,
+  ProjectStatus,
+  TeamRole,
+  VotingEligibility,
+  CertificateType,
+} from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { normalizationService } from '../src/modules/normalization/normalization.service.js';
 
 const prisma = new PrismaClient();
 
@@ -10,11 +19,11 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 async function main() {
-  console.log('🌱 Seeding DOGFOOD 2026 Database with fixture data...');
+  console.log('🌱 Seeding DOGFOOD 2026 Database with comprehensive end-to-end fixture data...');
 
   const passwordHash = await hashPassword('Dogfood2026!');
 
-  // 1. Create Core Users
+  // 1. Create Core Users Across All Distinct Roles
   const adminUser = await prisma.user.upsert({
     where: { email: 'admin@dogfood.local' },
     update: {},
@@ -81,10 +90,10 @@ async function main() {
     update: {},
     create: {
       email: 'judge.specialist@dogfood.local',
-      name: 'Sam Specialist',
+      name: 'Sam Specialist (Judge & Team Member)',
       passwordHash,
       role: Role.JUDGE,
-      bio: 'Domain Specialist in AI Architecture.',
+      bio: 'Domain Specialist in AI Architecture; also member of Synthetix Audio.',
     },
   });
 
@@ -161,9 +170,45 @@ async function main() {
     },
   });
 
+  const grace = await prisma.user.upsert({
+    where: { email: 'grace@dogfood.local' },
+    update: {},
+    create: {
+      email: 'grace@dogfood.local',
+      name: 'Grace Hopper',
+      passwordHash,
+      role: Role.PARTICIPANT,
+      bio: 'Biomedical & Telehealth Software Engineer',
+    },
+  });
+
+  const liam = await prisma.user.upsert({
+    where: { email: 'liam@dogfood.local' },
+    update: {},
+    create: {
+      email: 'liam@dogfood.local',
+      name: 'Liam Vance',
+      passwordHash,
+      role: Role.PARTICIPANT,
+      bio: 'Audio DSP & Generative AI Researcher',
+    },
+  });
+
+  const zack = await prisma.user.upsert({
+    where: { email: 'zack@dogfood.local' },
+    update: {},
+    create: {
+      email: 'zack@dogfood.local',
+      name: 'Zack Taylor',
+      passwordHash,
+      role: Role.PARTICIPANT,
+      bio: 'Cybersecurity Analyst (Working on draft)',
+    },
+  });
+
   console.log('✅ Core users created.');
 
-  // 2. Create Flagship Event (Clean up previous seed event if present)
+  // 2. Create Flagship Event in JUDGING_ACTIVE state
   await prisma.event.deleteMany({
     where: { slug: 'dogfood-2026' },
   });
@@ -186,7 +231,7 @@ async function main() {
 Participants collaborate in teams of 1-4 to build cutting-edge solutions across AI, Web3, DevTools, and Social Impact. 
 
 All projects undergo rigorous, cross-judge score normalization and Bradley-Terry pairwise evaluation to guarantee total fairness.`,
-      status: EventStatus.SUBMISSION_OPEN,
+      status: EventStatus.JUDGING_ACTIVE,
       registrationStartDate: regStart,
       registrationEndDate: regEnd,
       submissionStartDate: subStart,
@@ -200,7 +245,7 @@ All projects undergo rigorous, cross-judge score normalization and Bradley-Terry
           allowCommunityVoting: true,
           votingEligibility: VotingEligibility.VERIFIED_USERS,
           votesPerUser: 3,
-          hideResultsUntilPublished: true,
+          hideResultsUntilPublished: false,
           randomizeGallery: true,
           assignmentsPerProject: 3,
         },
@@ -208,7 +253,7 @@ All projects undergo rigorous, cross-judge score normalization and Bradley-Terry
     },
   });
 
-  console.log(`✅ Event created: ${event.name}`);
+  console.log(`✅ Event created: ${event.name} (Status: ${event.status})`);
 
   // 3. Create Tracks
   const trackAI = await prisma.track.create({
@@ -283,54 +328,51 @@ All projects undergo rigorous, cross-judge score normalization and Bradley-Terry
     ],
   });
 
-  // 5. Create Judging Rubric (upsert so repeated seeding doesn't crash)
-  let rubric = await prisma.rubric.findUnique({ where: { eventId: event.id }, include: { criteria: true } });
-  if (!rubric) {
-    rubric = await prisma.rubric.create({
-      data: {
-        eventId: event.id,
-        name: 'Dogfood Official Evaluation Rubric 2026',
-        description: 'Standard 4-tier rubric with weighted criteria summing to 100%.',
-        criteria: {
-          create: [
-            {
-              title: 'Technical Depth & Architecture',
-              description: 'Code quality, system design, defensibility, and algorithmic complexity.',
-              weight: 0.30,
-              maxScore: 10,
-              orderIndex: 0,
-            },
-            {
-              title: 'Innovation & Originality',
-              description: 'Novelty of the concept, breakthrough approach, and creative problem solving.',
-              weight: 0.30,
-              maxScore: 10,
-              orderIndex: 1,
-            },
-            {
-              title: 'Impact & Practical Utility',
-              description: 'Real-world applicability, problem significance, and adoption potential.',
-              weight: 0.20,
-              maxScore: 10,
-              orderIndex: 2,
-            },
-            {
-              title: 'Design & User Experience',
-              description: 'Intuitive interface, aesthetic polish, and seamless onboarding flow.',
-              weight: 0.20,
-              maxScore: 10,
-              orderIndex: 3,
-            },
-          ],
-        },
+  // 5. Create Judging Rubric
+  const rubric = await prisma.rubric.create({
+    data: {
+      eventId: event.id,
+      name: 'Dogfood Official Evaluation Rubric 2026',
+      description: 'Standard 4-tier rubric with weighted criteria summing to 100%.',
+      criteria: {
+        create: [
+          {
+            title: 'Technical Depth & Architecture',
+            description: 'Code quality, system design, defensibility, and algorithmic complexity.',
+            weight: 0.30,
+            maxScore: 10,
+            orderIndex: 0,
+          },
+          {
+            title: 'Innovation & Originality',
+            description: 'Novelty of the concept, breakthrough approach, and creative problem solving.',
+            weight: 0.30,
+            maxScore: 10,
+            orderIndex: 1,
+          },
+          {
+            title: 'Impact & Practical Utility',
+            description: 'Real-world applicability, problem significance, and adoption potential.',
+            weight: 0.20,
+            maxScore: 10,
+            orderIndex: 2,
+          },
+          {
+            title: 'Design & User Experience',
+            description: 'Intuitive interface, aesthetic polish, and seamless onboarding flow.',
+            weight: 0.20,
+            maxScore: 10,
+            orderIndex: 3,
+          },
+        ],
       },
-      include: { criteria: true },
-    });
-  }
+    },
+    include: { criteria: true },
+  });
 
   console.log('✅ Tracks, Prizes, and Rubrics created.');
 
-  // 6. Enlist Judges (upsert so repeated seeding doesn't crash)
+  // 6. Enlist Judges
   const upsertJudge = (userId: string) =>
     prisma.judge.upsert({
       where: { eventId_userId: { eventId: event.id, userId } },
@@ -469,10 +511,107 @@ All projects undergo rigorous, cross-judge score normalization and Bradley-Terry
     },
   });
 
-  console.log('✅ Teams and Submissions seeded.');
+  // Team 5: PulseWave Health (Grace Hopper) - HAS UNSCORED ASSIGNMENT for testing
+  const team5 = await prisma.team.create({
+    data: {
+      eventId: event.id,
+      name: 'PulseWave Health',
+      description: 'Decentralized biomedical sensor meshes',
+      inviteCode: 'PULSE5',
+      members: {
+        create: [{ userId: grace.id, role: TeamRole.LEADER }],
+      },
+    },
+  });
 
-  // 8. Create Judge Assignments & Evaluations
-  // Project 1 (Aegis AI) evaluated by Judge Harsh, Judge Lenient, Judge Balanced
+  const proj5 = await prisma.project.create({
+    data: {
+      eventId: event.id,
+      teamId: team5.id,
+      trackId: trackImpact.id,
+      title: 'PulseMesh: Decentralized Vital Signs Triage',
+      tagline: 'Offline-first peer-to-peer vital telemetry for disaster response zones.',
+      problemStatement: 'Mass casualty and disaster triage centers lack reliable cellular uplink to central hospitals, causing fatal treatment delays.',
+      solutionDescription: 'PulseMesh deploys Bluetooth LE triage bracelets transmitting patient triage status over an offline local mesh network to field medics without internet.',
+      technologies: ['Flutter', 'Rust', 'BLE Mesh', 'SQLite', 'WebRTC'],
+      repoUrl: 'https://github.com/dogfood-demo/pulsemesh',
+      demoUrl: 'https://pulsemesh.demo.local',
+      status: ProjectStatus.SUBMITTED,
+      submittedAt: new Date(now.getTime() - 0.3 * 24 * 60 * 60 * 1000),
+    },
+  });
+
+  // Team 6: Synthetix Audio (Judge Specialist + Liam) - CONFLICT OF INTEREST DEMO
+  const team6 = await prisma.team.create({
+    data: {
+      eventId: event.id,
+      name: 'Synthetix Audio',
+      description: 'Generative AI speech forensics and watermarking',
+      inviteCode: 'SYNTH6',
+      members: {
+        create: [
+          { userId: judgeSpecialist.id, role: TeamRole.MEMBER }, // Judge is on this team!
+          { userId: liam.id, role: TeamRole.LEADER },
+        ],
+      },
+    },
+  });
+
+  const proj6 = await prisma.project.create({
+    data: {
+      eventId: event.id,
+      teamId: team6.id,
+      trackId: trackAI.id,
+      title: 'SonicForge: Real-Time Neural Speech Watermarking',
+      tagline: 'Cryptographic imperceptible audio steganography preventing deepfake disinformation.',
+      problemStatement: 'Audio deepfakes are weaponized in real-time phone fraud and election manipulation without verifiable provenance.',
+      solutionDescription: 'SonicForge injects provably imperceptible high-entropy phase signatures directly into live PCM audio streams, verifiable on-device in under 5ms.',
+      technologies: ['Python', 'PyTorch', 'ONNX', 'WebAudio', 'C++'],
+      repoUrl: 'https://github.com/dogfood-demo/sonicforge',
+      demoUrl: 'https://sonicforge.demo.local',
+      status: ProjectStatus.SUBMITTED,
+      submittedAt: new Date(now.getTime() - 0.2 * 24 * 60 * 60 * 1000),
+    },
+  });
+
+  // Team 7: StealthSec (Zack Taylor) - DRAFT PRIVACY DEMO
+  const team7 = await prisma.team.create({
+    data: {
+      eventId: event.id,
+      name: 'StealthSec',
+      description: 'Side-channel vulnerability research',
+      inviteCode: 'STLTH7',
+      members: {
+        create: [{ userId: zack.id, role: TeamRole.LEADER }],
+      },
+    },
+  });
+
+  const projDraft = await prisma.project.create({
+    data: {
+      eventId: event.id,
+      teamId: team7.id,
+      trackId: trackDevTools.id,
+      title: 'GhostProtocol: Covert Timing-Channel Defense (UNSUBMITTED DRAFT)',
+      tagline: 'Defending microarchitectural side-channels in multi-tenant cloud enclaves.',
+      problemStatement: 'Unmitigated Spectre-v2 cache timing channels allow hostile neighbors in Kubernetes to exfiltrate cryptographic keys.',
+      solutionDescription: 'GhostProtocol dynamically injects constant-time micro-jitter into speculative memory execution paths.',
+      technologies: ['C', 'Assembly', 'Linux Kernel', 'QEMU'],
+      repoUrl: 'https://github.com/dogfood-demo/ghostprotocol-private',
+      demoUrl: 'https://ghostprotocol.private.local',
+      status: ProjectStatus.DRAFT, // MUST BE INVISIBLE TO OTHER TEAMS AND PUBLIC
+    },
+  });
+
+  console.log('✅ Teams and Submissions seeded (including UNSCORED, COI, and DRAFT projects).');
+
+  // 8. Create Judge Assignments
+  // Proj 1: Harsh, Lenient, Balanced (All Completed)
+  // Proj 2: Harsh, Lenient, Specialist (All Completed)
+  // Proj 3: Balanced, Specialist, Lenient (All Completed)
+  // Proj 4: Harsh, Balanced, Specialist (All Completed)
+  // Proj 5: Harsh (PENDING/UNSCORED for manual testing!), Balanced (Completed), Lenient (Completed)
+  // Proj 6: Harsh (Completed), Lenient (Completed) [Notice: Specialist is PROHIBITED due to COI]
   await prisma.judgeAssignment.createMany({
     skipDuplicates: true,
     data: [
@@ -491,18 +630,25 @@ All projects undergo rigorous, cross-judge score normalization and Bradley-Terry
       { eventId: event.id, judgeId: jHarsh.id, projectId: proj4.id, isCompleted: true },
       { eventId: event.id, judgeId: jBalanced.id, projectId: proj4.id, isCompleted: true },
       { eventId: event.id, judgeId: jSpecialist.id, projectId: proj4.id, isCompleted: true },
+
+      // Project 5: ASSIGNED TO HARSH BUT UNSCORED!
+      { eventId: event.id, judgeId: jHarsh.id, projectId: proj5.id, isCompleted: false },
+      { eventId: event.id, judgeId: jBalanced.id, projectId: proj5.id, isCompleted: true },
+      { eventId: event.id, judgeId: jLenient.id, projectId: proj5.id, isCompleted: true },
+
+      // Project 6: Evaluated by Harsh and Lenient. Specialist is on team so no assignment!
+      { eventId: event.id, judgeId: jHarsh.id, projectId: proj6.id, isCompleted: true },
+      { eventId: event.id, judgeId: jLenient.id, projectId: proj6.id, isCompleted: true },
     ],
   });
 
-  // Seed Evaluations demonstrating Harsh vs Lenient vs Balanced Graders:
   const c0 = rubric.criteria[0].id; // Tech 30%
   const c1 = rubric.criteria[1].id; // Innov 30%
   const c2 = rubric.criteria[2].id; // Impact 20%
   const c3 = rubric.criteria[3].id; // UX 20%
 
   // Project 1 Evaluations
-  // Harsh Judge gives 7, 7, 6, 6 -> Raw = 66.0
-  const eval1_H = await prisma.evaluation.create({
+  await prisma.evaluation.create({
     data: {
       eventId: event.id,
       judgeId: jHarsh.id,
@@ -521,8 +667,7 @@ All projects undergo rigorous, cross-judge score normalization and Bradley-Terry
     },
   });
 
-  // Lenient Judge gives 9, 10, 9, 9 -> Raw = 93.0
-  const eval1_L = await prisma.evaluation.create({
+  await prisma.evaluation.create({
     data: {
       eventId: event.id,
       judgeId: jLenient.id,
@@ -541,8 +686,7 @@ All projects undergo rigorous, cross-judge score normalization and Bradley-Terry
     },
   });
 
-  // Balanced Judge gives 8, 9, 8, 8 -> Raw = 83.0
-  const eval1_B = await prisma.evaluation.create({
+  await prisma.evaluation.create({
     data: {
       eventId: event.id,
       judgeId: jBalanced.id,
@@ -569,6 +713,7 @@ All projects undergo rigorous, cross-judge score normalization and Bradley-Terry
       projectId: proj2.id,
       isDraft: false,
       weightedTotal: 62.0,
+      feedback: 'Circuits are complex, though developer ergonomics need work.',
       scores: {
         create: [
           { criterionId: c0, score: 8 },
@@ -587,6 +732,7 @@ All projects undergo rigorous, cross-judge score normalization and Bradley-Terry
       projectId: proj2.id,
       isDraft: false,
       weightedTotal: 89.0,
+      feedback: 'Remarkable ZK cryptography. Huge leap for user privacy.',
       scores: {
         create: [
           { criterionId: c0, score: 10 },
@@ -605,6 +751,7 @@ All projects undergo rigorous, cross-judge score normalization and Bradley-Terry
       projectId: proj2.id,
       isDraft: false,
       weightedTotal: 86.0,
+      feedback: 'Mathematically rigorous proof circuits and clean interface.',
       scores: {
         create: [
           { criterionId: c0, score: 9 },
@@ -732,7 +879,85 @@ All projects undergo rigorous, cross-judge score normalization and Bradley-Terry
     },
   });
 
-  // Sample Community Votes
+  // Project 5 Evaluations (Completed by Balanced & Lenient; UNSCORED for Harsh)
+  await prisma.evaluation.create({
+    data: {
+      eventId: event.id,
+      judgeId: jBalanced.id,
+      projectId: proj5.id,
+      isDraft: false,
+      weightedTotal: 78.0,
+      feedback: 'Impressive peer-to-peer vital signs relay with zero cellular dependency.',
+      scores: {
+        create: [
+          { criterionId: c0, score: 8 },
+          { criterionId: c1, score: 8 },
+          { criterionId: c2, score: 8 },
+          { criterionId: c3, score: 7 },
+        ],
+      },
+    },
+  });
+
+  await prisma.evaluation.create({
+    data: {
+      eventId: event.id,
+      judgeId: jLenient.id,
+      projectId: proj5.id,
+      isDraft: false,
+      weightedTotal: 88.0,
+      feedback: 'Lifesaving telehealth tech! Super slick UI and quick setup.',
+      scores: {
+        create: [
+          { criterionId: c0, score: 9 },
+          { criterionId: c1, score: 9 },
+          { criterionId: c2, score: 9 },
+          { criterionId: c3, score: 8 },
+        ],
+      },
+    },
+  });
+
+  // Project 6 Evaluations (Completed by Harsh & Lenient)
+  await prisma.evaluation.create({
+    data: {
+      eventId: event.id,
+      judgeId: jHarsh.id,
+      projectId: proj6.id,
+      isDraft: false,
+      weightedTotal: 72.0,
+      feedback: 'Audio steganography is computationally heavy, but mathematical model is sound.',
+      scores: {
+        create: [
+          { criterionId: c0, score: 8 },
+          { criterionId: c1, score: 7 },
+          { criterionId: c2, score: 7 },
+          { criterionId: c3, score: 6 },
+        ],
+      },
+    },
+  });
+
+  await prisma.evaluation.create({
+    data: {
+      eventId: event.id,
+      judgeId: jLenient.id,
+      projectId: proj6.id,
+      isDraft: false,
+      weightedTotal: 91.0,
+      feedback: 'Essential technology to defeat voice clones and social engineering.',
+      scores: {
+        create: [
+          { criterionId: c0, score: 9 },
+          { criterionId: c1, score: 10 },
+          { criterionId: c2, score: 9 },
+          { criterionId: c3, score: 8 },
+        ],
+      },
+    },
+  });
+
+  // 9. Create Sample Community Votes
   await prisma.vote.createMany({
     skipDuplicates: true,
     data: [
@@ -740,11 +965,79 @@ All projects undergo rigorous, cross-judge score normalization and Bradley-Terry
       { eventId: event.id, projectId: proj1.id, userId: eve.id, ipAddress: '192.168.1.102' },
       { eventId: event.id, projectId: proj2.id, userId: alice.id, ipAddress: '192.168.1.103' },
       { eventId: event.id, projectId: proj3.id, userId: bob.id, ipAddress: '192.168.1.104' },
+      { eventId: event.id, projectId: proj5.id, userId: carol.id, ipAddress: '192.168.1.105' },
     ],
   });
 
-  console.log('✅ Seed evaluations and community votes recorded.');
-  console.log('🌟 SEEDING COMPLETE! You can now log in with demo accounts.');
+  // 10. Pre-populate Immutable Audit Logs
+  await prisma.auditLog.createMany({
+    data: [
+      {
+        eventId: event.id,
+        userId: organizerUser.id,
+        action: 'EVENT_STATUS_UPDATED',
+        entityType: 'Event',
+        entityId: event.id,
+        payload: { previousStatus: 'SUBMISSION_OPEN', newStatus: 'JUDGING_ACTIVE' },
+      },
+      {
+        eventId: event.id,
+        userId: organizerUser.id,
+        action: 'JUDGES_ASSIGNED_AUTO',
+        entityType: 'JudgeAssignment',
+        entityId: event.id,
+        payload: { algorithm: 'Mulberry32-RoundRobin', seed: 42, assignmentsCreated: 15 },
+      },
+      {
+        eventId: event.id,
+        userId: judgeHarsh.id,
+        action: 'EVALUATION_SUBMITTED',
+        entityType: 'Evaluation',
+        entityId: proj1.id,
+        payload: { projectTitle: 'Aegis AI: Autonomous Incident Defense', weightedTotal: 66.0 },
+      },
+      {
+        eventId: event.id,
+        userId: judgeLenient.id,
+        action: 'EVALUATION_SUBMITTED',
+        entityType: 'Evaluation',
+        entityId: proj1.id,
+        payload: { projectTitle: 'Aegis AI: Autonomous Incident Defense', weightedTotal: 93.0 },
+      },
+      {
+        eventId: event.id,
+        userId: judgeBalanced.id,
+        action: 'EVALUATION_SUBMITTED',
+        entityType: 'Evaluation',
+        entityId: proj1.id,
+        payload: { projectTitle: 'Aegis AI: Autonomous Incident Defense', weightedTotal: 83.0 },
+      },
+      {
+        eventId: event.id,
+        userId: judgeBalanced.id,
+        action: 'EVALUATION_SUBMITTED',
+        entityType: 'Evaluation',
+        entityId: proj5.id,
+        payload: { projectTitle: 'PulseMesh: Decentralized Vital Signs Triage', weightedTotal: 78.0 },
+      },
+      {
+        eventId: event.id,
+        userId: judgeLenient.id,
+        action: 'EVALUATION_SUBMITTED',
+        entityType: 'Evaluation',
+        entityId: proj5.id,
+        payload: { projectTitle: 'PulseMesh: Decentralized Vital Signs Triage', weightedTotal: 88.0 },
+      },
+    ],
+  });
+
+  console.log('✅ Audit logs recorded.');
+
+  // 11. Run Normalization Engine Calculation
+  const normResults = await normalizationService.normalizeScores(event.id);
+  console.log(`✅ Normalization engine executed: ${normResults.rankings.length} projects calibrated.`);
+
+  console.log('🌟 SEEDING COMPLETE! Platform is primed for full end-to-end evaluation.');
 }
 
 main()

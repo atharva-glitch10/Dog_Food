@@ -19,6 +19,7 @@ import { ApiDocsPage } from './pages/ApiDocsPage.tsx';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage.tsx';
 import { TermsPage } from './pages/TermsPage.tsx';
 import { NotFoundPage } from './pages/NotFoundPage.tsx';
+import { SettingsPage } from './pages/SettingsPage.tsx';
 import { EmbedWidget } from './components/gallery/EmbedWidget.tsx';
 
 export const App: React.FC = () => {
@@ -45,6 +46,7 @@ export const App: React.FC = () => {
         <Route path="results/:eventSlug" element={<ResultsPage />} />
         <Route path="verify" element={<CertificateVerifyPage />} />
         <Route path="api-docs" element={<ApiDocsPage />} />
+        <Route path="settings" element={<SettingsPage />} />
         <Route path="privacy" element={<PrivacyPolicyPage />} />
         <Route path="terms" element={<TermsPage />} />
         {/* Catch-all: renders a proper 404 page instead of a blank screen */}

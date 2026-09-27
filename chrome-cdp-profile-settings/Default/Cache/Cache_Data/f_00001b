@@ -1,0 +1,185 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/pages/ApiDocsPage.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=af2f0ff0"; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+let prevRefreshReg;
+let prevRefreshSig;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+import { Terminal, ExternalLink, Code } from "/node_modules/.vite/deps/lucide-react.js?v=af2f0ff0";
+export const ApiDocsPage = () => {
+  return /* @__PURE__ */ jsxDEV("div", { className: "max-w-4xl mx-auto space-y-6 py-4", children: [
+    /* @__PURE__ */ jsxDEV("div", { className: "border-b border-slate-800 pb-4 space-y-1", children: [
+      /* @__PURE__ */ jsxDEV("h1", { className: "text-2xl font-bold text-white tracking-tight flex items-center gap-2.5", children: [
+        /* @__PURE__ */ jsxDEV(Code, { className: "w-6 h-6 text-slate-300" }, void 0, false, {
+          fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx",
+          lineNumber: 28,
+          columnNumber: 11
+        }, this),
+        "REST API & Swagger Documentation"
+      ] }, void 0, true, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx",
+        lineNumber: 27,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("p", { className: "text-xs text-slate-400", children: "The DOGFOOD 2026 backend exposes 100% of all platform operations via REST APIs." }, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx",
+        lineNumber: 31,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx",
+      lineNumber: 26,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: "bg-slate-900 border border-slate-800 p-6 rounded-lg space-y-3", children: [
+      /* @__PURE__ */ jsxDEV("h2", { className: "text-base font-semibold text-white flex items-center gap-2", children: [
+        /* @__PURE__ */ jsxDEV(Terminal, { className: "w-4 h-4 text-slate-300" }, void 0, false, {
+          fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx",
+          lineNumber: 38,
+          columnNumber: 11
+        }, this),
+        "Interactive OpenAPI / Swagger UI"
+      ] }, void 0, true, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx",
+        lineNumber: 37,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("p", { className: "text-xs text-slate-300 leading-relaxed", children: "You can test every endpoint directly using the interactive Swagger UI served locally by the backend." }, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx",
+        lineNumber: 41,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(
+        "a",
+        {
+          href: "http://localhost:4000/api/docs",
+          target: "_blank",
+          rel: "noopener noreferrer",
+          className: "btn-primary text-xs py-2 px-3 inline-flex items-center gap-2 font-semibold",
+          children: [
+            "Open Swagger UI Documentation (Port 4000)",
+            /* @__PURE__ */ jsxDEV(ExternalLink, { className: "w-3.5 h-3.5" }, void 0, false, {
+              fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx",
+              lineNumber: 51,
+              columnNumber: 11
+            }, this)
+          ]
+        },
+        void 0,
+        true,
+        {
+          fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx",
+          lineNumber: 44,
+          columnNumber: 9
+        },
+        this
+      )
+    ] }, void 0, true, {
+      fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx",
+      lineNumber: 36,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-4 text-xs", children: [
+      /* @__PURE__ */ jsxDEV("div", { className: "bg-slate-900 border border-slate-800 p-5 rounded-lg space-y-1.5", children: [
+        /* @__PURE__ */ jsxDEV("span", { className: "font-semibold text-slate-200 block font-mono", children: "Authentication & RBAC" }, void 0, false, {
+          fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx",
+          lineNumber: 57,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("p", { className: "text-slate-400", children: "JWT and HTTP-only cookie sessions with server-side role validation on every route." }, void 0, false, {
+          fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx",
+          lineNumber: 58,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx",
+        lineNumber: 56,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "bg-slate-900 border border-slate-800 p-5 rounded-lg space-y-1.5", children: [
+        /* @__PURE__ */ jsxDEV("span", { className: "font-semibold text-slate-200 block font-mono", children: "Statistical Judging & Normalization" }, void 0, false, {
+          fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx",
+          lineNumber: 61,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("p", { className: "text-slate-400", children: "Cross-judge Z-score transformation, Bayesian shrinkage, and Bradley-Terry MLE ranking." }, void 0, false, {
+          fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx",
+          lineNumber: 62,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx",
+        lineNumber: 60,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "bg-slate-900 border border-slate-800 p-5 rounded-lg space-y-1.5", children: [
+        /* @__PURE__ */ jsxDEV("span", { className: "font-semibold text-emerald-400 block font-mono", children: "Rate Limiting & Anti-Abuse" }, void 0, false, {
+          fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx",
+          lineNumber: 65,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("p", { className: "text-slate-400", children: "Sliding-window token bucket limiters on auth and voting routes preventing Sybil attacks." }, void 0, false, {
+          fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx",
+          lineNumber: 66,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx",
+        lineNumber: 64,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("div", { className: "bg-slate-900 border border-slate-800 p-5 rounded-lg space-y-1.5", children: [
+        /* @__PURE__ */ jsxDEV("span", { className: "font-semibold text-amber-400 block font-mono", children: "Data Import / Export & Webhooks" }, void 0, false, {
+          fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx",
+          lineNumber: 69,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("p", { className: "text-slate-400", children: "RFC 4180 CSV streams, HMAC-signed webhooks, and cryptographic participation verification." }, void 0, false, {
+          fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx",
+          lineNumber: 70,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx",
+        lineNumber: 68,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx",
+      lineNumber: 55,
+      columnNumber: 7
+    }, this)
+  ] }, void 0, true, {
+    fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx",
+    lineNumber: 25,
+    columnNumber: 5
+  }, this);
+};
+_c = ApiDocsPage;
+var _c;
+$RefreshReg$(_c, "ApiDocsPage");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/ApiDocsPage.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,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SUFBQSIsIm5hbWVzIjpbIlRlcm1pbmFsIiwiRXh0ZXJuYWxMaW5rIiwiQ29kZSIsIkFwaURvY3NQYWdlIiwiX2MiXSwiaWdub3JlTGlzdCI6W10sInNvdXJjZXMiOlsiQXBpRG9jc1BhZ2UudHN4Il0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBSZWFjdCBmcm9tICdyZWFjdCc7XHJcbmltcG9ydCB7IFRlcm1pbmFsLCBFeHRlcm5hbExpbmssIENvZGUgfSBmcm9tICdsdWNpZGUtcmVhY3QnO1xyXG5cclxuZXhwb3J0IGNvbnN0IEFwaURvY3NQYWdlOiBSZWFjdC5GQyA9ICgpID0+IHtcclxuICByZXR1cm4gKFxyXG4gICAgPGRpdiBjbGFzc05hbWU9XCJtYXgtdy00eGwgbXgtYXV0byBzcGFjZS15LTYgcHktNFwiPlxyXG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cImJvcmRlci1iIGJvcmRlci1zbGF0ZS04MDAgcGItNCBzcGFjZS15LTFcIj5cclxuICAgICAgICA8aDEgY2xhc3NOYW1lPVwidGV4dC0yeGwgZm9udC1ib2xkIHRleHQtd2hpdGUgdHJhY2tpbmctdGlnaHQgZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIuNVwiPlxyXG4gICAgICAgICAgPENvZGUgY2xhc3NOYW1lPVwidy02IGgtNiB0ZXh0LXNsYXRlLTMwMFwiIC8+XHJcbiAgICAgICAgICBSRVNUIEFQSSAmIFN3YWdnZXIgRG9jdW1lbnRhdGlvblxyXG4gICAgICAgIDwvaDE+XHJcbiAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC14cyB0ZXh0LXNsYXRlLTQwMFwiPlxyXG4gICAgICAgICAgVGhlIERPR0ZPT0QgMjAyNiBiYWNrZW5kIGV4cG9zZXMgMTAwJSBvZiBhbGwgcGxhdGZvcm0gb3BlcmF0aW9ucyB2aWEgUkVTVCBBUElzLlxyXG4gICAgICAgIDwvcD5cclxuICAgICAgPC9kaXY+XHJcblxyXG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cImJnLXNsYXRlLTkwMCBib3JkZXIgYm9yZGVyLXNsYXRlLTgwMCBwLTYgcm91bmRlZC1sZyBzcGFjZS15LTNcIj5cclxuICAgICAgICA8aDIgY2xhc3NOYW1lPVwidGV4dC1iYXNlIGZvbnQtc2VtaWJvbGQgdGV4dC13aGl0ZSBmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMlwiPlxyXG4gICAgICAgICAgPFRlcm1pbmFsIGNsYXNzTmFtZT1cInctNCBoLTQgdGV4dC1zbGF0ZS0zMDBcIiAvPlxyXG4gICAgICAgICAgSW50ZXJhY3RpdmUgT3BlbkFQSSAvIFN3YWdnZXIgVUlcclxuICAgICAgICA8L2gyPlxyXG4gICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQteHMgdGV4dC1zbGF0ZS0zMDAgbGVhZGluZy1yZWxheGVkXCI+XHJcbiAgICAgICAgICBZb3UgY2FuIHRlc3QgZXZlcnkgZW5kcG9pbnQgZGlyZWN0bHkgdXNpbmcgdGhlIGludGVyYWN0aXZlIFN3YWdnZXIgVUkgc2VydmVkIGxvY2FsbHkgYnkgdGhlIGJhY2tlbmQuXHJcbiAgICAgICAgPC9wPlxyXG4gICAgICAgIDxhXHJcbiAgICAgICAgICBocmVmPVwiaHR0cDovL2xvY2FsaG9zdDo0MDAwL2FwaS9kb2NzXCJcclxuICAgICAgICAgIHRhcmdldD1cIl9ibGFua1wiXHJcbiAgICAgICAgICByZWw9XCJub29wZW5lciBub3JlZmVycmVyXCJcclxuICAgICAgICAgIGNsYXNzTmFtZT1cImJ0bi1wcmltYXJ5IHRleHQteHMgcHktMiBweC0zIGlubGluZS1mbGV4IGl0ZW1zLWNlbnRlciBnYXAtMiBmb250LXNlbWlib2xkXCJcclxuICAgICAgICA+XHJcbiAgICAgICAgICBPcGVuIFN3YWdnZXIgVUkgRG9jdW1lbnRhdGlvbiAoUG9ydCA0MDAwKVxyXG4gICAgICAgICAgPEV4dGVybmFsTGluayBjbGFzc05hbWU9XCJ3LTMuNSBoLTMuNVwiIC8+XHJcbiAgICAgICAgPC9hPlxyXG4gICAgICA8L2Rpdj5cclxuXHJcbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZ3JpZCBncmlkLWNvbHMtMSBtZDpncmlkLWNvbHMtMiBnYXAtNCB0ZXh0LXhzXCI+XHJcbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJiZy1zbGF0ZS05MDAgYm9yZGVyIGJvcmRlci1zbGF0ZS04MDAgcC01IHJvdW5kZWQtbGcgc3BhY2UteS0xLjVcIj5cclxuICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cImZvbnQtc2VtaWJvbGQgdGV4dC1zbGF0ZS0yMDAgYmxvY2sgZm9udC1tb25vXCI+QXV0aGVudGljYXRpb24gJiBSQkFDPC9zcGFuPlxyXG4gICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbGF0ZS00MDBcIj5KV1QgYW5kIEhUVFAtb25seSBjb29raWUgc2Vzc2lvbnMgd2l0aCBzZXJ2ZXItc2lkZSByb2xlIHZhbGlkYXRpb24gb24gZXZlcnkgcm91dGUuPC9wPlxyXG4gICAgICAgIDwvZGl2PlxyXG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiYmctc2xhdGUtOTAwIGJvcmRlciBib3JkZXItc2xhdGUtODAwIHAtNSByb3VuZGVkLWxnIHNwYWNlLXktMS41XCI+XHJcbiAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJmb250LXNlbWlib2xkIHRleHQtc2xhdGUtMjAwIGJsb2NrIGZvbnQtbW9ub1wiPlN0YXRpc3RpY2FsIEp1ZGdpbmcgJiBOb3JtYWxpemF0aW9uPC9zcGFuPlxyXG4gICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbGF0ZS00MDBcIj5Dcm9zcy1qdWRnZSBaLXNjb3JlIHRyYW5zZm9ybWF0aW9uLCBCYXllc2lhbiBzaHJpbmthZ2UsIGFuZCBCcmFkbGV5LVRlcnJ5IE1MRSByYW5raW5nLjwvcD5cclxuICAgICAgICA8L2Rpdj5cclxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImJnLXNsYXRlLTkwMCBib3JkZXIgYm9yZGVyLXNsYXRlLTgwMCBwLTUgcm91bmRlZC1sZyBzcGFjZS15LTEuNVwiPlxyXG4gICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwiZm9udC1zZW1pYm9sZCB0ZXh0LWVtZXJhbGQtNDAwIGJsb2NrIGZvbnQtbW9ub1wiPlJhdGUgTGltaXRpbmcgJiBBbnRpLUFidXNlPC9zcGFuPlxyXG4gICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbGF0ZS00MDBcIj5TbGlkaW5nLXdpbmRvdyB0b2tlbiBidWNrZXQgbGltaXRlcnMgb24gYXV0aCBhbmQgdm90aW5nIHJvdXRlcyBwcmV2ZW50aW5nIFN5YmlsIGF0dGFja3MuPC9wPlxyXG4gICAgICAgIDwvZGl2PlxyXG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiYmctc2xhdGUtOTAwIGJvcmRlciBib3JkZXItc2xhdGUtODAwIHAtNSByb3VuZGVkLWxnIHNwYWNlLXktMS41XCI+XHJcbiAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJmb250LXNlbWlib2xkIHRleHQtYW1iZXItNDAwIGJsb2NrIGZvbnQtbW9ub1wiPkRhdGEgSW1wb3J0IC8gRXhwb3J0ICYgV2ViaG9va3M8L3NwYW4+XHJcbiAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXNsYXRlLTQwMFwiPlJGQyA0MTgwIENTViBzdHJlYW1zLCBITUFDLXNpZ25lZCB3ZWJob29rcywgYW5kIGNyeXB0b2dyYXBoaWMgcGFydGljaXBhdGlvbiB2ZXJpZmljYXRpb24uPC9wPlxyXG4gICAgICAgIDwvZGl2PlxyXG4gICAgICA8L2Rpdj5cclxuICAgIDwvZGl2PlxyXG4gICk7XHJcbn07XHJcbiJdLCJmaWxlIjoiQzovVXNlcnMvUlVUVUpBIFBBVE9MRS9Eb2dfRm9vZC9mcm9udGVuZC9zcmMvcGFnZXMvQXBpRG9jc1BhZ2UudHN4In0=

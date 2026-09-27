@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.tsx';
-import { UserPlus, KeyRound, Mail, User as UserIcon, AlertCircle } from 'lucide-react';
+import { UserPlus, KeyRound, Mail, User as UserIcon, AlertCircle, Sparkles } from 'lucide-react';
 import { Role } from '../types/index.ts';
 
 export const RegisterPage: React.FC = () => {
@@ -33,51 +33,59 @@ export const RegisterPage: React.FC = () => {
   return (
     <div className="max-w-md mx-auto py-8 space-y-6">
       <div className="text-center space-y-2">
-        <h1 className="text-3xl font-extrabold text-white">Create Account</h1>
-        <p className="text-sm text-slate-400">Join the hackathon, build teams, or judge submissions.</p>
+        <div className="inline-flex items-center gap-1.5 badge-signal text-xs">
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Join the Platform</span>
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+          Create an Account
+        </h1>
+        <p className="text-sm text-slate-600 dark:text-slate-400 font-sans">
+          Join the hackathon, create a team, or evaluate submissions.
+        </p>
       </div>
 
-      <div className="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-lg space-y-6">
+      <div className="console-panel p-6 sm:p-8 space-y-5">
         {error && (
-          <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-lg flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div className="p-3.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-700 dark:text-rose-300 text-xs rounded-xl flex items-center gap-2.5 font-medium">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
             <span>{error}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Full Name</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200 block">Full Name</label>
             <div className="relative">
               <input
                 type="text"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Jane Doe"
-                className="input-field pl-9"
+                placeholder="Alex Morgan"
+                className="input-field pl-10"
               />
-              <UserIcon className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+              <UserIcon className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Email Address</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200 block">Email Address</label>
             <div className="relative">
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="jane@example.com"
-                className="input-field pl-9"
+                placeholder="alex@example.com"
+                className="input-field pl-10"
               />
-              <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+              <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Password</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200 block">Password</label>
             <div className="relative">
               <input
                 type="password"
@@ -85,19 +93,19 @@ export const RegisterPage: React.FC = () => {
                 minLength={8}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="•••••••• (Min 8 chars)"
-                className="input-field pl-9"
+                placeholder="•••••••• (Min 8 characters)"
+                className="input-field pl-10"
               />
-              <KeyRound className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+              <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Initial Account Role</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200 block">Account Role</label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value as Role)}
-              className="input-field"
+              className="input-field font-semibold text-xs"
             >
               <option value="PARTICIPANT">Participant (Hacker / Builder)</option>
               <option value="JUDGE">Judge (Evaluator)</option>
@@ -106,30 +114,30 @@ export const RegisterPage: React.FC = () => {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Bio / Technical Background (Optional)</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200 block">Bio & Background (Optional)</label>
             <textarea
               rows={2}
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              placeholder="e.g. Distributed systems engineer, React & Rust developer..."
-              className="input-field"
+              placeholder="e.g. Full-stack developer, AI enthusiast, design passionate..."
+              className="input-field text-sm"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="btn-primary w-full py-2.5 text-sm flex items-center justify-center gap-2 font-semibold"
+            className="btn-primary w-full py-3 text-sm flex items-center justify-center gap-2 font-semibold shadow-soft mt-2"
           >
             <UserPlus className="w-4 h-4" />
-            {loading ? 'Creating Account...' : 'Register'}
+            <span>{loading ? 'Creating Account...' : 'Create Account'}</span>
           </button>
         </form>
       </div>
 
-      <p className="text-center text-xs text-slate-400">
+      <p className="text-center text-sm text-slate-500 dark:text-slate-400">
         Already have an account?{' '}
-        <Link to="/login" className="text-blue-400 hover:underline font-semibold">
+        <Link to="/login" className="text-indigo-600 dark:text-indigo-400 hover:underline font-bold">
           Sign In
         </Link>
       </p>

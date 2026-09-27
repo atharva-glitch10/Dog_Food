@@ -96,8 +96,8 @@ export const SubmitPage: React.FC = () => {
   if (!team) {
     return (
       <div className="max-w-md mx-auto py-12 text-center space-y-4">
-        <p className="text-slate-300">You must create or join a team before submitting a project.</p>
-        <Link to={`/dashboard/team/${eventSlug}`} className="btn-primary text-xs py-2 px-4">
+        <p className="text-slate-600 dark:text-slate-300">You must create or join a team before submitting a project.</p>
+        <Link to={`/dashboard/team/${eventSlug}`} className="btn-primary text-sm py-2 px-5">
           Go to Team Dashboard
         </Link>
       </div>
@@ -108,32 +108,32 @@ export const SubmitPage: React.FC = () => {
     <div className="max-w-3xl mx-auto space-y-8 py-4">
       <Link
         to={`/dashboard/team/${eventSlug}`}
-        className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"
       >
-        <ArrowLeft className="w-3.5 h-3.5" />
+        <ArrowLeft className="w-4 h-4" />
         Back to Team Dashboard
       </Link>
 
-      <div className="border-b border-slate-800 pb-4 space-y-1">
-        <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
-          <FileText className="w-6 h-6 text-slate-300" />
+      <div className="border-b border-slate-200 dark:border-slate-800 pb-4 space-y-1">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
+          <FileText className="w-7 h-7 text-brand-600 dark:text-brand-400" />
           {project ? 'Edit Project Submission' : 'Create Project Submission'}
         </h1>
-        <p className="text-xs text-slate-400">
-          Submitting for team <strong className="text-slate-200">{team.name}</strong>.
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          Submitting for team <strong className="text-slate-900 dark:text-slate-200 font-semibold">{team.name}</strong>.
         </p>
       </div>
 
       {error && (
-        <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded flex items-center gap-2">
+        <div className="p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm rounded-2xl flex items-center gap-2">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
-      <form onSubmit={handleSaveDraft} className="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-lg space-y-6">
+      <form onSubmit={handleSaveDraft} className="console-panel p-6 sm:p-10 space-y-6">
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-300">Project Title *</label>
+          <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Project Title *</label>
           <input
             type="text"
             required
@@ -145,7 +145,7 @@ export const SubmitPage: React.FC = () => {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-300">Tagline / Short Elevator Pitch</label>
+          <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Tagline / Short Elevator Pitch</label>
           <input
             type="text"
             value={tagline}
@@ -156,7 +156,7 @@ export const SubmitPage: React.FC = () => {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-300">Target Track</label>
+          <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Target Track</label>
           <select
             value={trackId}
             onChange={(e) => setTrackId(e.target.value)}
@@ -170,7 +170,7 @@ export const SubmitPage: React.FC = () => {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-300">Problem Statement *</label>
+          <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Problem Statement *</label>
           <textarea
             rows={3}
             required
@@ -182,7 +182,7 @@ export const SubmitPage: React.FC = () => {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-300">Solution & Technical Architecture *</label>
+          <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Solution & Technical Architecture *</label>
           <textarea
             rows={4}
             required
@@ -194,7 +194,7 @@ export const SubmitPage: React.FC = () => {
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-slate-300">Technologies Used (Comma-separated)</label>
+          <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Technologies Used (Comma-separated)</label>
           <input
             type="text"
             value={techString}
@@ -206,7 +206,7 @@ export const SubmitPage: React.FC = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Git Repository URL</label>
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Git Repository URL</label>
             <input
               type="url"
               value={repoUrl}
@@ -217,7 +217,7 @@ export const SubmitPage: React.FC = () => {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Live Demo / Deployment URL</label>
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Live Demo / Deployment URL</label>
             <input
               type="url"
               value={demoUrl}
@@ -231,9 +231,9 @@ export const SubmitPage: React.FC = () => {
         <button
           type="submit"
           disabled={saving}
-          className="btn-primary w-full py-2.5 text-sm font-semibold flex items-center justify-center gap-2"
+          className="btn-primary w-full py-3 text-base font-semibold flex items-center justify-center gap-2"
         >
-          <Save className="w-4 h-4" />
+          <Save className="w-5 h-5" />
           {saving ? 'Saving Project Draft...' : 'Save Draft Project'}
         </button>
       </form>

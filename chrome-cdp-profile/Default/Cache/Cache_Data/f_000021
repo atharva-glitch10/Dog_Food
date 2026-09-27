@@ -1,0 +1,254 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/App.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=a0ae45c2"; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+let prevRefreshReg;
+let prevRefreshSig;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+import { Routes, Route } from "/node_modules/.vite/deps/react-router-dom.js?v=dee4042c";
+import { Layout } from "/src/components/layout/Layout.tsx";
+import { HomePage } from "/src/pages/HomePage.tsx";
+import { LoginPage } from "/src/pages/LoginPage.tsx";
+import { RegisterPage } from "/src/pages/RegisterPage.tsx";
+import { EventDetailPage } from "/src/pages/EventDetailPage.tsx";
+import { GalleryPage } from "/src/pages/GalleryPage.tsx";
+import { ProjectDetailPage } from "/src/pages/ProjectDetailPage.tsx";
+import { TeamDashboardPage } from "/src/pages/TeamDashboardPage.tsx";
+import { SubmitPage } from "/src/pages/SubmitPage.tsx";
+import { JudgeDashboardPage } from "/src/pages/JudgeDashboardPage.tsx";
+import { JudgeEvaluatePage } from "/src/pages/JudgeEvaluatePage.tsx?t=1790481639855";
+import { JudgePairwisePage } from "/src/pages/JudgePairwisePage.tsx";
+import { OrganizerDashboardPage } from "/src/pages/OrganizerDashboardPage.tsx";
+import { ResultsPage } from "/src/pages/ResultsPage.tsx";
+import { CertificateVerifyPage } from "/src/pages/CertificateVerifyPage.tsx";
+import { ApiDocsPage } from "/src/pages/ApiDocsPage.tsx";
+import { PrivacyPolicyPage } from "/src/pages/PrivacyPolicyPage.tsx";
+import { TermsPage } from "/src/pages/TermsPage.tsx";
+import { NotFoundPage } from "/src/pages/NotFoundPage.tsx";
+import { EmbedWidget } from "/src/components/gallery/EmbedWidget.tsx";
+export const App = () => {
+  return /* @__PURE__ */ jsxDEV(Routes, { children: [
+    /* @__PURE__ */ jsxDEV(Route, { path: "embed/gallery/:eventId", element: /* @__PURE__ */ jsxDEV(EmbedWidget, {}, void 0, false, {
+      fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+      lineNumber: 47,
+      columnNumber: 53
+    }, this) }, void 0, false, {
+      fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+      lineNumber: 47,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV(Route, { path: "embed/gallery/:eventSlug", element: /* @__PURE__ */ jsxDEV(EmbedWidget, {}, void 0, false, {
+      fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+      lineNumber: 48,
+      columnNumber: 55
+    }, this) }, void 0, false, {
+      fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+      lineNumber: 48,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV(Route, { path: "/", element: /* @__PURE__ */ jsxDEV(Layout, {}, void 0, false, {
+      fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+      lineNumber: 51,
+      columnNumber: 32
+    }, this), children: [
+      /* @__PURE__ */ jsxDEV(Route, { index: true, element: /* @__PURE__ */ jsxDEV(HomePage, {}, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 52,
+        columnNumber: 31
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 52,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "login", element: /* @__PURE__ */ jsxDEV(LoginPage, {}, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 53,
+        columnNumber: 38
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 53,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "register", element: /* @__PURE__ */ jsxDEV(RegisterPage, {}, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 54,
+        columnNumber: 41
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 54,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "event/:slugOrId", element: /* @__PURE__ */ jsxDEV(EventDetailPage, {}, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 55,
+        columnNumber: 48
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 55,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "gallery/:eventSlug", element: /* @__PURE__ */ jsxDEV(GalleryPage, {}, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 56,
+        columnNumber: 51
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 56,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "project/:id", element: /* @__PURE__ */ jsxDEV(ProjectDetailPage, {}, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 57,
+        columnNumber: 44
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 57,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "dashboard/team/:eventSlug", element: /* @__PURE__ */ jsxDEV(TeamDashboardPage, {}, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 58,
+        columnNumber: 58
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 58,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "submit/:eventSlug", element: /* @__PURE__ */ jsxDEV(SubmitPage, {}, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 59,
+        columnNumber: 50
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 59,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "dashboard/judge/:eventSlug", element: /* @__PURE__ */ jsxDEV(JudgeDashboardPage, {}, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 60,
+        columnNumber: 59
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 60,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "evaluate/:eventSlug/:projectId", element: /* @__PURE__ */ jsxDEV(JudgeEvaluatePage, {}, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 61,
+        columnNumber: 63
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 61,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "dashboard/pairwise/:eventSlug", element: /* @__PURE__ */ jsxDEV(JudgePairwisePage, {}, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 62,
+        columnNumber: 62
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 62,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "dashboard/organizer/:eventSlug", element: /* @__PURE__ */ jsxDEV(OrganizerDashboardPage, {}, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 63,
+        columnNumber: 63
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 63,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "results/:eventSlug", element: /* @__PURE__ */ jsxDEV(ResultsPage, {}, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 64,
+        columnNumber: 51
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 64,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "verify", element: /* @__PURE__ */ jsxDEV(CertificateVerifyPage, {}, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 65,
+        columnNumber: 39
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 65,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "api-docs", element: /* @__PURE__ */ jsxDEV(ApiDocsPage, {}, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 66,
+        columnNumber: 41
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 66,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "privacy", element: /* @__PURE__ */ jsxDEV(PrivacyPolicyPage, {}, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 67,
+        columnNumber: 40
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 67,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "terms", element: /* @__PURE__ */ jsxDEV(TermsPage, {}, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 68,
+        columnNumber: 38
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 68,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV(Route, { path: "*", element: /* @__PURE__ */ jsxDEV(NotFoundPage, {}, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 70,
+        columnNumber: 34
+      }, this) }, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+        lineNumber: 70,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+      lineNumber: 51,
+      columnNumber: 7
+    }, this)
+  ] }, void 0, true, {
+    fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx",
+    lineNumber: 45,
+    columnNumber: 5
+  }, this);
+};
+_c = App;
+var _c;
+$RefreshReg$(_c, "App");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/App.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,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QUFBLGFBQTBDO0FBQUEsU0FuQjVDO0FBQUE7QUFBQTtBQUFBO0FBQUEsV0FvQkE7QUFBQSxPQTFCRjtBQUFBO0FBQUE7QUFBQTtBQUFBLFNBMkJBO0FBRUo7QUFBRUMsS0EvQldEO0FBQWEsSUFBQUM7QUFBQSxhQUFBQSxJQUFBIiwibmFtZXMiOlsiUm91dGVzIiwiUm91dGUiLCJMYXlvdXQiLCJIb21lUGFnZSIsIkxvZ2luUGFnZSIsIlJlZ2lzdGVyUGFnZSIsIkV2ZW50RGV0YWlsUGFnZSIsIkdhbGxlcnlQYWdlIiwiUHJvamVjdERldGFpbFBhZ2UiLCJUZWFtRGFzaGJvYXJkUGFnZSIsIlN1Ym1pdFBhZ2UiLCJKdWRnZURhc2hib2FyZFBhZ2UiLCJKdWRnZUV2YWx1YXRlUGFnZSIsIkp1ZGdlUGFpcndpc2VQYWdlIiwiT3JnYW5pemVyRGFzaGJvYXJkUGFnZSIsIlJlc3VsdHNQYWdlIiwiQ2VydGlmaWNhdGVWZXJpZnlQYWdlIiwiQXBpRG9jc1BhZ2UiLCJQcml2YWN5UG9saWN5UGFnZSIsIlRlcm1zUGFnZSIsIk5vdEZvdW5kUGFnZSIsIkVtYmVkV2lkZ2V0IiwiQXBwIiwiX2MiXSwiaWdub3JlTGlzdCI6W10sInNvdXJjZXMiOlsiQXBwLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgUmVhY3QgZnJvbSAncmVhY3QnO1xyXG5pbXBvcnQgeyBSb3V0ZXMsIFJvdXRlIH0gZnJvbSAncmVhY3Qtcm91dGVyLWRvbSc7XHJcbmltcG9ydCB7IExheW91dCB9IGZyb20gJy4vY29tcG9uZW50cy9sYXlvdXQvTGF5b3V0LnRzeCc7XHJcbmltcG9ydCB7IEhvbWVQYWdlIH0gZnJvbSAnLi9wYWdlcy9Ib21lUGFnZS50c3gnO1xyXG5pbXBvcnQgeyBMb2dpblBhZ2UgfSBmcm9tICcuL3BhZ2VzL0xvZ2luUGFnZS50c3gnO1xyXG5pbXBvcnQgeyBSZWdpc3RlclBhZ2UgfSBmcm9tICcuL3BhZ2VzL1JlZ2lzdGVyUGFnZS50c3gnO1xyXG5pbXBvcnQgeyBFdmVudERldGFpbFBhZ2UgfSBmcm9tICcuL3BhZ2VzL0V2ZW50RGV0YWlsUGFnZS50c3gnO1xyXG5pbXBvcnQgeyBHYWxsZXJ5UGFnZSB9IGZyb20gJy4vcGFnZXMvR2FsbGVyeVBhZ2UudHN4JztcclxuaW1wb3J0IHsgUHJvamVjdERldGFpbFBhZ2UgfSBmcm9tICcuL3BhZ2VzL1Byb2plY3REZXRhaWxQYWdlLnRzeCc7XHJcbmltcG9ydCB7IFRlYW1EYXNoYm9hcmRQYWdlIH0gZnJvbSAnLi9wYWdlcy9UZWFtRGFzaGJvYXJkUGFnZS50c3gnO1xyXG5pbXBvcnQgeyBTdWJtaXRQYWdlIH0gZnJvbSAnLi9wYWdlcy9TdWJtaXRQYWdlLnRzeCc7XHJcbmltcG9ydCB7IEp1ZGdlRGFzaGJvYXJkUGFnZSB9IGZyb20gJy4vcGFnZXMvSnVkZ2VEYXNoYm9hcmRQYWdlLnRzeCc7XHJcbmltcG9ydCB7IEp1ZGdlRXZhbHVhdGVQYWdlIH0gZnJvbSAnLi9wYWdlcy9KdWRnZUV2YWx1YXRlUGFnZS50c3gnO1xyXG5pbXBvcnQgeyBKdWRnZVBhaXJ3aXNlUGFnZSB9IGZyb20gJy4vcGFnZXMvSnVkZ2VQYWlyd2lzZVBhZ2UudHN4JztcclxuaW1wb3J0IHsgT3JnYW5pemVyRGFzaGJvYXJkUGFnZSB9IGZyb20gJy4vcGFnZXMvT3JnYW5pemVyRGFzaGJvYXJkUGFnZS50c3gnO1xyXG5pbXBvcnQgeyBSZXN1bHRzUGFnZSB9IGZyb20gJy4vcGFnZXMvUmVzdWx0c1BhZ2UudHN4JztcclxuaW1wb3J0IHsgQ2VydGlmaWNhdGVWZXJpZnlQYWdlIH0gZnJvbSAnLi9wYWdlcy9DZXJ0aWZpY2F0ZVZlcmlmeVBhZ2UudHN4JztcclxuaW1wb3J0IHsgQXBpRG9jc1BhZ2UgfSBmcm9tICcuL3BhZ2VzL0FwaURvY3NQYWdlLnRzeCc7XHJcbmltcG9ydCB7IFByaXZhY3lQb2xpY3lQYWdlIH0gZnJvbSAnLi9wYWdlcy9Qcml2YWN5UG9saWN5UGFnZS50c3gnO1xyXG5pbXBvcnQgeyBUZXJtc1BhZ2UgfSBmcm9tICcuL3BhZ2VzL1Rlcm1zUGFnZS50c3gnO1xyXG5pbXBvcnQgeyBOb3RGb3VuZFBhZ2UgfSBmcm9tICcuL3BhZ2VzL05vdEZvdW5kUGFnZS50c3gnO1xyXG5pbXBvcnQgeyBFbWJlZFdpZGdldCB9IGZyb20gJy4vY29tcG9uZW50cy9nYWxsZXJ5L0VtYmVkV2lkZ2V0LnRzeCc7XHJcblxyXG5leHBvcnQgY29uc3QgQXBwOiBSZWFjdC5GQyA9ICgpID0+IHtcclxuICByZXR1cm4gKFxyXG4gICAgPFJvdXRlcz5cclxuICAgICAgey8qIFN0YW5kYWxvbmUgRW1iZWQgUm91dGVzIChubyBwbGF0Zm9ybSBoZWFkZXIvZm9vdGVyKSAqL31cclxuICAgICAgPFJvdXRlIHBhdGg9XCJlbWJlZC9nYWxsZXJ5LzpldmVudElkXCIgZWxlbWVudD17PEVtYmVkV2lkZ2V0IC8+fSAvPlxyXG4gICAgICA8Um91dGUgcGF0aD1cImVtYmVkL2dhbGxlcnkvOmV2ZW50U2x1Z1wiIGVsZW1lbnQ9ezxFbWJlZFdpZGdldCAvPn0gLz5cclxuXHJcbiAgICAgIHsvKiBNYWluIFBsYXRmb3JtIFJvdXRlcyB3aXRoIExheW91dCAqL31cclxuICAgICAgPFJvdXRlIHBhdGg9XCIvXCIgZWxlbWVudD17PExheW91dCAvPn0+XHJcbiAgICAgICAgPFJvdXRlIGluZGV4IGVsZW1lbnQ9ezxIb21lUGFnZSAvPn0gLz5cclxuICAgICAgICA8Um91dGUgcGF0aD1cImxvZ2luXCIgZWxlbWVudD17PExvZ2luUGFnZSAvPn0gLz5cclxuICAgICAgICA8Um91dGUgcGF0aD1cInJlZ2lzdGVyXCIgZWxlbWVudD17PFJlZ2lzdGVyUGFnZSAvPn0gLz5cclxuICAgICAgICA8Um91dGUgcGF0aD1cImV2ZW50LzpzbHVnT3JJZFwiIGVsZW1lbnQ9ezxFdmVudERldGFpbFBhZ2UgLz59IC8+XHJcbiAgICAgICAgPFJvdXRlIHBhdGg9XCJnYWxsZXJ5LzpldmVudFNsdWdcIiBlbGVtZW50PXs8R2FsbGVyeVBhZ2UgLz59IC8+XHJcbiAgICAgICAgPFJvdXRlIHBhdGg9XCJwcm9qZWN0LzppZFwiIGVsZW1lbnQ9ezxQcm9qZWN0RGV0YWlsUGFnZSAvPn0gLz5cclxuICAgICAgICA8Um91dGUgcGF0aD1cImRhc2hib2FyZC90ZWFtLzpldmVudFNsdWdcIiBlbGVtZW50PXs8VGVhbURhc2hib2FyZFBhZ2UgLz59IC8+XHJcbiAgICAgICAgPFJvdXRlIHBhdGg9XCJzdWJtaXQvOmV2ZW50U2x1Z1wiIGVsZW1lbnQ9ezxTdWJtaXRQYWdlIC8+fSAvPlxyXG4gICAgICAgIDxSb3V0ZSBwYXRoPVwiZGFzaGJvYXJkL2p1ZGdlLzpldmVudFNsdWdcIiBlbGVtZW50PXs8SnVkZ2VEYXNoYm9hcmRQYWdlIC8+fSAvPlxyXG4gICAgICAgIDxSb3V0ZSBwYXRoPVwiZXZhbHVhdGUvOmV2ZW50U2x1Zy86cHJvamVjdElkXCIgZWxlbWVudD17PEp1ZGdlRXZhbHVhdGVQYWdlIC8+fSAvPlxyXG4gICAgICAgIDxSb3V0ZSBwYXRoPVwiZGFzaGJvYXJkL3BhaXJ3aXNlLzpldmVudFNsdWdcIiBlbGVtZW50PXs8SnVkZ2VQYWlyd2lzZVBhZ2UgLz59IC8+XHJcbiAgICAgICAgPFJvdXRlIHBhdGg9XCJkYXNoYm9hcmQvb3JnYW5pemVyLzpldmVudFNsdWdcIiBlbGVtZW50PXs8T3JnYW5pemVyRGFzaGJvYXJkUGFnZSAvPn0gLz5cclxuICAgICAgICA8Um91dGUgcGF0aD1cInJlc3VsdHMvOmV2ZW50U2x1Z1wiIGVsZW1lbnQ9ezxSZXN1bHRzUGFnZSAvPn0gLz5cclxuICAgICAgICA8Um91dGUgcGF0aD1cInZlcmlmeVwiIGVsZW1lbnQ9ezxDZXJ0aWZpY2F0ZVZlcmlmeVBhZ2UgLz59IC8+XHJcbiAgICAgICAgPFJvdXRlIHBhdGg9XCJhcGktZG9jc1wiIGVsZW1lbnQ9ezxBcGlEb2NzUGFnZSAvPn0gLz5cclxuICAgICAgICA8Um91dGUgcGF0aD1cInByaXZhY3lcIiBlbGVtZW50PXs8UHJpdmFjeVBvbGljeVBhZ2UgLz59IC8+XHJcbiAgICAgICAgPFJvdXRlIHBhdGg9XCJ0ZXJtc1wiIGVsZW1lbnQ9ezxUZXJtc1BhZ2UgLz59IC8+XHJcbiAgICAgICAgey8qIENhdGNoLWFsbDogcmVuZGVycyBhIHByb3BlciA0MDQgcGFnZSBpbnN0ZWFkIG9mIGEgYmxhbmsgc2NyZWVuICovfVxyXG4gICAgICAgIDxSb3V0ZSBwYXRoPVwiKlwiIGVsZW1lbnQ9ezxOb3RGb3VuZFBhZ2UgLz59IC8+XHJcbiAgICAgIDwvUm91dGU+XHJcbiAgICA8L1JvdXRlcz5cclxuICApO1xyXG59O1xyXG4iXSwiZmlsZSI6IkM6L1VzZXJzL1JVVFVKQSBQQVRPTEUvRG9nX0Zvb2QvZnJvbnRlbmQvc3JjL0FwcC50c3gifQ==

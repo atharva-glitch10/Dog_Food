@@ -3,26 +3,154 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --bg: #f8fafc;
+    --panel: #ffffff;
+    --panel-elevated: #ffffff;
+    --border: #e2e8f0;
+    --border-hover: #cbd5e1;
+    --primary: #6366f1;
+    --primary-hover: #4f46e5;
+    --primary-light: #eef2ff;
+    --primary-border: #c7d2fe;
+    --muted: #64748b;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --radius: 1rem;
+    --radius-pill: 9999px;
+  }
+
+  html.dark {
+    --bg: #0b1120;
+    --panel: #1e293b;
+    --panel-elevated: #273549;
+    --border: #334155;
+    --border-hover: #475569;
+    --primary: #818cf8;
+    --primary-hover: #6366f1;
+    --primary-light: rgba(99, 102, 241, 0.15);
+    --primary-border: rgba(129, 140, 248, 0.35);
+    --muted: #94a3b8;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+  }
+
   body {
-    @apply bg-slate-950 text-slate-100 antialiased;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    background-color: var(--bg);
+    color: var(--text-main);
+    font-family: 'Plus Jakarta Sans', Inter, system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', Inter, sans-serif;
+    letter-spacing: -0.025em;
+    font-weight: 700;
+    color: var(--text-main);
   }
 }
 
-
-
-.gradient-text {
-  @apply text-white font-bold;
+/* Unstop-inspired Card & Panel System */
+.console-panel {
+  @apply bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200;
 }
 
+.console-panel-elevated {
+  @apply bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/80 rounded-2xl shadow-lg transition-all duration-200;
+}
+
+/* Stat Cards */
+.stat-strip-card {
+  @apply bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200;
+}
+
+/* Friendly Button System (Purple primary, rounded-xl, comfortable sizing) */
 .btn-primary {
-  @apply inline-flex items-center justify-center px-4 py-2 font-medium text-white bg-blue-600 rounded-md hover:bg-blue-500 transition-colors disabled:opacity-50 disabled:pointer-events-none;
+  @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 rounded-xl shadow-sm hover:shadow transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none;
 }
 
 .btn-secondary {
-  @apply inline-flex items-center justify-center px-4 py-2 font-medium text-slate-200 bg-slate-800 border border-slate-700 rounded-md hover:bg-slate-700 hover:text-white transition-colors disabled:opacity-50 disabled:pointer-events-none;
+  @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-all duration-150 disabled:opacity-50 disabled:pointer-events-none dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-700;
 }
 
-.input-field {
-  @apply w-full bg-slate-900 border border-slate-700 rounded-md px-3.5 py-2.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors;
+.btn-outline {
+  @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl shadow-xs transition-all duration-150 dark:bg-transparent dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-800;
 }
+
+.btn-danger {
+  @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition-all duration-150 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/60;
+}
+
+/* Approachable Inputs */
+.input-field {
+  @apply w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-slate-800 dark:text-slate-100 text-sm placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/30 transition-all duration-150;
+}
+
+/* Friendly Rounded Pill Badges (Pastel color palette) */
+.badge-mint {
+  @apply inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/80 rounded-full dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60;
+}
+
+.badge-amber {
+  @apply inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-amber-800 bg-amber-50 border border-amber-200/80 rounded-full dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60;
+}
+
+.badge-cyan {
+  @apply inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-sky-700 bg-sky-50 border border-sky-200/80 rounded-full dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800/60;
+}
+
+.badge-signal {
+  @apply inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200/80 rounded-full dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-800/60;
+}
+
+.badge-mono {
+  @apply inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-slate-600 bg-slate-100 border border-slate-200/80 rounded-full dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700;
+}
+
+/* Range Slider (Approachable purple accent) */
+input[type="range"] {
+  @apply h-2 bg-slate-200 dark:bg-slate-700 rounded-full appearance-none cursor-pointer accent-indigo-600;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  @apply w-5 h-5 bg-indigo-600 border-2 border-white rounded-full cursor-pointer shadow-md transition-transform duration-100 hover:scale-110;
+}
+
+/* Increased Base Font Sizing */
+html.font-size-small {
+  font-size: 15px;
+}
+
+html.font-size-medium {
+  font-size: 17px;
+}
+
+html.font-size-large {
+  font-size: 19px;
+}
+
+/* Density Settings */
+html.density-compact .console-panel {
+  padding: 1rem !important;
+}
+
+html.density-compact .stat-strip-card {
+  padding: 0.875rem !important;
+}
+
+html.density-compact table th,
+html.density-compact table td {
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+}
+
+/* Accessibility: Reduce Motion */
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+

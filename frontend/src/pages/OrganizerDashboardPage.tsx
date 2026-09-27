@@ -3,8 +3,6 @@ import { useParams, Link } from 'react-router-dom';
 import api, { API_BASE_URL } from '../services/api.ts';
 import { useToast } from '../components/ui/Toast.tsx';
 import {
-  Terminal,
-  Cpu,
   Trophy,
   Download,
   Users,
@@ -18,6 +16,7 @@ import {
   Sparkles,
   Layers,
   History,
+  Cpu,
 } from 'lucide-react';
 
 export const OrganizerDashboardPage: React.FC = () => {
@@ -102,22 +101,30 @@ export const OrganizerDashboardPage: React.FC = () => {
 
   const handlePublishResults = async () => {
     if (!event) return;
-    if (!confirm('Are you sure you want to publish the official rankings and results to the public?')) return;
+    const confirm = window.confirm(
+      'Publishing final results will freeze active scoring and make normalized rankings publicly visible on the Leaderboard. Proceed?'
+    );
+    if (!confirm) return;
+
     try {
-      await api.post(`/events/${event.id}/results/publish`);
-      loadAll();
-      toastSuccess('Results have been officially published!');
+      const res: any = await api.post(`/events/${event.id}/publish-results`);
+      if (res.success) {
+        toastSuccess('Official event results published successfully!');
+        loadAll();
+      }
     } catch (err: any) {
-      toastError(err.message || 'Publishing failed');
+      toastError(err.message || 'Failed to publish results');
     }
   };
 
-  const handleGenerateCertificates = async (type: string) => {
+  const handleGenerateCertificates = async (type: 'PARTICIPANT' | 'JUDGE' | 'WINNER') => {
     if (!event) return;
     try {
-      const res: any = await api.post(`/events/${event.id}/certificates/generate`, { type });
-      setCertMsg(res.data.message);
-      toastSuccess(res.data.message || `${type} certificates generated.`);
+      const res: any = await api.post(`/events/${event.id}/certificates/batch`, { type });
+      if (res.success) {
+        setCertMsg(`Generated ${res.data.issuedCount} cryptographic certificates (${type}).`);
+        toastSuccess(`Successfully issued ${res.data.issuedCount} certificates`);
+      }
     } catch (err: any) {
       toastError(err.message || 'Certificate generation failed');
     }
@@ -126,9 +133,9 @@ export const OrganizerDashboardPage: React.FC = () => {
   const fetchAuditLogs = async () => {
     if (!event) return;
     try {
-      const res: any = await api.get(`/events/${event.id}/audit-logs`);
-      if (res.success && res.data) {
-        setAuditLogs(res.data.logs);
+      const res: any = await api.get(`/events/${event.id}/audit`);
+      if (res.success) {
+        setAuditLogs(res.data);
       }
     } catch (err) {
       console.error(err);
@@ -141,112 +148,110 @@ export const OrganizerDashboardPage: React.FC = () => {
     }
   }, [activeTab]);
 
-  if (loading) return <div className="text-center py-20 text-slate-400">Loading organizer dashboard...</div>;
+  if (loading) return <div className="text-center py-20 text-slate-400 text-sm">Loading organizer dashboard...</div>;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 py-4">
+    <div className="max-w-6xl mx-auto space-y-8 py-2">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">
-            Organizer Command Hub
+          <div className="inline-flex items-center gap-1.5 badge-signal text-xs">
+            <Shield className="w-3.5 h-3.5" />
+            <span>Organizer Management Hub</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">{event?.name?.replace(/—/g, ':')}</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            {event?.name?.replace(/—/g, ':')}
+          </h1>
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={handlePublishResults}
-            className="btn-primary text-xs py-2 px-4 flex items-center gap-1.5 font-semibold"
+            className="btn-primary text-sm !py-2.5 !px-5 flex items-center gap-2 shadow-soft font-semibold"
           >
             <Trophy className="w-4 h-4 text-amber-300" />
-            Publish Official Results
+            <span>Publish Final Results</span>
           </button>
         </div>
       </div>
 
-      {/* Tabs Navigation */}
-      <div className="flex border-b border-slate-800 gap-2 overflow-x-auto text-xs font-semibold">
-        <button
-          onClick={() => setActiveTab('overview')}
-          className={`py-3 px-4 border-b-2 flex items-center gap-2 transition-colors ${
-            activeTab === 'overview'
-              ? 'border-blue-500 text-white bg-blue-500/10'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <Layers className="w-4 h-4" /> Overview & Progress
-        </button>
-        <button
-          onClick={() => setActiveTab('assignments')}
-          className={`py-3 px-4 border-b-2 flex items-center gap-2 transition-colors ${
-            activeTab === 'assignments'
-              ? 'border-blue-500 text-white bg-blue-500/10'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <Shield className="w-4 h-4" /> Judge Assignment Engine
-        </button>
-        <button
-          onClick={() => setActiveTab('normalization')}
-          className={`py-3 px-4 border-b-2 flex items-center gap-2 transition-colors ${
-            activeTab === 'normalization'
-              ? 'border-blue-500 text-white bg-blue-500/10'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <Cpu className="w-4 h-4" /> Score Normalization & Ranks
-        </button>
-        <button
-          onClick={() => setActiveTab('exports')}
-          className={`py-3 px-4 border-b-2 flex items-center gap-2 transition-colors ${
-            activeTab === 'exports'
-              ? 'border-blue-500 text-white bg-blue-500/10'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <Download className="w-4 h-4" /> CSV Exports & Certs
-        </button>
-        <button
-          onClick={() => setActiveTab('audit')}
-          className={`py-3 px-4 border-b-2 flex items-center gap-2 transition-colors ${
-            activeTab === 'audit'
-              ? 'border-blue-500 text-white bg-blue-500/10'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
-          }`}
-        >
-          <History className="w-4 h-4" /> Audit Trails
-        </button>
+      {/* Tabs Navigation (Unstop-inspired rounded pill navigation) */}
+      <div className="flex gap-2 overflow-x-auto pb-1 text-sm font-semibold">
+        {[
+          { id: 'overview', label: 'Overview & Stats', icon: Layers },
+          { id: 'assignments', label: 'Jury Assignment', icon: Shield },
+          { id: 'normalization', label: 'Score Normalization', icon: Cpu },
+          { id: 'exports', label: 'CSV Exports & Certs', icon: Download },
+          { id: 'audit', label: 'Audit Trail', icon: History },
+        ].map((tab) => {
+          const Icon = tab.icon;
+          const isCurrent = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`py-2 px-4 rounded-full flex items-center gap-2 transition-all whitespace-nowrap ${
+                isCurrent
+                  ? 'bg-indigo-50 border border-indigo-200/90 text-indigo-700 dark:bg-indigo-950/50 dark:border-indigo-800/60 dark:text-indigo-300 font-bold shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/70'
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Tab: Overview */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
-          {/* Key Metric Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-lg space-y-1">
-              <span className="text-xs text-slate-400">Total Submitted Projects</span>
-              <p className="text-xl font-bold text-white">{stats?.totalProjects || 0}</p>
+          {/* 4-Column Stat Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="stat-strip-card space-y-2">
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 block">
+                Total Projects
+              </span>
+              <p className="text-3xl font-extrabold text-slate-900 dark:text-white">{stats?.totalProjects || 0}</p>
+              <span className="badge-cyan text-xs">Active Submissions</span>
             </div>
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-lg space-y-1">
-              <span className="text-xs text-slate-400">Enlisted Judges</span>
-              <p className="text-xl font-bold text-slate-200">{stats?.totalJudges || 0}</p>
+
+            <div className="stat-strip-card space-y-2">
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 block">
+                Jury Members
+              </span>
+              <p className="text-3xl font-extrabold text-slate-900 dark:text-white">{stats?.totalJudges || 0}</p>
+              <span className="badge-mono text-xs">Active Judges</span>
             </div>
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-lg space-y-1">
-              <span className="text-xs text-slate-400">Evaluations Completed</span>
-              <p className="text-xl font-bold text-emerald-400">{stats?.completedEvaluations || 0} / {stats?.totalAssignments || 0}</p>
+
+            <div className="stat-strip-card space-y-2">
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 block">
+                Evaluations Done
+              </span>
+              <p className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">
+                {stats?.completedEvaluations || 0} <span className="text-xs text-slate-400 font-normal">/ {stats?.totalAssignments || 0}</span>
+              </p>
+              <span className="badge-mint text-xs">Completed Scores</span>
             </div>
-            <div className="bg-slate-900 border border-slate-800 p-4 rounded-lg space-y-1">
-              <span className="text-xs text-slate-400">Completion Rate</span>
-              <p className="text-xl font-bold text-slate-200">{stats?.completionRate || 0}%</p>
+
+            <div className="stat-strip-card space-y-2">
+              <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 block">
+                Completion Rate
+              </span>
+              <p className="text-3xl font-extrabold text-indigo-600 dark:text-indigo-400">{stats?.completionRate || 0}%</p>
+              <span className="badge-signal text-xs">Jury Progress</span>
             </div>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 p-5 rounded-lg space-y-2">
-            <h3 className="text-sm font-bold text-white">Event Lifecycle Status</h3>
-            <p className="text-xs text-slate-300">
-              Current state is <strong className="text-slate-200 font-mono">{event.status}</strong>.
-              Submissions due on {new Date(event.submissionDeadline).toLocaleString()}, judging closes on {new Date(event.judgingDeadline).toLocaleString()}.
+          <div className="console-panel p-6 space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                Event Schedule & Deadlines
+              </h3>
+              <span className="badge-mint text-xs capitalize">{event?.status?.toLowerCase().replace(/_/g, ' ')}</span>
+            </div>
+            <p className="text-sm text-slate-600 dark:text-slate-300 font-sans leading-relaxed">
+              Submissions deadline: <span className="font-semibold text-slate-900 dark:text-white">{new Date(event?.submissionDeadline).toLocaleString()}</span>. Judging conclusion: <span className="font-semibold text-slate-900 dark:text-white">{new Date(event?.judgingDeadline).toLocaleString()}</span>.
             </p>
           </div>
         </div>
@@ -254,53 +259,53 @@ export const OrganizerDashboardPage: React.FC = () => {
 
       {/* Tab: Deterministic Assignment */}
       {activeTab === 'assignments' && (
-        <div className="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-lg space-y-6">
+        <div className="console-panel p-6 sm:p-8 space-y-6">
           <div className="space-y-1">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <Shield className="w-5 h-5 text-slate-300" />
-              Deterministic Mulberry32 Judge Assignment Engine
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Shield className="w-5 h-5 text-indigo-500" />
+              <span>Deterministic Mulberry32 Judge Assignment Engine</span>
             </h2>
-            <p className="text-xs text-slate-400">
-              Greedy load-balancing matching algorithm with self-conflict exclusion and capacity bounds.
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Balanced round-robin assignment with automatic conflict-of-interest exclusion and capacity enforcement.
             </p>
           </div>
 
-          <div className="p-4 bg-slate-950 rounded border border-slate-800 flex flex-col sm:flex-row items-center gap-4">
+          <div className="p-5 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-center gap-4">
             <div className="space-y-1 w-full sm:w-auto">
-              <label className="text-xs font-semibold text-slate-300 block">PRNG Integer Seed</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-200 block">Random PRNG Seed</label>
               <input
                 type="number"
                 value={seed}
                 onChange={(e) => setSeed(parseInt(e.target.value, 10))}
-                className="input-field w-32 font-mono text-xs"
+                className="input-field w-32"
               />
             </div>
 
             <button
               onClick={handleRunAutoAssign}
               disabled={assignLoading}
-              className="btn-primary text-xs py-2.5 px-6 font-bold flex items-center gap-2 mt-4 sm:mt-auto"
+              className="btn-primary text-sm py-2.5 px-6 font-semibold flex items-center gap-2 mt-4 sm:mt-auto shadow-soft"
             >
               <RefreshCw className={`w-4 h-4 ${assignLoading ? 'animate-spin' : ''}`} />
-              {assignLoading ? 'Computing Assignments...' : 'Run Auto Assignment Engine'}
+              <span>{assignLoading ? 'Generating Assignments...' : 'Run Auto Assignment Engine'}</span>
             </button>
           </div>
 
           {assignResult && (
-            <div className="space-y-4 pt-4 border-t border-slate-800">
-              <div className="flex items-center gap-2 text-xs text-emerald-400 font-semibold">
+            <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400 font-semibold">
                 <CheckCircle className="w-4 h-4" />
                 <span>Successfully generated {assignResult.totalAssignments} project assignments (Seed: {assignResult.seedUsed}).</span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
                 {assignResult.judgeWorkloads.map((jw: any) => (
-                  <div key={jw.judgeId} className="p-3 bg-slate-950 rounded border border-slate-800 flex justify-between items-center">
+                  <div key={jw.judgeId} className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 flex justify-between items-center">
                     <div>
-                      <span className="font-semibold text-slate-200 block">{jw.name}</span>
-                      <span className="text-slate-500 text-[11px]">{jw.email}</span>
+                      <span className="font-semibold text-slate-900 dark:text-slate-100 block">{jw.name}</span>
+                      <span className="text-slate-500 text-xs">{jw.email}</span>
                     </div>
-                    <span className="font-mono font-bold text-slate-200">
+                    <span className="badge-signal text-xs font-bold">
                       {jw.assignedCount} / {jw.capacity}
                     </span>
                   </div>
@@ -314,72 +319,72 @@ export const OrganizerDashboardPage: React.FC = () => {
       {/* Tab: Normalization */}
       {activeTab === 'normalization' && (
         <div className="space-y-6">
-          <div className="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-lg space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="console-panel p-6 sm:p-8 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
               <div className="space-y-1">
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Cpu className="w-5 h-5 text-slate-300" />
-                  Cross-Judge Score Normalization Pipeline
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Cpu className="w-5 h-5 text-indigo-500" />
+                  <span>Cross-Judge Score Normalization Pipeline</span>
                 </h2>
-                <p className="text-xs text-slate-400">
-                  Calculates per-judge mean and standard deviation, applying Bayesian prior shrinkage for small sample sizes.
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  Calculates per-judge mean and standard deviation, applying Bayesian prior shrinkage for fair rankings.
                 </p>
               </div>
 
               <button
                 onClick={handleRunNormalization}
                 disabled={normLoading}
-                className="btn-primary text-xs py-2.5 px-6 font-bold flex items-center gap-2"
+                className="btn-primary text-sm py-2.5 px-6 font-semibold flex items-center gap-2 shadow-soft shrink-0"
               >
                 <RefreshCw className={`w-4 h-4 ${normLoading ? 'animate-spin' : ''}`} />
-                {normLoading ? 'Normalizing...' : 'Calculate Score Normalization'}
+                <span>{normLoading ? 'Normalizing...' : 'Calculate Normalization'}</span>
               </button>
             </div>
 
             {normResult && (
-              <div className="space-y-6 pt-4 border-t border-slate-800">
+              <div className="space-y-6 pt-2">
                 {/* Global stats */}
-                <div className="grid grid-cols-3 gap-4 text-xs">
-                  <div className="p-3 bg-slate-950 rounded border border-slate-800">
-                    <span className="text-slate-500 block">Total Evaluations</span>
-                    <strong className="text-sm text-white">{normResult.globalStats.totalEvaluations}</strong>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                  <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <span className="text-slate-500 block text-xs">Total Evaluations</span>
+                    <strong className="text-lg text-slate-900 dark:text-white font-bold">{normResult.globalStats.totalEvaluations}</strong>
                   </div>
-                  <div className="p-3 bg-slate-950 rounded border border-slate-800">
-                    <span className="text-slate-500 block">Global Mean Score</span>
-                    <strong className="text-sm text-slate-200">{normResult.globalStats.globalMean}</strong>
+                  <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <span className="text-slate-500 block text-xs">Global Mean Score</span>
+                    <strong className="text-lg text-slate-900 dark:text-white font-bold">{normResult.globalStats.globalMean}</strong>
                   </div>
-                  <div className="p-3 bg-slate-950 rounded border border-slate-800">
-                    <span className="text-slate-500 block">Global Std Deviation</span>
-                    <strong className="text-sm text-slate-200">{normResult.globalStats.globalStdDev}</strong>
+                  <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <span className="text-slate-500 block text-xs">Global Standard Deviation</span>
+                    <strong className="text-lg text-slate-900 dark:text-white font-bold">{normResult.globalStats.globalStdDev}</strong>
                   </div>
                 </div>
 
                 {/* Rankings Table */}
                 <div className="space-y-3">
-                  <h3 className="text-sm font-bold text-white">Normalized Rankings Table</h3>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-xs text-left">
-                      <thead className="bg-slate-900/80 text-slate-400 uppercase font-mono">
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">Normalized Rankings Table</h3>
+                  <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                    <table className="w-full text-sm text-left">
+                      <thead className="bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 font-semibold border-b border-slate-200 dark:border-slate-700">
                         <tr>
-                          <th className="py-2.5 px-3">Rank</th>
-                          <th className="py-2.5 px-3">Project</th>
-                          <th className="py-2.5 px-3">Team</th>
-                          <th className="py-2.5 px-3">Track</th>
-                          <th className="py-2.5 px-3">Normalized Score</th>
-                          <th className="py-2.5 px-3">Raw Score</th>
-                          <th className="py-2.5 px-3">Evaluations</th>
+                          <th className="py-3 px-4">Rank</th>
+                          <th className="py-3 px-4">Project</th>
+                          <th className="py-3 px-4">Team</th>
+                          <th className="py-3 px-4">Track</th>
+                          <th className="py-3 px-4">Normalized Score</th>
+                          <th className="py-3 px-4">Raw Score</th>
+                          <th className="py-3 px-4">Evaluations</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-800">
+                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                         {normResult.rankings.map((r: any) => (
-                          <tr key={r.projectId} className="hover:bg-slate-800/40">
-                            <td className="py-2.5 px-3 font-bold text-amber-400 font-mono">#{r.finalRank}</td>
-                            <td className="py-2.5 px-3 font-semibold text-slate-200">{r.title}</td>
-                            <td className="py-2.5 px-3 text-slate-400">{r.teamName}</td>
-                            <td className="py-2.5 px-3 text-slate-400">{r.trackName || 'General'}</td>
-                            <td className="py-2.5 px-3 font-mono font-bold text-slate-200">{r.normalizedScore}</td>
-                            <td className="py-2.5 px-3 font-mono text-slate-400">{r.rawScore}</td>
-                            <td className="py-2.5 px-3 font-mono text-slate-400">{r.evaluationsCount}</td>
+                          <tr key={r.projectId} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
+                            <td className="py-3 px-4 font-bold text-amber-500">#{r.finalRank}</td>
+                            <td className="py-3 px-4 font-semibold text-slate-900 dark:text-white">{r.title}</td>
+                            <td className="py-3 px-4 text-slate-600 dark:text-slate-400">{r.teamName}</td>
+                            <td className="py-3 px-4 text-slate-600 dark:text-slate-400">{r.trackName || 'General'}</td>
+                            <td className="py-3 px-4 font-bold text-indigo-600 dark:text-indigo-400">{r.normalizedScore}</td>
+                            <td className="py-3 px-4 text-slate-500">{r.rawScore}</td>
+                            <td className="py-3 px-4 text-slate-500">{r.evaluationsCount}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -396,63 +401,67 @@ export const OrganizerDashboardPage: React.FC = () => {
       {activeTab === 'exports' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* CSV Exports */}
-          <div className="bg-slate-900 border border-slate-800 p-6 rounded-lg space-y-4">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Download className="w-4 h-4 text-slate-300" />
-              RFC 4180 CSV Data Exports
+          <div className="console-panel p-6 sm:p-7 space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Download className="w-5 h-5 text-indigo-500" />
+              <span>RFC 4180 CSV Data Exports</span>
             </h3>
-            <p className="text-xs text-slate-400">Download sanitized data exports for offline record keeping.</p>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+              Download clean comma-separated exports for offline records and external reporting.
+            </p>
 
-            <div className="grid grid-cols-2 gap-2 pt-2 text-xs">
-              <a href={`${API_BASE_URL}/events/${event.id}/export/participants.csv`} download className="btn-secondary py-2 px-3 text-center">
+            <div className="grid grid-cols-2 gap-2.5 pt-2 text-xs">
+              <a href={`${API_BASE_URL}/events/${event.id}/export/participants.csv`} download className="btn-secondary !py-2.5 !px-3 text-center">
                 Participants CSV
               </a>
-              <a href={`${API_BASE_URL}/events/${event.id}/export/teams.csv`} download className="btn-secondary py-2 px-3 text-center">
+              <a href={`${API_BASE_URL}/events/${event.id}/export/teams.csv`} download className="btn-secondary !py-2.5 !px-3 text-center">
                 Teams CSV
               </a>
-              <a href={`${API_BASE_URL}/events/${event.id}/export/projects.csv`} download className="btn-secondary py-2 px-3 text-center">
+              <a href={`${API_BASE_URL}/events/${event.id}/export/projects.csv`} download className="btn-secondary !py-2.5 !px-3 text-center">
                 Projects CSV
               </a>
-              <a href={`${API_BASE_URL}/events/${event.id}/export/scores.csv`} download className="btn-secondary py-2 px-3 text-center">
+              <a href={`${API_BASE_URL}/events/${event.id}/export/scores.csv`} download className="btn-secondary !py-2.5 !px-3 text-center">
                 Scores CSV
               </a>
-              <a href={`${API_BASE_URL}/events/${event.id}/export/results.csv`} download className="btn-primary py-2 px-3 text-center col-span-2">
+              <a href={`${API_BASE_URL}/events/${event.id}/export/results.csv`} download className="btn-primary !py-2.5 !px-3 text-center col-span-2 shadow-soft">
                 Official Final Results CSV
               </a>
             </div>
           </div>
 
           {/* Certificates Generation */}
-          <div className="bg-slate-900 border border-slate-800 p-6 rounded-lg space-y-4">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <FileCheck className="w-5 h-5 text-emerald-400" />
-              HMAC Signed Certificates
+          <div className="console-panel p-6 sm:p-7 space-y-4">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <FileCheck className="w-5 h-5 text-emerald-500" />
+              <span>HMAC Signed Certificates</span>
             </h3>
-            <p className="text-xs text-slate-400">Generate tamper-evident, cryptographically verifiable certificates.</p>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+              Generate tamper-evident, cryptographically verifiable certificates with verification codes.
+            </p>
 
-            <div className="space-y-2 pt-2">
+            <div className="space-y-2.5 pt-2">
               <button
                 onClick={() => handleGenerateCertificates('PARTICIPANT')}
-                className="btn-secondary w-full py-2 text-xs"
+                className="btn-secondary w-full !py-2.5 text-xs font-semibold"
               >
-                Generate Participant Certificates
+                Issue Participant Certificates
               </button>
               <button
                 onClick={() => handleGenerateCertificates('JUDGE')}
-                className="btn-secondary w-full py-2 text-xs"
+                className="btn-secondary w-full !py-2.5 text-xs font-semibold"
               >
-                Generate Judge Certificates
+                Issue Judge Certificates
               </button>
               <button
                 onClick={() => handleGenerateCertificates('WINNER')}
-                className="btn-primary w-full py-2 text-xs"
+                className="btn-primary w-full !py-2.5 text-xs font-semibold shadow-soft"
               >
-                Generate Winner Certificates (Top 3)
+                Issue Winner Certificates (Top 3)
               </button>
             </div>
 
             {certMsg && (
-              <p className="text-xs text-emerald-400 bg-emerald-500/10 p-2.5 rounded border border-emerald-500/20">
+              <p className="text-xs text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 p-3 rounded-xl border border-emerald-200 dark:border-emerald-800/60 font-medium">
                 {certMsg}
               </p>
             )}
@@ -462,34 +471,36 @@ export const OrganizerDashboardPage: React.FC = () => {
 
       {/* Tab: Audit Trails */}
       {activeTab === 'audit' && (
-        <div className="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-lg space-y-4">
+        <div className="console-panel p-6 sm:p-8 space-y-4">
           <div className="space-y-1">
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <History className="w-4 h-4 text-slate-300" />
-              Immutable Audit Log Records
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <History className="w-5 h-5 text-indigo-500" />
+              <span>Immutable Audit Log Records</span>
             </h3>
-            <p className="text-xs text-slate-400">Complete tamper-evident log of all mutations.</p>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+              Full chronological log of mutations and security events.
+            </p>
           </div>
 
-          <div className="overflow-x-auto pt-2">
-            <table className="w-full text-xs text-left">
-              <thead className="bg-slate-900 text-slate-400 uppercase font-mono">
+          <div className="overflow-x-auto pt-2 rounded-xl border border-slate-200 dark:border-slate-800">
+            <table className="w-full text-sm text-left">
+              <thead className="bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 font-semibold border-b border-slate-200 dark:border-slate-700">
                 <tr>
-                  <th className="py-2.5 px-3">Timestamp</th>
-                  <th className="py-2.5 px-3">Action</th>
-                  <th className="py-2.5 px-3">Actor</th>
-                  <th className="py-2.5 px-3">Target Entity</th>
-                  <th className="py-2.5 px-3">IP Address</th>
+                  <th className="py-3 px-4">Timestamp</th>
+                  <th className="py-3 px-4">Action</th>
+                  <th className="py-3 px-4">Actor</th>
+                  <th className="py-3 px-4">Target Entity</th>
+                  <th className="py-3 px-4">IP Address</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
                 {auditLogs.map((log) => (
-                  <tr key={log.id} className="hover:bg-slate-800/40">
-                    <td className="py-2 px-3 text-slate-400 font-mono">{new Date(log.createdAt).toLocaleString()}</td>
-                    <td className="py-2 px-3 font-semibold text-slate-200">{log.action}</td>
-                    <td className="py-2 px-3 text-slate-300">{log.user?.name || 'System / Anon'}</td>
-                    <td className="py-2 px-3 text-slate-400">{log.entityType} ({log.entityId || 'N/A'})</td>
-                    <td className="py-2 px-3 font-mono text-slate-500">{log.ipAddress || '127.0.0.1'}</td>
+                  <tr key={log.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
+                    <td className="py-2.5 px-4 text-slate-500">{new Date(log.createdAt).toLocaleString()}</td>
+                    <td className="py-2.5 px-4 font-semibold text-slate-800 dark:text-slate-200">{log.action}</td>
+                    <td className="py-2.5 px-4 text-slate-600 dark:text-slate-400">{log.user?.name || 'System / Anon'}</td>
+                    <td className="py-2.5 px-4 text-slate-500">{log.entityType} ({log.entityId || 'N/A'})</td>
+                    <td className="py-2.5 px-4 text-slate-400">{log.ipAddress || '127.0.0.1'}</td>
                   </tr>
                 ))}
               </tbody>

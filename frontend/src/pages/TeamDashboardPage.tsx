@@ -128,18 +128,18 @@ export const TeamDashboardPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-8 py-4">
       {/* Header */}
-      <div className="border-b border-slate-800 pb-6 space-y-1">
-        <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
-          <Users className="w-6 h-6 text-slate-300" />
+      <div className="border-b border-slate-200 dark:border-slate-800 pb-6 space-y-1">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
+          <Users className="w-7 h-7 text-brand-600 dark:text-brand-400" />
           Participant Dashboard: Team & Project
         </h1>
-        <p className="text-sm text-slate-400">
-          Event: <strong className="text-slate-200">{event?.name?.replace(/—/g, ':')}</strong>
+        <p className="text-base text-slate-600 dark:text-slate-400">
+          Event: <strong className="text-slate-900 dark:text-slate-200 font-semibold">{event?.name?.replace(/—/g, ':')}</strong>
         </p>
       </div>
 
       {actionError && (
-        <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded flex items-center gap-2">
+        <div className="p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm rounded-2xl flex items-center gap-2">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{actionError}</span>
         </div>
@@ -149,18 +149,18 @@ export const TeamDashboardPage: React.FC = () => {
         /* Not in a team view */
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Create a Team */}
-          <div className="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-lg space-y-6">
+          <div className="console-panel p-6 sm:p-8 space-y-6">
             <div className="space-y-1">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Plus className="w-4 h-4 text-slate-300" />
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Plus className="w-5 h-5 text-brand-600 dark:text-brand-400" />
                 Create New Team
               </h2>
-              <p className="text-xs text-slate-400">Form a new team as Team Leader.</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Form a new team as Team Leader.</p>
             </div>
 
             <form onSubmit={handleCreateTeam} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-300">Team Name</label>
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Team Name</label>
                 <input
                   type="text"
                   required
@@ -172,7 +172,7 @@ export const TeamDashboardPage: React.FC = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-300">Description (Optional)</label>
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Description (Optional)</label>
                 <textarea
                   rows={2}
                   value={newTeamDesc}
@@ -182,36 +182,36 @@ export const TeamDashboardPage: React.FC = () => {
                 />
               </div>
 
-              <button type="submit" className="btn-primary w-full py-2 text-sm font-semibold">
+              <button type="submit" className="btn-primary w-full py-2.5 text-sm font-semibold">
                 Create Team
               </button>
             </form>
           </div>
 
           {/* Join a Team */}
-          <div className="bg-slate-900 p-6 sm:p-8 rounded-lg border border-slate-800 space-y-6">
+          <div className="console-panel p-6 sm:p-8 space-y-6">
             <div className="space-y-1">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <UserPlus className="w-5 h-5 text-emerald-400" />
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <UserPlus className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                 Join Existing Team
               </h2>
-              <p className="text-xs text-slate-400">Enter a team invite code to join.</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Enter a team invite code to join.</p>
             </div>
 
             <form onSubmit={handleJoinTeam} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-300">Team Invite Code</label>
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Team Invite Code</label>
                 <input
                   type="text"
                   required
                   value={joinCode}
                   onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                   placeholder="e.g. NEXUS1"
-                  className="input-field uppercase font-mono"
+                  className="input-field uppercase font-mono tracking-wider"
                 />
               </div>
 
-              <button type="submit" className="btn-secondary w-full py-2 text-sm font-semibold">
+              <button type="submit" className="btn-secondary w-full py-2.5 text-sm font-semibold">
                 Join Team
               </button>
             </form>
@@ -221,41 +221,41 @@ export const TeamDashboardPage: React.FC = () => {
         /* Team Dashboard View */
         <div className="space-y-8">
           {/* Team Info Card */}
-          <div className="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-lg space-y-6">
+          <div className="console-panel p-6 sm:p-8 space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="space-y-1">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Your Team</span>
-                <h2 className="text-xl font-bold text-white">{team.name}</h2>
-                {team.description && <p className="text-xs text-slate-300">{team.description}</p>}
+                <span className="text-xs font-bold text-brand-600 dark:text-brand-400 uppercase tracking-wider">Your Team</span>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{team.name}</h2>
+                {team.description && <p className="text-sm text-slate-600 dark:text-slate-300">{team.description}</p>}
               </div>
 
               {/* Invite Code Badge */}
-              <div className="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded border border-slate-700">
+              <div className="flex items-center gap-2.5 bg-slate-100 dark:bg-slate-900/80 px-4 py-2 rounded-2xl border border-slate-200 dark:border-slate-800">
                 <div className="text-right">
-                  <span className="text-[10px] text-slate-400 block uppercase font-mono">Invite Code</span>
-                  <span className="text-sm font-mono font-bold text-slate-200">{team.inviteCode}</span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 block font-medium">Invite Code</span>
+                  <span className="text-base font-mono font-bold text-slate-800 dark:text-slate-100">{team.inviteCode}</span>
                 </div>
                 <button
                   onClick={handleCopyCode}
-                  className="p-1 hover:bg-slate-800 text-slate-400 hover:text-white rounded transition-colors"
+                  className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors"
                   title="Copy Invite Code"
                 >
-                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copied ? <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
             {/* Member Roster */}
-            <div className="space-y-3 pt-4 border-t border-slate-800">
+            <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">
               <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Team Roster</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {team.members.map((m) => (
-                  <div key={m.id} className="p-3 bg-slate-950 rounded border border-slate-800 flex items-center justify-between">
+                  <div key={m.id} className="p-3.5 bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200/80 dark:border-slate-800 flex items-center justify-between">
                     <div>
-                      <span className="text-sm font-semibold text-slate-200 block">{m.user.name}</span>
-                      <span className="text-xs text-slate-500">{m.user.email}</span>
+                      <span className="text-sm font-semibold text-slate-900 dark:text-slate-100 block">{m.user.name}</span>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">{m.user.email}</span>
                     </div>
-                    <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 uppercase font-mono">
+                    <span className="badge-mono text-[10px] uppercase font-mono">
                       {m.role}
                     </span>
                   </div>
@@ -264,7 +264,7 @@ export const TeamDashboardPage: React.FC = () => {
             </div>
 
             {/* Invite Form */}
-            <form onSubmit={handleInviteMember} className="pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row gap-3">
+            <form onSubmit={handleInviteMember} className="pt-4 border-t border-slate-100 dark:border-slate-800/80 flex flex-col sm:flex-row gap-3">
               <input
                 type="email"
                 required
@@ -273,70 +273,66 @@ export const TeamDashboardPage: React.FC = () => {
                 placeholder="Teammate's email address..."
                 className="input-field flex-1"
               />
-              <button type="submit" className="btn-secondary whitespace-nowrap text-xs py-2 px-4">
+              <button type="submit" className="btn-secondary whitespace-nowrap text-sm py-2 px-5 font-semibold">
                 Send Invitation Token
               </button>
             </form>
             {inviteResult && (
-              <p className="text-xs text-emerald-400 bg-emerald-500/10 p-2.5 rounded-lg border border-emerald-500/20">
+              <p className="text-sm text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 p-3 rounded-xl border border-emerald-200 dark:border-emerald-800">
                 {inviteResult}
               </p>
             )}
           </div>
 
           {/* Project Submission Status Card */}
-          <div className="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-lg space-y-6">
+          <div className="console-panel p-6 sm:p-8 space-y-6">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <FileText className="w-5 h-5 text-slate-300" />
+              <div className="flex items-center gap-3">
+                <FileText className="w-6 h-6 text-brand-600 dark:text-brand-400" />
                 <div>
-                  <h3 className="text-base font-bold text-white">Project Submission</h3>
-                  <p className="text-xs text-slate-400">Manage your project draft, metadata, and final submission.</p>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">Project Submission</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Manage your project draft, metadata, and final submission.</p>
                 </div>
               </div>
 
               {team.project && (
-                <span className={`px-2.5 py-0.5 rounded text-xs font-semibold uppercase tracking-wider ${
-                  team.project.status === 'SUBMITTED' || team.project.status === 'FINALIZED'
-                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                    : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                }`}>
+                <span className={team.project.status === 'SUBMITTED' || team.project.status === 'FINALIZED' ? 'badge-mint' : 'badge-amber'}>
                   Status: {team.project.status}
                 </span>
               )}
             </div>
 
             {team.project ? (
-              <div className="space-y-4 pt-4 border-t border-slate-800">
+              <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800/80">
                 <div className="space-y-1">
-                  <h4 className="text-lg font-bold text-white">{team.project.title}</h4>
-                  {team.project.tagline && <p className="text-sm text-slate-300">{team.project.tagline}</p>}
+                  <h4 className="text-xl font-bold text-slate-900 dark:text-white">{team.project.title}</h4>
+                  {team.project.tagline && <p className="text-sm text-slate-600 dark:text-slate-300">{team.project.tagline}</p>}
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3 pt-2">
-                  <Link to={`/submit/${event?.slug}`} className="btn-secondary text-xs py-2 px-4">
+                  <Link to={`/submit/${event?.slug}`} className="btn-secondary text-sm py-2 px-4 font-semibold">
                     Edit Project Draft
                   </Link>
 
                   {team.project.status === 'DRAFT' && (
-                    <button onClick={handleSubmitProject} className="btn-primary text-xs py-2 px-4 flex items-center gap-1.5">
-                      <Send className="w-3.5 h-3.5" />
+                    <button onClick={handleSubmitProject} className="btn-primary text-sm py-2 px-4 flex items-center gap-1.5 font-semibold">
+                      <Send className="w-4 h-4" />
                       Submit Project (Before Deadline)
                     </button>
                   )}
 
                   {team.project.status !== 'DRAFT' && (
-                    <Link to={`/project/${team.project.id}`} className="btn-primary text-xs py-2 px-4 flex items-center gap-1.5">
+                    <Link to={`/project/${team.project.id}`} className="btn-primary text-sm py-2 px-4 flex items-center gap-1.5 font-semibold">
                       View Public Project Page
-                      <ArrowRight className="w-3.5 h-3.5" />
+                      <ArrowRight className="w-4 h-4" />
                     </Link>
                   )}
                 </div>
               </div>
             ) : (
-              <div className="text-center py-8 space-y-4 pt-4 border-t border-slate-800/80">
-                <p className="text-sm text-slate-400">Your team has not created a project draft yet.</p>
-                <Link to={`/submit/${event?.slug}`} className="btn-primary text-sm py-2 px-5 inline-flex items-center gap-2">
+              <div className="text-center py-8 space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800/80">
+                <p className="text-sm text-slate-500 dark:text-slate-400">Your team has not created a project draft yet.</p>
+                <Link to={`/submit/${event?.slug}`} className="btn-primary text-sm py-2.5 px-6 inline-flex items-center gap-2 font-semibold">
                   <Plus className="w-4 h-4" />
                   Create Project Submission
                 </Link>

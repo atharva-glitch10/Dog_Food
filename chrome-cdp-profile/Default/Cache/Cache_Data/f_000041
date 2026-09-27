@@ -1,0 +1,203 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/pages/TermsPage.tsx");import __vite__cjsImport0_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=af2f0ff0"; const jsxDEV = __vite__cjsImport0_react_jsxDevRuntime["jsxDEV"];
+import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== "undefined" && self instanceof WorkerGlobalScope;
+let prevRefreshReg;
+let prevRefreshSig;
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react can't detect preamble. Something is wrong."
+    );
+  }
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+import { Scale } from "/node_modules/.vite/deps/lucide-react.js?v=af2f0ff0";
+export const TermsPage = () => {
+  return /* @__PURE__ */ jsxDEV("div", { className: "max-w-4xl mx-auto py-8 space-y-8", children: [
+    /* @__PURE__ */ jsxDEV("div", { className: "border-b border-slate-800 pb-6", children: [
+      /* @__PURE__ */ jsxDEV("div", { className: "flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2", children: [
+        /* @__PURE__ */ jsxDEV(Scale, { className: "w-4 h-4 text-slate-300" }, void 0, false, {
+          fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+          lineNumber: 28,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("span", { children: "Legal & Compliance" }, void 0, false, {
+          fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+          lineNumber: 29,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+        lineNumber: 27,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("h1", { className: "text-3xl font-bold text-white tracking-tight", children: "Terms and Conditions" }, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+        lineNumber: 31,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("p", { className: "text-sm text-slate-400 mt-2", children: "Last revised: September 26, 2026. Standard operating terms for the DOGFOOD 2026 platform." }, void 0, false, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+        lineNumber: 32,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+      lineNumber: 26,
+      columnNumber: 7
+    }, this),
+    /* @__PURE__ */ jsxDEV("div", { className: "space-y-8 text-sm text-slate-300 leading-relaxed", children: [
+      /* @__PURE__ */ jsxDEV("section", { className: "space-y-3", children: [
+        /* @__PURE__ */ jsxDEV("h2", { className: "text-lg font-semibold text-white", children: "1. Platform Scope and License" }, void 0, false, {
+          fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+          lineNumber: 39,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("p", { children: "DOGFOOD 2026 is an open-source hackathon management and scoring verification platform licensed under the MIT License. Operators deploying this platform agree to comply with local regulations and ensure fair, transparent execution of all judging algorithms." }, void 0, false, {
+          fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+          lineNumber: 40,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+        lineNumber: 38,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("section", { className: "space-y-3", children: [
+        /* @__PURE__ */ jsxDEV("h2", { className: "text-lg font-semibold text-white", children: "2. Participant Eligibility and Conduct" }, void 0, false, {
+          fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+          lineNumber: 46,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("div", { className: "bg-slate-900/80 border border-slate-800 rounded-lg p-4 space-y-2", children: /* @__PURE__ */ jsxDEV("ul", { className: "list-disc list-inside space-y-1.5 text-slate-300", children: [
+          /* @__PURE__ */ jsxDEV("li", { children: [
+            /* @__PURE__ */ jsxDEV("strong", { className: "text-slate-100", children: "Originality:" }, void 0, false, {
+              fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+              lineNumber: 49,
+              columnNumber: 19
+            }, this),
+            " Submitted projects must represent work created during the designated hackathon event period unless explicit prior-work exemptions are documented."
+          ] }, void 0, true, {
+            fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+            lineNumber: 49,
+            columnNumber: 15
+          }, this),
+          /* @__PURE__ */ jsxDEV("li", { children: [
+            /* @__PURE__ */ jsxDEV("strong", { className: "text-slate-100", children: "Intellectual Property:" }, void 0, false, {
+              fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+              lineNumber: 50,
+              columnNumber: 19
+            }, this),
+            " Participants retain full ownership and intellectual property rights to all software, documentation, and repositories submitted."
+          ] }, void 0, true, {
+            fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+            lineNumber: 50,
+            columnNumber: 15
+          }, this),
+          /* @__PURE__ */ jsxDEV("li", { children: [
+            /* @__PURE__ */ jsxDEV("strong", { className: "text-slate-100", children: "Anti-Sybil Policy:" }, void 0, false, {
+              fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+              lineNumber: 51,
+              columnNumber: 19
+            }, this),
+            " Creating multiple accounts, manipulating community voting via automated scripts, or colluding with evaluators results in immediate disqualification."
+          ] }, void 0, true, {
+            fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+            lineNumber: 51,
+            columnNumber: 15
+          }, this)
+        ] }, void 0, true, {
+          fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+          lineNumber: 48,
+          columnNumber: 13
+        }, this) }, void 0, false, {
+          fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+          lineNumber: 47,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+        lineNumber: 45,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("section", { className: "space-y-3", children: [
+        /* @__PURE__ */ jsxDEV("h2", { className: "text-lg font-semibold text-white", children: "3. Evaluation and Statistical Scoring" }, void 0, false, {
+          fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+          lineNumber: 57,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("p", { children: "Final rankings are calculated using standardized statistical procedures including Z-score normalization with Bayesian shrinkage and Bradley-Terry paired comparison models. The mathematical models are deterministic and reproducible given the underlying raw evaluation dataset. All decisions of the event organizers regarding dispute resolution are final." }, void 0, false, {
+          fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+          lineNumber: 58,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+        lineNumber: 56,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("section", { className: "space-y-3", children: [
+        /* @__PURE__ */ jsxDEV("h2", { className: "text-lg font-semibold text-white", children: "4. Digital Certificate Verification" }, void 0, false, {
+          fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+          lineNumber: 64,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("p", { children: "Digital certificates issued by this platform include cryptographic verification hashes. The authenticity of any certificate can be verified independently via the verification endpoint against the signing authority's public record." }, void 0, false, {
+          fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+          lineNumber: 65,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+        lineNumber: 63,
+        columnNumber: 9
+      }, this),
+      /* @__PURE__ */ jsxDEV("section", { className: "space-y-3", children: [
+        /* @__PURE__ */ jsxDEV("h2", { className: "text-lg font-semibold text-white", children: "5. Disclaimer of Warranties" }, void 0, false, {
+          fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+          lineNumber: 71,
+          columnNumber: 11
+        }, this),
+        /* @__PURE__ */ jsxDEV("p", { children: 'The software is provided "as is", without warranty of any kind, express or implied. The developers and operators shall not be held liable for any damages, downtime, or data loss arising from the use of this software.' }, void 0, false, {
+          fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+          lineNumber: 72,
+          columnNumber: 11
+        }, this)
+      ] }, void 0, true, {
+        fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+        lineNumber: 70,
+        columnNumber: 9
+      }, this)
+    ] }, void 0, true, {
+      fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+      lineNumber: 37,
+      columnNumber: 7
+    }, this)
+  ] }, void 0, true, {
+    fileName: "C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx",
+    lineNumber: 25,
+    columnNumber: 5
+  }, this);
+};
+_c = TermsPage;
+var _c;
+$RefreshReg$(_c, "TermsPage");
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("C:/Users/RUTUJA PATOLE/Dog_Food/frontend/src/pages/TermsPage.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,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QUMsT0FBRSx3T0FBSDtBQUFBO0FBQUE7QUFBQTtBQUFBLGVBRUE7QUFBQSxXQUpGO0FBQUE7QUFBQTtBQUFBO0FBQUEsYUFLQTtBQUFBLFNBdENGO0FBQUE7QUFBQTtBQUFBO0FBQUEsV0F1Q0E7QUFBQSxPQW5ERjtBQUFBO0FBQUE7QUFBQTtBQUFBLFNBb0RBO0FBRUo7QUFBRUMsS0F4RFdEO0FBQW1CLElBQUFDO0FBQUEsYUFBQUEsSUFBQSIsIm5hbWVzIjpbIlNjYWxlIiwiVGVybXNQYWdlIiwiX2MiXSwiaWdub3JlTGlzdCI6W10sInNvdXJjZXMiOlsiVGVybXNQYWdlLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgUmVhY3QgZnJvbSAncmVhY3QnO1xyXG5pbXBvcnQgeyBGaWxlVGV4dCwgQ2hlY2tDaXJjbGUsIEFsZXJ0Q2lyY2xlLCBTY2FsZSB9IGZyb20gJ2x1Y2lkZS1yZWFjdCc7XHJcblxyXG5leHBvcnQgY29uc3QgVGVybXNQYWdlOiBSZWFjdC5GQyA9ICgpID0+IHtcclxuICByZXR1cm4gKFxyXG4gICAgPGRpdiBjbGFzc05hbWU9XCJtYXgtdy00eGwgbXgtYXV0byBweS04IHNwYWNlLXktOFwiPlxyXG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cImJvcmRlci1iIGJvcmRlci1zbGF0ZS04MDAgcGItNlwiPlxyXG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIgdGV4dC14cyBmb250LXNlbWlib2xkIHVwcGVyY2FzZSB0cmFja2luZy13aWRlciB0ZXh0LXNsYXRlLTQwMCBtYi0yXCI+XHJcbiAgICAgICAgICA8U2NhbGUgY2xhc3NOYW1lPVwidy00IGgtNCB0ZXh0LXNsYXRlLTMwMFwiIC8+XHJcbiAgICAgICAgICA8c3Bhbj5MZWdhbCAmIENvbXBsaWFuY2U8L3NwYW4+XHJcbiAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgPGgxIGNsYXNzTmFtZT1cInRleHQtM3hsIGZvbnQtYm9sZCB0ZXh0LXdoaXRlIHRyYWNraW5nLXRpZ2h0XCI+VGVybXMgYW5kIENvbmRpdGlvbnM8L2gxPlxyXG4gICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtc20gdGV4dC1zbGF0ZS00MDAgbXQtMlwiPlxyXG4gICAgICAgICAgTGFzdCByZXZpc2VkOiBTZXB0ZW1iZXIgMjYsIDIwMjYuIFN0YW5kYXJkIG9wZXJhdGluZyB0ZXJtcyBmb3IgdGhlIERPR0ZPT0QgMjAyNiBwbGF0Zm9ybS5cclxuICAgICAgICA8L3A+XHJcbiAgICAgIDwvZGl2PlxyXG5cclxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTggdGV4dC1zbSB0ZXh0LXNsYXRlLTMwMCBsZWFkaW5nLXJlbGF4ZWRcIj5cclxuICAgICAgICA8c2VjdGlvbiBjbGFzc05hbWU9XCJzcGFjZS15LTNcIj5cclxuICAgICAgICAgIDxoMiBjbGFzc05hbWU9XCJ0ZXh0LWxnIGZvbnQtc2VtaWJvbGQgdGV4dC13aGl0ZVwiPjEuIFBsYXRmb3JtIFNjb3BlIGFuZCBMaWNlbnNlPC9oMj5cclxuICAgICAgICAgIDxwPlxyXG4gICAgICAgICAgICBET0dGT09EIDIwMjYgaXMgYW4gb3Blbi1zb3VyY2UgaGFja2F0aG9uIG1hbmFnZW1lbnQgYW5kIHNjb3JpbmcgdmVyaWZpY2F0aW9uIHBsYXRmb3JtIGxpY2Vuc2VkIHVuZGVyIHRoZSBNSVQgTGljZW5zZS4gT3BlcmF0b3JzIGRlcGxveWluZyB0aGlzIHBsYXRmb3JtIGFncmVlIHRvIGNvbXBseSB3aXRoIGxvY2FsIHJlZ3VsYXRpb25zIGFuZCBlbnN1cmUgZmFpciwgdHJhbnNwYXJlbnQgZXhlY3V0aW9uIG9mIGFsbCBqdWRnaW5nIGFsZ29yaXRobXMuXHJcbiAgICAgICAgICA8L3A+XHJcbiAgICAgICAgPC9zZWN0aW9uPlxyXG5cclxuICAgICAgICA8c2VjdGlvbiBjbGFzc05hbWU9XCJzcGFjZS15LTNcIj5cclxuICAgICAgICAgIDxoMiBjbGFzc05hbWU9XCJ0ZXh0LWxnIGZvbnQtc2VtaWJvbGQgdGV4dC13aGl0ZVwiPjIuIFBhcnRpY2lwYW50IEVsaWdpYmlsaXR5IGFuZCBDb25kdWN0PC9oMj5cclxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiYmctc2xhdGUtOTAwLzgwIGJvcmRlciBib3JkZXItc2xhdGUtODAwIHJvdW5kZWQtbGcgcC00IHNwYWNlLXktMlwiPlxyXG4gICAgICAgICAgICA8dWwgY2xhc3NOYW1lPVwibGlzdC1kaXNjIGxpc3QtaW5zaWRlIHNwYWNlLXktMS41IHRleHQtc2xhdGUtMzAwXCI+XHJcbiAgICAgICAgICAgICAgPGxpPjxzdHJvbmcgY2xhc3NOYW1lPVwidGV4dC1zbGF0ZS0xMDBcIj5PcmlnaW5hbGl0eTo8L3N0cm9uZz4gU3VibWl0dGVkIHByb2plY3RzIG11c3QgcmVwcmVzZW50IHdvcmsgY3JlYXRlZCBkdXJpbmcgdGhlIGRlc2lnbmF0ZWQgaGFja2F0aG9uIGV2ZW50IHBlcmlvZCB1bmxlc3MgZXhwbGljaXQgcHJpb3Itd29yayBleGVtcHRpb25zIGFyZSBkb2N1bWVudGVkLjwvbGk+XHJcbiAgICAgICAgICAgICAgPGxpPjxzdHJvbmcgY2xhc3NOYW1lPVwidGV4dC1zbGF0ZS0xMDBcIj5JbnRlbGxlY3R1YWwgUHJvcGVydHk6PC9zdHJvbmc+IFBhcnRpY2lwYW50cyByZXRhaW4gZnVsbCBvd25lcnNoaXAgYW5kIGludGVsbGVjdHVhbCBwcm9wZXJ0eSByaWdodHMgdG8gYWxsIHNvZnR3YXJlLCBkb2N1bWVudGF0aW9uLCBhbmQgcmVwb3NpdG9yaWVzIHN1Ym1pdHRlZC48L2xpPlxyXG4gICAgICAgICAgICAgIDxsaT48c3Ryb25nIGNsYXNzTmFtZT1cInRleHQtc2xhdGUtMTAwXCI+QW50aS1TeWJpbCBQb2xpY3k6PC9zdHJvbmc+IENyZWF0aW5nIG11bHRpcGxlIGFjY291bnRzLCBtYW5pcHVsYXRpbmcgY29tbXVuaXR5IHZvdGluZyB2aWEgYXV0b21hdGVkIHNjcmlwdHMsIG9yIGNvbGx1ZGluZyB3aXRoIGV2YWx1YXRvcnMgcmVzdWx0cyBpbiBpbW1lZGlhdGUgZGlzcXVhbGlmaWNhdGlvbi48L2xpPlxyXG4gICAgICAgICAgICA8L3VsPlxyXG4gICAgICAgICAgPC9kaXY+XHJcbiAgICAgICAgPC9zZWN0aW9uPlxyXG5cclxuICAgICAgICA8c2VjdGlvbiBjbGFzc05hbWU9XCJzcGFjZS15LTNcIj5cclxuICAgICAgICAgIDxoMiBjbGFzc05hbWU9XCJ0ZXh0LWxnIGZvbnQtc2VtaWJvbGQgdGV4dC13aGl0ZVwiPjMuIEV2YWx1YXRpb24gYW5kIFN0YXRpc3RpY2FsIFNjb3Jpbmc8L2gyPlxyXG4gICAgICAgICAgPHA+XHJcbiAgICAgICAgICAgIEZpbmFsIHJhbmtpbmdzIGFyZSBjYWxjdWxhdGVkIHVzaW5nIHN0YW5kYXJkaXplZCBzdGF0aXN0aWNhbCBwcm9jZWR1cmVzIGluY2x1ZGluZyBaLXNjb3JlIG5vcm1hbGl6YXRpb24gd2l0aCBCYXllc2lhbiBzaHJpbmthZ2UgYW5kIEJyYWRsZXktVGVycnkgcGFpcmVkIGNvbXBhcmlzb24gbW9kZWxzLiBUaGUgbWF0aGVtYXRpY2FsIG1vZGVscyBhcmUgZGV0ZXJtaW5pc3RpYyBhbmQgcmVwcm9kdWNpYmxlIGdpdmVuIHRoZSB1bmRlcmx5aW5nIHJhdyBldmFsdWF0aW9uIGRhdGFzZXQuIEFsbCBkZWNpc2lvbnMgb2YgdGhlIGV2ZW50IG9yZ2FuaXplcnMgcmVnYXJkaW5nIGRpc3B1dGUgcmVzb2x1dGlvbiBhcmUgZmluYWwuXHJcbiAgICAgICAgICA8L3A+XHJcbiAgICAgICAgPC9zZWN0aW9uPlxyXG5cclxuICAgICAgICA8c2VjdGlvbiBjbGFzc05hbWU9XCJzcGFjZS15LTNcIj5cclxuICAgICAgICAgIDxoMiBjbGFzc05hbWU9XCJ0ZXh0LWxnIGZvbnQtc2VtaWJvbGQgdGV4dC13aGl0ZVwiPjQuIERpZ2l0YWwgQ2VydGlmaWNhdGUgVmVyaWZpY2F0aW9uPC9oMj5cclxuICAgICAgICAgIDxwPlxyXG4gICAgICAgICAgICBEaWdpdGFsIGNlcnRpZmljYXRlcyBpc3N1ZWQgYnkgdGhpcyBwbGF0Zm9ybSBpbmNsdWRlIGNyeXB0b2dyYXBoaWMgdmVyaWZpY2F0aW9uIGhhc2hlcy4gVGhlIGF1dGhlbnRpY2l0eSBvZiBhbnkgY2VydGlmaWNhdGUgY2FuIGJlIHZlcmlmaWVkIGluZGVwZW5kZW50bHkgdmlhIHRoZSB2ZXJpZmljYXRpb24gZW5kcG9pbnQgYWdhaW5zdCB0aGUgc2lnbmluZyBhdXRob3JpdHkncyBwdWJsaWMgcmVjb3JkLlxyXG4gICAgICAgICAgPC9wPlxyXG4gICAgICAgIDwvc2VjdGlvbj5cclxuXHJcbiAgICAgICAgPHNlY3Rpb24gY2xhc3NOYW1lPVwic3BhY2UteS0zXCI+XHJcbiAgICAgICAgICA8aDIgY2xhc3NOYW1lPVwidGV4dC1sZyBmb250LXNlbWlib2xkIHRleHQtd2hpdGVcIj41LiBEaXNjbGFpbWVyIG9mIFdhcnJhbnRpZXM8L2gyPlxyXG4gICAgICAgICAgPHA+XHJcbiAgICAgICAgICAgIFRoZSBzb2Z0d2FyZSBpcyBwcm92aWRlZCBcImFzIGlzXCIsIHdpdGhvdXQgd2FycmFudHkgb2YgYW55IGtpbmQsIGV4cHJlc3Mgb3IgaW1wbGllZC4gVGhlIGRldmVsb3BlcnMgYW5kIG9wZXJhdG9ycyBzaGFsbCBub3QgYmUgaGVsZCBsaWFibGUgZm9yIGFueSBkYW1hZ2VzLCBkb3dudGltZSwgb3IgZGF0YSBsb3NzIGFyaXNpbmcgZnJvbSB0aGUgdXNlIG9mIHRoaXMgc29mdHdhcmUuXHJcbiAgICAgICAgICA8L3A+XHJcbiAgICAgICAgPC9zZWN0aW9uPlxyXG4gICAgICA8L2Rpdj5cclxuICAgIDwvZGl2PlxyXG4gICk7XHJcbn07XHJcbiJdLCJmaWxlIjoiQzovVXNlcnMvUlVUVUpBIFBBVE9MRS9Eb2dfRm9vZC9mcm9udGVuZC9zcmMvcGFnZXMvVGVybXNQYWdlLnRzeCJ9
