@@ -21,7 +21,8 @@ export class ScoringController {
       const evaluation = await scoringService.submitEvaluation(
         req.body.eventId,
         req.user!.id,
-        req.body
+        req.body,
+        req.user!.role
       );
       return sendSuccess(res, evaluation, 201);
     } catch (err) {

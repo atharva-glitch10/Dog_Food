@@ -1,7 +1,7 @@
 import { prisma } from '../../utils/prisma.js';
 import { generateRandomToken } from '../../utils/crypto.js';
 import { AppError } from '../../utils/response.js';
-import { TeamRole, InviteStatus } from '@prisma/client';
+import { TeamRole, InviteStatus, EventStatus } from '@prisma/client';
 
 export class TeamsService {
   async getTeamsByEvent(eventId: string) {
@@ -95,6 +95,19 @@ export class TeamsService {
 
     if (!event) throw new AppError('Event not found', 404, 'EVENT_NOT_FOUND');
 
+    if (event.status === EventStatus.ARCHIVED) {
+      throw new AppError('Event is archived. New teams cannot be created.', 400, 'EVENT_ARCHIVED');
+    }
+
+    // Enforce registration window
+    const now = new Date();
+    if (now < event.registrationStartDate) {
+      throw new AppError('Team registration has not opened yet for this event.', 400, 'REGISTRATION_NOT_STARTED');
+    }
+    if (now > event.registrationEndDate) {
+      throw new AppError('Team registration deadline has passed for this event.', 400, 'REGISTRATION_CLOSED');
+    }
+
     // Check if user is already in a team for this event
     const existingMembership = await prisma.teamMember.findFirst({
       where: {
@@ -156,6 +169,16 @@ export class TeamsService {
     });
 
     if (!team) throw new AppError('Team not found', 404, 'TEAM_NOT_FOUND');
+
+    if (team.event.status === EventStatus.ARCHIVED) {
+      throw new AppError('Event is archived. Invitations cannot be issued.', 400, 'EVENT_ARCHIVED');
+    }
+
+    // Verify registration deadline
+    const now = new Date();
+    if (now > team.event.registrationEndDate) {
+      throw new AppError('Team invitations cannot be issued after registration has closed.', 400, 'REGISTRATION_CLOSED');
+    }
 
     // Verify leader authorization
     const leader = team.members.find((m) => m.userId === leaderUserId);
@@ -248,6 +271,19 @@ export class TeamsService {
     });
 
     if (!team) throw new AppError('Team not found', 404, 'TEAM_NOT_FOUND');
+
+    if (team.event.status === EventStatus.ARCHIVED) {
+      throw new AppError('Event is archived. Cannot join teams.', 400, 'EVENT_ARCHIVED');
+    }
+
+    // Enforce registration window for joining teams
+    const joinNow = new Date();
+    if (joinNow < team.event.registrationStartDate) {
+      throw new AppError('Team registration has not opened yet for this event.', 400, 'REGISTRATION_NOT_STARTED');
+    }
+    if (joinNow > team.event.registrationEndDate) {
+      throw new AppError('Team registration has closed for this event.', 400, 'REGISTRATION_CLOSED');
+    }
 
     // Check if user is already in a team for this event
     const existingMembership = await prisma.teamMember.findFirst({

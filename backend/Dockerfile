@@ -21,8 +21,8 @@ FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-# Install OpenSSL and libc compatibility for Prisma engine on Alpine
-RUN apk add --no-cache openssl libc6-compat
+# Install OpenSSL and libc compatibility for Prisma engine, plus su-exec for safe privilege dropping
+RUN apk add --no-cache openssl libc6-compat su-exec
 
 ENV NODE_ENV=production
 ENV PORT=4000
@@ -35,12 +35,15 @@ RUN npm ci --omit=dev
 RUN npx prisma generate
 
 COPY --from=builder /app/dist ./dist
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
 
-# Create uploads directory with appropriate permissions
-RUN mkdir -p /app/uploads && chown -R node:node /app
-
-USER node
+# Ensure uploads directory exists and prepare entrypoint permissions
+RUN mkdir -p /app/uploads && \
+    chown -R node:node /app && \
+    sed -i 's/\r$//' /app/docker-entrypoint.sh && \
+    chmod +x /app/docker-entrypoint.sh
 
 EXPOSE 4000
 
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 CMD ["node", "dist/server.js"]

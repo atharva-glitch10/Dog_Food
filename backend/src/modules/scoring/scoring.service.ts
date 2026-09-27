@@ -1,6 +1,6 @@
 import { prisma } from '../../utils/prisma.js';
 import { AppError } from '../../utils/response.js';
-import { Role } from '@prisma/client';
+import { Role, ProjectStatus, EventStatus } from '@prisma/client';
 
 export interface ScoreInput {
   criterionId: string;
@@ -17,6 +17,16 @@ export class ScoringService {
 
     if (!judge && !isPrivileged) {
       throw new AppError('You are not a registered judge.', 403, 'FORBIDDEN');
+    }
+
+    // Role Isolation: Unprivileged judge can ONLY view projects they are assigned to
+    if (judge && !isPrivileged) {
+      const assignment = await prisma.judgeAssignment.findUnique({
+        where: { judgeId_projectId: { judgeId: judge.id, projectId } },
+      });
+      if (!assignment) {
+        throw new AppError('You are not assigned to evaluate this project.', 403, 'NOT_ASSIGNED');
+      }
     }
 
     const evaluation = await prisma.evaluation.findFirst({
@@ -41,7 +51,8 @@ export class ScoringService {
       isDraft?: boolean;
       feedback?: string;
       scores: ScoreInput[];
-    }
+    },
+    userRole?: Role
   ) {
     const event = await prisma.event.findUnique({
       where: { id: eventId },
@@ -50,13 +61,33 @@ export class ScoringService {
 
     if (!event) throw new AppError('Event not found', 404, 'EVENT_NOT_FOUND');
 
+    if (event.status === EventStatus.ARCHIVED) {
+      throw new AppError('Event is archived. Evaluations cannot be submitted.', 400, 'EVENT_ARCHIVED');
+    }
+
     const now = new Date();
+    if (now < event.judgingStartDate) {
+      throw new AppError('Judging period has not started yet for this event.', 400, 'JUDGING_NOT_STARTED');
+    }
     if (now > event.judgingDeadline) {
       throw new AppError('Judging deadline has passed. Evaluations can no longer be submitted.', 400, 'DEADLINE_EXCEEDED');
     }
 
     if (!event.rubric || event.rubric.criteria.length === 0) {
       throw new AppError('Judging rubric has not been configured for this event.', 400, 'NO_RUBRIC');
+    }
+
+    // Verify project exists, belongs to this event, and is submitted (not draft)
+    const project = await prisma.project.findUnique({
+      where: { id: data.projectId },
+    });
+
+    if (!project || project.eventId !== eventId) {
+      throw new AppError('Project not found for this event.', 404, 'PROJECT_NOT_FOUND');
+    }
+
+    if (project.status === ProjectStatus.DRAFT) {
+      throw new AppError('Judges cannot evaluate an unsubmitted draft project.', 400, 'PROJECT_NOT_SUBMITTED');
     }
 
     const judge = await prisma.judge.findUnique({
@@ -144,9 +175,21 @@ export class ScoringService {
     weightedTotal = Math.min(100, Math.max(0, parseFloat(weightedTotal.toFixed(2))));
 
     const isDraft = Boolean(data.isDraft);
+    const isPrivileged = userRole === Role.ORGANIZER || userRole === Role.ADMIN;
 
-    // Save evaluation in transaction
+    // Save evaluation & record append-only audit trail in an atomic transaction
     const evaluation = await prisma.$transaction(async (tx) => {
+      // Check if this evaluation already existed to distinguish initial creation vs edit/override
+      const existingEval = await tx.evaluation.findUnique({
+        where: {
+          judgeId_projectId: {
+            judgeId: judge.id,
+            projectId: data.projectId,
+          },
+        },
+        include: { scores: true },
+      });
+
       const evalRecord = await tx.evaluation.upsert({
         where: {
           judgeId_projectId: {
@@ -170,7 +213,6 @@ export class ScoringService {
       });
 
       // Bulk-replace criterion scores: delete existing rows, then insert all at once.
-      // This replaces the N+1 upsert loop (one query per criterion) with just 2 queries.
       await tx.evaluationScore.deleteMany({
         where: { evaluationId: evalRecord.id },
       });
@@ -186,6 +228,36 @@ export class ScoringService {
       await tx.judgeAssignment.update({
         where: { id: assignment.id },
         data: { isCompleted: !isDraft },
+      });
+
+      // Append-only audit log entry: records who scored what, previous scores vs new scores, and edits/overrides
+      const isOverride = isPrivileged && judge.userId !== judgeUserId;
+      const auditAction = existingEval
+        ? (isOverride ? 'SCORE_OVERRIDE' : 'EVALUATION_UPDATED')
+        : 'EVALUATION_CREATED';
+
+      await tx.auditLog.create({
+        data: {
+          eventId,
+          userId: judgeUserId,
+          action: auditAction,
+          entityType: 'Evaluation',
+          entityId: evalRecord.id,
+          payload: {
+            judgeId: judge.id,
+            judgeUserId: judge.userId,
+            scorerUserId: judgeUserId,
+            projectId: data.projectId,
+            isDraft,
+            isOverride,
+            previousWeightedTotal: existingEval ? existingEval.weightedTotal : null,
+            newWeightedTotal: weightedTotal,
+            previousScores: existingEval?.scores.map((s) => ({ criterionId: s.criterionId, score: s.score })) ?? [],
+            newScores: data.scores,
+            feedback: data.feedback !== undefined ? data.feedback : (existingEval?.feedback ?? null),
+            timestamp: new Date().toISOString(),
+          } as any,
+        },
       });
 
       return evalRecord;

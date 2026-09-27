@@ -20,15 +20,13 @@ ENV VITE_API_URL=$VITE_API_URL
 
 RUN npm run build
 
-# Runner stage using lightweight node static server or nginx
-FROM node:20-alpine AS runner
+# Runner stage using lightweight nginx alpine
+FROM nginx:alpine AS runner
 
-WORKDIR /app
-
-RUN npm install -g serve
-
-COPY --from=builder /app/dist ./dist
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/dist /usr/share/nginx/html
 
 EXPOSE 3000
 
-CMD ["serve", "-s", "dist", "-l", "3000"]
+CMD ["nginx", "-g", "daemon off;"]
+

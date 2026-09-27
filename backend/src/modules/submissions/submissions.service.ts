@@ -1,6 +1,6 @@
 import { prisma } from '../../utils/prisma.js';
 import { AppError } from '../../utils/response.js';
-import { ProjectStatus, Role } from '@prisma/client';
+import { ProjectStatus, Role, EventStatus } from '@prisma/client';
 
 export class SubmissionsService {
   async getProjectById(projectId: string, user?: { id: string; role: Role }) {
@@ -103,10 +103,26 @@ export class SubmissionsService {
       throw new AppError('Your team already has an existing project submission. Please edit the existing draft.', 409, 'PROJECT_EXISTS');
     }
 
+    // Enforce active event status for participants
+    if (team.event.status === EventStatus.ARCHIVED || team.event.status === EventStatus.DRAFT) {
+      throw new AppError(`Submissions are not accepted while event is in ${team.event.status} status.`, 400, 'EVENT_NOT_ACTIVE');
+    }
+
     // Enforce submission window
     const now = new Date();
+    if (now < team.event.submissionStartDate) {
+      throw new AppError('Project submission period has not started yet for this event.', 400, 'SUBMISSION_NOT_STARTED');
+    }
     if (now > team.event.submissionDeadline) {
       throw new AppError('Project submission deadline has passed for this event.', 400, 'DEADLINE_EXCEEDED');
+    }
+
+    // Validate track eligibility if provided
+    if (data.trackId) {
+      const track = await prisma.track.findUnique({ where: { id: data.trackId } });
+      if (!track || track.eventId !== eventId) {
+        throw new AppError('Selected track is not valid for this event.', 400, 'INVALID_TRACK');
+      }
     }
 
     const project = await prisma.$transaction(async (tx) => {
@@ -170,14 +186,29 @@ export class SubmissionsService {
       throw new AppError('You do not have permission to edit this project.', 403, 'FORBIDDEN');
     }
 
-    // Enforce deadline for participants
+    if (project.event.status === EventStatus.ARCHIVED) {
+      throw new AppError('Event is archived. Submissions can no longer be modified.', 400, 'EVENT_ARCHIVED');
+    }
+
+    // Enforce deadline and window for participants
     const now = new Date();
+    if (!isPrivileged && now < project.event.submissionStartDate) {
+      throw new AppError('Submission window has not opened yet.', 400, 'SUBMISSION_NOT_STARTED');
+    }
     if (!isPrivileged && now > project.event.submissionDeadline) {
       throw new AppError('Submission deadline has passed. Projects can no longer be edited.', 400, 'DEADLINE_EXCEEDED');
     }
 
     if (project.status === ProjectStatus.FINALIZED && !isPrivileged) {
       throw new AppError('This project has been finalized and locked.', 400, 'PROJECT_FINALIZED');
+    }
+
+    // Validate track eligibility if changed
+    if (data.trackId) {
+      const track = await prisma.track.findUnique({ where: { id: data.trackId } });
+      if (!track || track.eventId !== project.eventId) {
+        throw new AppError('Selected track is not valid for this event.', 400, 'INVALID_TRACK');
+      }
     }
 
     const updated = await prisma.$transaction(async (tx) => {
@@ -226,7 +257,7 @@ export class SubmissionsService {
     const project = await prisma.project.findUnique({
       where: { id: projectId },
       include: {
-        event: true,
+        event: { include: { settings: true } },
         team: { include: { members: true } },
       },
     });
@@ -240,13 +271,45 @@ export class SubmissionsService {
       throw new AppError('You do not have permission to submit this project.', 403, 'FORBIDDEN');
     }
 
+    if (project.event.status === EventStatus.ARCHIVED) {
+      throw new AppError('Event is archived. Projects cannot be submitted.', 400, 'EVENT_ARCHIVED');
+    }
+
     const now = new Date();
+    if (!isPrivileged && now < project.event.submissionStartDate) {
+      throw new AppError('Project submission period has not started yet.', 400, 'SUBMISSION_NOT_STARTED');
+    }
     if (!isPrivileged && now > project.event.submissionDeadline) {
       throw new AppError('Submission deadline has passed. Projects cannot be submitted.', 400, 'DEADLINE_EXCEEDED');
     }
 
+    if (project.status === ProjectStatus.FINALIZED && !isPrivileged) {
+      throw new AppError('This project has already been finalized and locked.', 400, 'PROJECT_FINALIZED');
+    }
+    if (project.status === ProjectStatus.SUBMITTED && !isPrivileged) {
+      throw new AppError('This project has already been submitted.', 400, 'PROJECT_ALREADY_SUBMITTED');
+    }
+
+    // Team Size Eligibility Check against Event Settings
+    const minTeamSize = project.event.settings?.minTeamSize ?? 1;
+    const maxTeamSize = project.event.settings?.maxTeamSize ?? 4;
+    if (project.team.members.length < minTeamSize) {
+      throw new AppError(
+        `Team does not meet minimum team size of ${minTeamSize} required for submission. Currently has ${project.team.members.length} member(s).`,
+        400,
+        'TEAM_SIZE_TOO_SMALL'
+      );
+    }
+    if (project.team.members.length > maxTeamSize) {
+      throw new AppError(
+        `Team exceeds maximum team size of ${maxTeamSize} permitted. Currently has ${project.team.members.length} members.`,
+        400,
+        'TEAM_SIZE_TOO_LARGE'
+      );
+    }
+
     // Validate required fields
-    if (!project.title || !project.problemStatement || !project.solutionDescription) {
+    if (!project.title?.trim() || !project.problemStatement?.trim() || !project.solutionDescription?.trim()) {
       throw new AppError('Project is missing required fields (title, problem statement, or solution).', 400, 'INCOMPLETE_SUBMISSION');
     }
 

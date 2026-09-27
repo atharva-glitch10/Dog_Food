@@ -107,4 +107,33 @@ describe('Cross-Judge Score Normalization Unit Tests', () => {
 
     expect(sorted[0].id).toBe('A');
   });
+
+  // Test Min-Max Feature Scaling
+  it('should linearly scale scores to [0, 100] using judge min and max', () => {
+    const rawScores = [50, 75, 100];
+    const min = Math.min(...rawScores);
+    const max = Math.max(...rawScores);
+    const range = max - min; // 50
+
+    const scaled = rawScores.map((s) => ((s - min) / range) * 100);
+    expect(scaled).toEqual([0, 50, 100]);
+  });
+
+  it('should fall back gracefully to global range when judge min === max in Min-Max scaling', () => {
+    const rawScore = 80;
+    const judgeMin = 80;
+    const judgeMax = 80;
+    const globalMin = 40;
+    const globalMax = 90;
+
+    let scaled: number;
+    if (judgeMax > judgeMin) {
+      scaled = ((rawScore - judgeMin) / (judgeMax - judgeMin)) * 100;
+    } else {
+      scaled = ((rawScore - globalMin) / (globalMax - globalMin)) * 100;
+    }
+
+    // (80 - 40) / 50 * 100 = 80.0
+    expect(scaled).toBe(80.0);
+  });
 });

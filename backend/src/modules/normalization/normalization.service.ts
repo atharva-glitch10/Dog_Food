@@ -13,18 +13,66 @@ export interface NormalizedProjectResult {
   scoreStdDev: number;
 }
 
+export type NormalizationMethod = 'Z_SCORE_FALLBACK' | 'MIN_MAX';
+
+/**
+ * NormalizationService
+ *
+ * THEORETICAL FOUNDATION & MATHEMATICAL RATIONALE:
+ *
+ * 1. THE PROBLEM WITH RAW JUDGE AVERAGES:
+ *    In hackathons, projects are evaluated by different sub-panels of judges.
+ *    Two major cognitive biases undermine raw scores:
+ *    - Leniency/Harshness Bias (Location Shift): Judge A averages 88/100, while Judge B averages 62/100.
+ *      A team evaluated by Judge A receives an artificial unearned advantage.
+ *    - Scale Compression/Dispersion Bias (Scale Shift): Judge C uses only [75, 85] (variance = 8),
+ *      while Judge D uses [20, 100] (variance = 400). Judge D's scores disproportionately dominate
+ *      the raw arithmetic average.
+ *
+ * 2. Z-SCORE NORMALIZATION (Standardized Normal Rescaling):
+ *    Standardizes each judge's evaluations into standard deviation units:
+ *      z = (x - mu_judge) / sigma_judge
+ *    Then linearly maps onto a standardized hackathon benchmark distribution (mean = 70, std = 15):
+ *      S_norm = clamp(70 + 15 * clamp(z, -3.0, 3.0), 0, 100)
+ *
+ * 3. BAYESIAN SHRINKAGE PRIOR (for small sample sizes N < 3):
+ *    Standard sample variance s^2 = sum(x - x_bar)^2 / (N - 1) is unstable or undefined when N < 3.
+ *    If a judge evaluates only 1 project, s is 0, causing division-by-zero.
+ *    If N = 2, variance estimation has massive error.
+ *    Solution: Empirical Bayes Shrinkage using pseudo-observations (k = 3):
+ *      mu_adj = (N * mu_raw + k * mu_global) / (N + k)
+ *      s^2_adj = ((N - 1)*s^2_raw + k*s^2_global + (N*k/(N+k))*(mu_raw - mu_global)^2) / (N + k - 1)
+ *    This smoothly shrinks small-sample judges toward the global hackathon population prior.
+ *
+ * 4. MIN-MAX FEATURE SCALING ALTERNATIVE:
+ *    Maps each judge's evaluations to [0, 100] based on their individual range:
+ *      S_norm = ((x - min_judge) / (max_judge - min_judge)) * 100
+ *    If a judge gives identical scores (min === max), falls back to global population range.
+ *
+ * 5. 4-TIER DETERMINISTIC TIE-BREAKING HIERARCHY:
+ *    - Tier 1: Highest Normalized Score.
+ *    - Tier 2: Highest Core Criterion Score (criterion with highest rubric weight).
+ *    - Tier 3: Lowest Judge Score Dispersion (higher consensus / lower standard deviation).
+ *    - Tier 4: Earliest Submission Timestamp.
+ */
 export class NormalizationService {
-  async normalizeScores(eventId: string) {
+  async normalizeScores(eventId: string, options?: { method?: NormalizationMethod }) {
     const event = await prisma.event.findUnique({
       where: { id: eventId },
       include: {
+        settings: true,
         rubric: { include: { criteria: true } },
       },
     });
 
     if (!event) throw new AppError('Event not found', 404, 'EVENT_NOT_FOUND');
 
-    // 1. Fetch all finalized/submitted evaluations
+    const method: NormalizationMethod =
+      options?.method ||
+      (event.settings?.defaultNormalization as NormalizationMethod) ||
+      'Z_SCORE_FALLBACK';
+
+    // 1. Fetch all finalized evaluations (drafts are excluded from normalization)
     const evaluations = await prisma.evaluation.findMany({
       where: {
         eventId,
@@ -46,9 +94,11 @@ export class NormalizationService {
       throw new AppError('No completed evaluations to normalize.', 400, 'NO_EVALUATIONS');
     }
 
-    // 2. Compute Global Statistics
+    // 2. Compute Global Population Statistics
     const allScores = evaluations.map((e) => e.weightedTotal);
     const globalMean = allScores.reduce((a, b) => a + b, 0) / allScores.length;
+    const globalMin = Math.min(...allScores);
+    const globalMax = Math.max(...allScores);
     const globalVariance =
       allScores.length > 1
         ? allScores.reduce((sum, s) => sum + Math.pow(s - globalMean, 2), 0) / (allScores.length - 1)
@@ -63,16 +113,21 @@ export class NormalizationService {
       judgeGroups.set(evalRecord.judgeId, group);
     }
 
+    const normalizedEvaluationScores = new Map<string, number>(); // evalId -> normalizedScore
+
     const judgeStats = new Map<
       string,
       {
         sampleSize: number;
         rawMean: number;
         rawStdDev: number;
+        rawMin: number;
+        rawMax: number;
         adjustedMean: number;
         adjustedStdDev: number;
         isZeroVariance: boolean;
         isBayesianShrunk: boolean;
+        normalizationMethod: NormalizationMethod;
       }
     >();
 
@@ -82,47 +137,66 @@ export class NormalizationService {
       const rawMean = scores.reduce((a, b) => a + b, 0) / N;
       const rawVariance = N > 1 ? scores.reduce((sum, s) => sum + Math.pow(s - rawMean, 2), 0) / (N - 1) : 0;
       const rawStdDev = Math.sqrt(rawVariance);
+      const rawMin = Math.min(...scores);
+      const rawMax = Math.max(...scores);
 
       let adjustedMean = rawMean;
       let adjustedStdDev = rawStdDev;
       let isZeroVariance = rawStdDev === 0;
       let isBayesianShrunk = false;
 
-      // Robust Fallback 1: Bayesian Shrinkage for small sample size (N < 3)
-      if (N < 3) {
-        const k = 3; // Pseudo-observation weight
-        adjustedMean = (N * rawMean + k * globalMean) / (N + k);
-        const combinedVariance =
-          ((Math.max(0, N - 1) * rawVariance) + k * globalVariance + ((N * k) / (N + k)) * Math.pow(rawMean - globalMean, 2)) /
-          (N + k - 1);
-        adjustedStdDev = Math.sqrt(combinedVariance) || globalStdDev;
-        isBayesianShrunk = true;
-      } else if (isZeroVariance) {
-        // Robust Fallback 2: Zero variance (judge gave all identical scores)
-        adjustedStdDev = globalStdDev;
+      if (method === 'MIN_MAX') {
+        // Min-Max Scaling per judge
+        const judgeRange = rawMax - rawMin;
+        const globalRange = globalMax - globalMin || 1;
+
+        for (const e of evals) {
+          let scaled: number;
+          if (judgeRange > 0) {
+            scaled = ((e.weightedTotal - rawMin) / judgeRange) * 100;
+          } else {
+            // Judge gave all identical scores: scale relative to global hackathon bounds
+            scaled = ((e.weightedTotal - globalMin) / globalRange) * 100;
+          }
+          const clamped = Math.max(0, Math.min(100, parseFloat(scaled.toFixed(2))));
+          normalizedEvaluationScores.set(e.id, clamped);
+        }
+      } else {
+        // Z_SCORE_FALLBACK: Bayesian Shrinkage for small sample size (N < 3)
+        if (N < 3) {
+          const k = 3; // Pseudo-observation weight for prior
+          adjustedMean = (N * rawMean + k * globalMean) / (N + k);
+          const combinedVariance =
+            ((Math.max(0, N - 1) * rawVariance) + k * globalVariance + ((N * k) / (N + k)) * Math.pow(rawMean - globalMean, 2)) /
+            (N + k - 1);
+          adjustedStdDev = Math.sqrt(combinedVariance) || globalStdDev;
+          isBayesianShrunk = true;
+        } else if (isZeroVariance) {
+          // Zero variance fallback: judge gave identical scores to all projects
+          adjustedStdDev = globalStdDev;
+        }
+
+        for (const e of evals) {
+          let z = (e.weightedTotal - adjustedMean) / (adjustedStdDev || 1);
+          z = Math.max(-3.0, Math.min(3.0, z)); // Outlier clamp [-3sigma, +3sigma]
+          // Rescale: target mean 70, target std dev 15
+          const normalized = Math.max(0, Math.min(100, 70 + 15 * z));
+          normalizedEvaluationScores.set(e.id, parseFloat(normalized.toFixed(2)));
+        }
       }
 
       judgeStats.set(judgeId, {
         sampleSize: N,
         rawMean: parseFloat(rawMean.toFixed(2)),
         rawStdDev: parseFloat(rawStdDev.toFixed(2)),
+        rawMin: parseFloat(rawMin.toFixed(2)),
+        rawMax: parseFloat(rawMax.toFixed(2)),
         adjustedMean: parseFloat(adjustedMean.toFixed(2)),
         adjustedStdDev: parseFloat(adjustedStdDev.toFixed(2)),
         isZeroVariance,
         isBayesianShrunk,
+        normalizationMethod: method,
       });
-    }
-
-    // 4. Calculate Normalized Score for each Evaluation
-    // S_norm = clamp(70 + 15 * clamp(z, -3.0, 3.0), 0, 100)
-    const normalizedEvaluationScores = new Map<string, number>(); // evalId -> normalizedScore
-    for (const evalRecord of evaluations) {
-      const stats = judgeStats.get(evalRecord.judgeId)!;
-      let z = (evalRecord.weightedTotal - stats.adjustedMean) / (stats.adjustedStdDev || 1);
-      z = Math.max(-3.0, Math.min(3.0, z)); // Outlier clamp
-
-      const normalized = Math.max(0, Math.min(100, 70 + 15 * z));
-      normalizedEvaluationScores.set(evalRecord.id, parseFloat(normalized.toFixed(2)));
     }
 
     // 5. Aggregate Normalized Scores per Project

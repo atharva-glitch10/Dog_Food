@@ -5,7 +5,8 @@ import { sendSuccess } from '../../utils/response.js';
 export class NormalizationController {
   async normalize(req: Request, res: Response, next: NextFunction) {
     try {
-      const results = await normalizationService.normalizeScores(req.params.eventId);
+      const method = (req.body?.method || req.query?.method) as any;
+      const results = await normalizationService.normalizeScores(req.params.eventId, { method });
       return sendSuccess(res, results, 200);
     } catch (err) {
       next(err);
