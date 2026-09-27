@@ -26,7 +26,7 @@ async function main() {
   // 1. Create Core Users Across All Distinct Roles
   const adminUser = await prisma.user.upsert({
     where: { email: 'admin@dogfood.local' },
-    update: {},
+    update: { passwordHash },
     create: {
       email: 'admin@dogfood.local',
       name: 'System Admin',
@@ -38,7 +38,7 @@ async function main() {
 
   const organizerUser = await prisma.user.upsert({
     where: { email: 'organizer@dogfood.local' },
-    update: {},
+    update: { passwordHash },
     create: {
       email: 'organizer@dogfood.local',
       name: 'Olivia Organizer',
@@ -51,7 +51,7 @@ async function main() {
   // Judges
   const judgeHarsh = await prisma.user.upsert({
     where: { email: 'judge.harsh@dogfood.local' },
-    update: {},
+    update: { passwordHash },
     create: {
       email: 'judge.harsh@dogfood.local',
       name: 'Dr. Strict Scaler (Harsh Grader)',
@@ -63,7 +63,7 @@ async function main() {
 
   const judgeLenient = await prisma.user.upsert({
     where: { email: 'judge.lenient@dogfood.local' },
-    update: {},
+    update: { passwordHash },
     create: {
       email: 'judge.lenient@dogfood.local',
       name: 'Dr. Larry Lenient (Generous Grader)',
@@ -75,7 +75,7 @@ async function main() {
 
   const judgeBalanced = await prisma.user.upsert({
     where: { email: 'judge.balanced@dogfood.local' },
-    update: {},
+    update: { passwordHash },
     create: {
       email: 'judge.balanced@dogfood.local',
       name: 'Barbara Balanced (Median Grader)',
@@ -87,7 +87,7 @@ async function main() {
 
   const judgeSpecialist = await prisma.user.upsert({
     where: { email: 'judge.specialist@dogfood.local' },
-    update: {},
+    update: { passwordHash },
     create: {
       email: 'judge.specialist@dogfood.local',
       name: 'Sam Specialist (Judge & Team Member)',
@@ -100,7 +100,7 @@ async function main() {
   // Participants
   const alice = await prisma.user.upsert({
     where: { email: 'alice@dogfood.local' },
-    update: {},
+    update: { passwordHash },
     create: {
       email: 'alice@dogfood.local',
       name: 'Alice Chen',
@@ -112,7 +112,7 @@ async function main() {
 
   const bob = await prisma.user.upsert({
     where: { email: 'bob@dogfood.local' },
-    update: {},
+    update: { passwordHash },
     create: {
       email: 'bob@dogfood.local',
       name: 'Bob Miller',
@@ -124,7 +124,7 @@ async function main() {
 
   const carol = await prisma.user.upsert({
     where: { email: 'carol@dogfood.local' },
-    update: {},
+    update: { passwordHash },
     create: {
       email: 'carol@dogfood.local',
       name: 'Carol Davis',
@@ -136,7 +136,7 @@ async function main() {
 
   const dave = await prisma.user.upsert({
     where: { email: 'dave@dogfood.local' },
-    update: {},
+    update: { passwordHash },
     create: {
       email: 'dave@dogfood.local',
       name: 'Dave Wilson',
@@ -148,7 +148,7 @@ async function main() {
 
   const eve = await prisma.user.upsert({
     where: { email: 'eve@dogfood.local' },
-    update: {},
+    update: { passwordHash },
     create: {
       email: 'eve@dogfood.local',
       name: 'Eve Johnson',
@@ -160,7 +160,7 @@ async function main() {
 
   const frank = await prisma.user.upsert({
     where: { email: 'frank@dogfood.local' },
-    update: {},
+    update: { passwordHash },
     create: {
       email: 'frank@dogfood.local',
       name: 'Frank Martinez',
@@ -172,7 +172,7 @@ async function main() {
 
   const grace = await prisma.user.upsert({
     where: { email: 'grace@dogfood.local' },
-    update: {},
+    update: { passwordHash },
     create: {
       email: 'grace@dogfood.local',
       name: 'Grace Hopper',
@@ -184,7 +184,7 @@ async function main() {
 
   const liam = await prisma.user.upsert({
     where: { email: 'liam@dogfood.local' },
-    update: {},
+    update: { passwordHash },
     create: {
       email: 'liam@dogfood.local',
       name: 'Liam Vance',
@@ -196,7 +196,7 @@ async function main() {
 
   const zack = await prisma.user.upsert({
     where: { email: 'zack@dogfood.local' },
-    update: {},
+    update: { passwordHash },
     create: {
       email: 'zack@dogfood.local',
       name: 'Zack Taylor',

@@ -13,6 +13,7 @@ import { JudgeDashboardPage } from './pages/JudgeDashboardPage.tsx';
 import { JudgeEvaluatePage } from './pages/JudgeEvaluatePage.tsx';
 import { JudgePairwisePage } from './pages/JudgePairwisePage.tsx';
 import { OrganizerDashboardPage } from './pages/OrganizerDashboardPage.tsx';
+import { CreateEventPage } from './pages/CreateEventPage.tsx';
 import { ResultsPage } from './pages/ResultsPage.tsx';
 import { CertificateVerifyPage } from './pages/CertificateVerifyPage.tsx';
 import { ApiDocsPage } from './pages/ApiDocsPage.tsx';
@@ -34,6 +35,7 @@ export const App: React.FC = () => {
         <Route index element={<HomePage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
+        <Route path="events/create" element={<CreateEventPage />} />
         <Route path="event/:slugOrId" element={<EventDetailPage />} />
         <Route path="gallery/:eventSlug" element={<GalleryPage />} />
         <Route path="project/:id" element={<ProjectDetailPage />} />

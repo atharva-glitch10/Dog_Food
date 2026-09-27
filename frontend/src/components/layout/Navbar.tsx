@@ -115,10 +115,16 @@ export const Navbar: React.FC = () => {
               )}
 
               {(user.role === 'ORGANIZER' || user.role === 'ADMIN') && (
-                <Link to="/dashboard/organizer/dogfood-2026" className="btn-primary !py-1.5 !px-3.5 text-xs">
-                  <Shield className="w-4 h-4" />
-                  <span>Organizer Hub</span>
-                </Link>
+                <>
+                  <Link to="/events/create" id="nav-create-event-btn" className="btn-secondary !py-1.5 !px-3 text-xs">
+                    <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+                    <span>Create Event</span>
+                  </Link>
+                  <Link to="/dashboard/organizer/dogfood-2026" className="btn-primary !py-1.5 !px-3.5 text-xs">
+                    <Shield className="w-4 h-4" />
+                    <span>Organizer Hub</span>
+                  </Link>
+                </>
               )}
 
               {/* User Profile Pill */}
