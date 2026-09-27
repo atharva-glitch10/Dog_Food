@@ -21,7 +21,7 @@ export class AuthService {
         email: data.email.toLowerCase(),
         passwordHash,
         name: data.name,
-        role: data.role || Role.PARTICIPANT,
+        role: Role.PARTICIPANT, // never trust a client-supplied role
         bio: data.bio || null,
       },
       select: {

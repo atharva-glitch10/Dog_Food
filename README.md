@@ -1,259 +1,241 @@
-# DOGFOOD 2026: Open-Source Hackathon Submission & Judging Platform
+# DOGFOOD 2026: Self-Hosted Hackathon Submission & Judging Platform
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Docker Ready](https://img.shields.io/badge/Docker-One--Command_Startup-2496ED?logo=docker&logoColor=white)](docker-compose.yml)
-[![Tests: Vitest](https://img.shields.io/badge/Tests-107%20Passing%20(100%25)-success)](backend/tests/)
-[![Offline Capable](https://img.shields.io/badge/Offline-100%25_Self--Contained-success)](ARCHITECTURE.md)
+[![Docker Compose](https://img.shields.io/badge/Docker-one--command_startup-2496ED?logo=docker&logoColor=white)](docker-compose.yml)
+[![CI](https://img.shields.io/badge/CI-GitHub_Actions-2088FF?logo=githubactions&logoColor=white)](.github/workflows/ci.yml)
 
-### What is Dogfood?
-**Dogfood** is a completely self-hostable, zero-cloud-dependency hackathon operating system and judging platform. Built for university hackathons, corporate internal sprints, and major open-source competitions, Dogfood runs end-to-end without requiring third-party SaaS accounts, credit cards, or external cloud infrastructure:
-\\text{Registration} \longrightarrow \text{Team Formation} \longrightarrow \text{Submissions} \longrightarrow \text{Eligibility} \longrightarrow \text{Judge Assignment} \longrightarrow \text{Scoring} \longrightarrow \text{Normalization} \longrightarrow \text{Results} \longrightarrow \text{Certificates} \longrightarrow \\text{Archiving}
+**DOGFOOD** is a self-hostable hackathon platform: registration, teams, project submissions, a public gallery,
+judge assignment, rubric scoring, cross-judge score normalization, pairwise ranking, community voting, results,
+certificates, CSV exports and webhooks. It runs entirely from `docker compose up` with no third-party SaaS
+accounts; the only outbound traffic is to webhook URLs an organizer configures.
 
-### Why is it structured this way?
-1. **Modular Monolith over Microservices**: Hackathons are time-compressed, mission-critical events where distributed failure modes (network partitions, out-of-order event buses, eventual consistency delays) are unacceptable. Dogfood implements a high-throughput Express/TypeScript modular monolith backed by PostgreSQL 16. This architecture enables atomic, ACID-compliant database transactions (prisma.) across project submissions, score submissions, and audit logging.
-2. **Server-Side Invariants & Zero Trust**: Client-side UI validations serve solely as user experience aids. Every business invariant—such as strict submission deadlines, registration windows, team size boundaries, track isolation, and conflict-of-interest prevention—is strictly enforced in the API layer with typed error codes. Bypassing the frontend via direct curl or Postman requests is rejected server-side.
-3. **Dedicated, Bias-Resistant Judging Engine**: Naive arithmetic averaging is mathematically flawed: teams evaluated by lenient judges gain an unfair advantage, while teams evaluated by strict judges are unfairly penalized. Dogfood’s core innovation is an automated judging engine featuring:
-   - **Conflict-Free Load Balancing**: Deterministic pseudo-random assignment matching projects to judges while strictly preventing self-scoring.
-   - **Empirical Bayes Z-Score Normalization**: Regularizes individual judge scoring distributions against the global population prior to eliminate leniency and scale-compression bias without small-sample distortion.
-   - **Bradley-Terry Pairwise Ranking**: Minorization-Maximization (MM) pairwise comparisons for head-to-head project evaluation.
-   - **Immutable Audit Trail**: Append-only logging of every score submission, update, and organizer override.
-4. **Decoupled Frontend with Reverse-Proxy Security**: The React 18 single-page application is built into static assets and served via Nginx. Nginx handles client caching and proxies /api requests to Express, stripping internal headers and shielding backend application logic.
-
-## Architecture Overview
+**Flow:** Registration → Team formation → Submission → Judge assignment → Scoring → Normalization → Results → Certificates
 
 ```mermaid
-graph TD
-    Client["Browser / Client (React 18 + Vite + Tailwind CSS)"] -->|HTTP / REST + Cookies| Nginx["Nginx Reverse Proxy / Static Host :3000"]
-    Nginx -->|Proxy /api| Express["Express.js API Layer (TypeScript) :4000"]
-    
-    subgraph "Backend API Architecture"
-        Express --> MW["Middleware: RBAC, AuditLogger, RateLimiter, Security Headers"]
-        MW --> Modules["Modular Domain Controllers & Services"]
-        
-        Modules --> Submissions["Submissions & Eligibility Engine"]
-        Modules --> JudgingEngine["Judging Engine"]
-        Modules --> ResultsPub["Results & Certs Engine"]
-        
-        subgraph "Judging Engine (Core Innovation)"
-            JudgingEngine --> Assign["Assignment: Load-Balanced Round-Robin + COI Prevention"]
-            JudgingEngine --> Scoring["Scoring: Multi-Criterion Rubric + Audit Trail"]
-            JudgingEngine --> Normalization["Normalization: Bayesian Z-Score & Min-Max Scaling"]
-            JudgingEngine --> Pairwise["Pairwise Ranking: Bradley-Terry MM Algorithm"]
-        end
-    end
-
-    Modules --> Prisma["Prisma ORM Client"]
-    Prisma --> Postgres[("PostgreSQL 16 Engine")]
-    Modules --> LocalFS["Local Volume Storage (/app/uploads)"]
+flowchart LR
+  A[Register] --> B[Form team] --> C[Submit project] --> D[Assign judges]
+  D --> E[Score with rubric] --> F[Normalize across judges] --> G[Publish results]
+  G --> H[Issue certificates]
+  C -.-> V[Community voting]
+  D -.-> P[Pairwise comparisons]
 ```
 
 ---
 
-## 1. One-Command Setup
+## 1. Quick start
 
-The entire stack — PostgreSQL, Express API backend, Prisma migrations, fixture seeding, and Nginx/React frontend — boots with **zero manual configuration editing**.
-
-### Option A: Direct Docker Compose (Universal)
 ```bash
 docker compose up --build
 ```
 
-### Option B: Quick Setup Script (Linux / macOS / WSL)
-```bash
-chmod +x ./setup.sh
-./setup.sh
-```
+Then open **http://localhost:3000** and sign in with a seeded account (password `Dogfood2026!`, see below).
 
-### Option C: Windows Batch Script
-```cmd
-setup.bat
-```
+No `.env` file is needed. On first start the backend:
 
-### Option D: Local Development (Without Docker)
-```bash
-# Terminal 1: Backend
-cd backend
-npm install
-npx prisma generate
-npx prisma db push
-npx tsx prisma/seed.ts
-npm run dev
+1. applies the committed Prisma migrations (`prisma migrate deploy`),
+2. generates random `JWT_SECRET` / `COOKIE_SECRET` values and stores them in the `backend_secrets` volume
+   (so sessions and certificate signatures survive restarts),
+3. seeds the demo event and accounts **only if the database is empty**. Existing data is never modified or deleted,
+   so `docker compose restart` or `docker compose up` again keeps everything you created.
 
-# Terminal 2: Frontend
-cd frontend
-npm install
-npm run dev
-```
-
-The stack is available at:
-- **Frontend Web UI**: [http://localhost:3000](http://localhost:3000)
-- **Backend REST API**: [http://localhost:4000/api](http://localhost:4000/api)
-- **Interactive Swagger Docs**: [http://localhost:4000/api/docs](http://localhost:4000/api/docs)
-- **Health Check**: [http://localhost:4000/api/health](http://localhost:4000/api/health)
-
----
-
-## 2. Seed Accounts & Credentials
-
-The database seeds with realistic data including multiple judges with distinct grading personalities (harsh vs. lenient) to demonstrate score normalization.
-
-**Standard Password for All Accounts:** `Dogfood2026!`
-
-| Role | Email | Capabilities & Scenarios |
-|---|---|---|
-| **Admin** | `admin@dogfood.local` | Platform-wide control, role management, system health, audit logs |
-| **Organizer** | `organizer@dogfood.local` | Event lifecycle, deadlines, judge assignment, normalization, publishing, exports |
-| **Harsh Judge** | `judge.harsh@dogfood.local` | Strict evaluator ($\mu \approx 62$); demonstrates upward normalization shift |
-| **Lenient Judge** | `judge.lenient@dogfood.local` | Generous evaluator ($\mu \approx 89$); demonstrates downward normalization shift |
-| **Balanced Judge** | `judge.balanced@dogfood.local` | Centered evaluator ($\mu \approx 74, \sigma \approx 12$) |
-| **Participant (Lead)** | `lead.alice@dogfood.local` | Team Captain of "Neural Nexus" (Project: *Aegis AI*) |
-| **Participant (Member)**| `bob@dogfood.local` | Team member of "Neural Nexus" |
-| **Participant (Lead 2)**| `lead.carol@dogfood.local` | Team Captain of "Quantum Leap" (Project: *HyperGraph*) |
-
----
-
-## 3. How the Judging Engine Works
-
-### A. Conflict-Free Load-Balanced Judge Assignment
-
-The judge assignment algorithm ([assignment.service.ts](file:///c:/Users/RUTUJA%20PATOLE/Dog_Food/backend/src/modules/assignments/assignment.service.ts)) solves the multi-round bipartite project assignment problem:
-
-1. **Conflict of Interest (COI) Invariant**:
-   Before assignments begin, the system builds an immutable conflict graph:
-   $$\text{COI}(P) = \{ J \mid \text{User}(J) \in \text{TeamMembers}(\text{Team}(P)) \}$$
-   Judges are strictly prohibited from evaluating their own team's submissions, both in automated assignment and manual assignment.
-2. **Greedy Load-Balanced Allocation**:
-   At each round $r \in [1, \text{targetPerProject}]$, candidate judges who are not conflicted, have not yet been assigned to project $P$, and have remaining capacity ($\text{load}_j < \text{capacity}_j$) are ranked by current assigned workload ascending.
-3. **Deterministic PRNG Tie-Breaking**:
-   Ties among judges with identical workloads are resolved via a seeded 32-bit **Mulberry32 PRNG**. This guarantees that given the same seed (e.g., `seed = 42`), the assignment schedule is 100% reproducible and verifiable by third-party auditors.
-4. **Coverage Diagnostics**:
-   The engine logs coverage summaries, explicitly highlighting any projects that received fewer assignments than target due to judge pool exhaustion or dense conflicts.
-
-### B. Cross-Judge Score Normalization
-
-#### Why Raw Scores Fail
-In any hackathon where projects are scored by different judges, raw arithmetic averages are mathematically unfair:
-- **Location Bias (Leniency vs. Harshness)**: A team evaluated by a lenient judge (averaging 90) gains an unearned advantage over a team evaluated by a harsh judge (averaging 65).
-- **Scale Bias (Variance Differences)**: A judge who uses the entire $[0, 100]$ range has 10x more mathematical influence on raw averages than a judge who clusters all scores in $[75, 85]$.
-
-#### The Normalization Solution
-The platform supports two configurable normalization strategies in [normalization.service.ts](file:///c:/Users/RUTUJA%20PATOLE/Dog_Food/backend/src/modules/normalization/normalization.service.ts):
-
-#### Method 1: Z-Score with Empirical Bayes Shrinkage (`Z_SCORE_FALLBACK` — Default)
-Each judge $j$'s scores are standardized into standard deviation units $z$:
-$$z_{ij} = \frac{x_{ij} - \mu_j^*}{\sigma_j^*}$$
-and mapped to a standardized scale ($\mu_0 = 70, \sigma_0 = 15$):
-$$S_{\text{norm}} = \text{clamp}\left(70 + 15 \times \text{clamp}(z, -3.0, 3.0),\, 0,\, 100\right)$$
-
-**Bayesian Shrinkage for Small Sample Sizes ($N_j < 3$):**
-When a judge evaluates only 1 or 2 projects, sample variance $s_j^2 = \frac{1}{N-1}\sum(x - \bar{x})^2$ is undefined ($N-1=0$) or has massive error. We apply an Empirical Bayes prior with pseudo-observations ($k = 3$):
-$$\mu_j^* = \frac{N_j \bar{x}_j + k \mu_{\text{global}}}{N_j + k}$$
-$$\sigma_j^{*2} = \frac{(N_j - 1)s_j^2 + k \sigma_{\text{global}}^2 + \frac{N_j k}{N_j + k}(\bar{x}_j - \mu_{\text{global}})^2}{N_j + k - 1}$$
-This shrinks under-sampled judges smoothly toward the global hackathon population mean.
-
-**Zero-Variance Fallback:**
-If a judge awards identical scores to all assigned projects ($s_j = 0$), the engine uses $\sigma_{\text{global}}$ to avoid division-by-zero.
-
-#### Method 2: Min-Max Feature Scaling (`MIN_MAX`)
-Linearly rescales each judge's evaluations into $[0, 100]$ based on their observed minimum and maximum:
-$$S_{\text{norm}} = \frac{x - \min_j}{\max_j - \min_j} \times 100$$
-If $\max_j = \min_j$, the engine falls back to the global hackathon score range.
-
-#### 4-Tier Deterministic Tie-Breaking Hierarchy
-When projects finish with identical normalized scores:
-1. **Tier 1**: Highest Normalized Score ($S_{\text{norm}}$)
-2. **Tier 2**: Highest Core Criterion Score (score on the rubric criterion with the highest weight)
-3. **Tier 3**: Lowest Judge Score Dispersion ($\sigma_{\text{eval}}$ — rewards consensus over polarized controversy)
-4. **Tier 4**: Earliest Submission Timestamp (rewards prompt project submission)
-
-### C. Append-Only Scoring Audit Trail
-Every evaluation creation, edit, and organizer override is recorded in an immutable, append-only `AuditLog` table within the database transaction:
-- Timestamp & Scorer User ID
-- Project ID, Event ID, and Judge ID
-- Action classification: `EVALUATION_CREATED`, `EVALUATION_UPDATED`, or `SCORE_OVERRIDE`
-- Previous vs. New Weighted Total & Complete Criterion Score Breakdown
-
----
-
-## 4. Backend Rule Enforcement
-
-All business rules are enforced server-side in the Express API and service layer:
-
-| Rule Category | Enforced Server-Side Behavior |
+| URL | What |
 |---|---|
-| **Submission Deadline** | Direct API calls after `submissionDeadline` return `400 DEADLINE_EXCEEDED`. |
-| **Submission Start Date** | Direct API calls before `submissionStartDate` return `400 SUBMISSION_NOT_STARTED`. |
-| **Team Size Bounds** | Submitting with fewer than `minTeamSize` returns `400 TEAM_SIZE_TOO_SMALL`. Exceeding `maxTeamSize` returns `400 TEAM_SIZE_TOO_LARGE`. |
-| **Track Scope** | Submitting with a track belonging to a foreign event returns `400 INVALID_TRACK`. |
-| **Registration Window** | Team creation or joining outside `[registrationStartDate, registrationEndDate]` returns `400 REGISTRATION_NOT_STARTED` / `REGISTRATION_CLOSED`. |
-| **Judge Access Scope** | A judge attempting to score an unassigned project returns `403 NOT_ASSIGNED`. |
-| **Draft Protection** | Judges attempting to evaluate unsubmitted `DRAFT` projects return `400 PROJECT_NOT_SUBMITTED`. |
-| **Conflict of Interest** | A judge scoring their own team's submission returns `403 SELF_EVALUATION_FORBIDDEN`. |
-| **Participant Score Isolation** | Participants querying `/api/events/:id/results` before publication return `403 RESULTS_NOT_PUBLISHED`. |
-| **Draft Privacy** | Participants querying another team's draft project return `403 FORBIDDEN`. |
-| **Role-Based Access Control** | Non-privileged users accessing `/api/admin/*`, `/api/events/:id/judges/assign/*`, or `/api/events/:id/export/*` return `403 FORBIDDEN`. |
+| http://localhost:3000 | Web UI (Nginx serves the React build and proxies `/api` and `/uploads` to the backend) |
+| http://localhost:3000/api/docs | Swagger UI for the OpenAPI spec (also at http://localhost:4000/api/docs) |
+| http://localhost:4000/api/health | Backend health check (port 4000 stays published for direct API access) |
 
----
+Other options:
 
-## 5. Automated Test Suite
+- `./setup.sh` (Linux/macOS/WSL) or `setup.bat` (Windows) create a `.env` with random secrets from
+  [`.env.example`](.env.example) and start the stack. They never delete volumes.
+- Full reset: `docker compose down -v` (removes the database, uploads and generated secrets).
+- Disable demo data: set `SEED_DEMO_DATA=false` (in `.env` or the environment).
 
-The platform includes **101 automated tests** covering unit math, security hardening, rule bypasses, and role isolation:
+<details>
+<summary>Local development without Docker</summary>
+
+```bash
+# PostgreSQL 16 must be reachable at DATABASE_URL (see .env.example)
+cd backend
+npm ci
+npx prisma migrate deploy
+npm run prisma:seed          # tsx src/seed/demo-seed.ts
+npm run dev                  # http://localhost:4000
+
+cd frontend
+npm ci
+npm run dev                  # http://localhost:3000 (Vite proxies /api and /uploads to :4000)
+```
+</details>
+
+> **Upgrading an older checkout:** earlier versions created the schema with `prisma db push`. `migrate deploy`
+> refuses to run on such a database; reset it with `docker compose down -v` (this deletes its data).
+
+## 2. Seeded accounts
+
+Password for every account: **`Dogfood2026!`**. The login page also has one-click buttons for the organizer,
+harsh judge, admin and a participant.
+
+| Role | Email | In the demo event |
+|---|---|---|
+| Admin | `admin@dogfood.local` | Everything an organizer can do, plus user role management (API) |
+| Organizer | `organizer@dogfood.local` | Organizer Hub: assignment, normalization, publishing, exports, certificates, webhooks, bulk import, audit trail |
+| Judge (harsh) | `judge.harsh@dogfood.local` | 5 assigned projects, **PulseMesh still unscored**, the one to grade live |
+| Judge (lenient) | `judge.lenient@dogfood.local` | 5 assigned projects, all scored with high marks |
+| Judge (balanced) | `judge.balanced@dogfood.local` | 4 assigned projects, all scored |
+| Judge (specialist) | `judge.specialist@dogfood.local` | Also a member of team Synthetix Audio, so never assigned their own project (conflict of interest) |
+| Participant | `alice@dogfood.local` | Leader of *Neural Nexus* (project *Aegis AI*, submitted); `bob@dogfood.local` is a member |
+| Participant | `carol@dogfood.local` | Leader of *Quantum Leap* (project *HyperGraph*); `dave@dogfood.local` is a member |
+| Participant | `zack@dogfood.local` | Leader of *StealthSec*, whose project is an unsubmitted **draft** (hidden from everyone else) |
+
+Other seeded participants: `eve@`, `frank@`, `grace@`, `liam@dogfood.local` (one team each). The demo event
+`dogfood-2026` is in `JUDGING_ACTIVE` with submission and judging windows open relative to the seed time, 6 submitted
+projects, 1 draft, 16 finalized evaluations and results **not yet published**.
+
+New sign-ups are always participants. Organizers add judges to an event ("add judge" API), and admins grant
+organizer access (role API or bulk import).
+
+[`END_TO_END_EVALUATION_GUIDE.md`](END_TO_END_EVALUATION_GUIDE.md) walks through the whole demo role by role;
+[`DEMO-SCRIPT.md`](DEMO-SCRIPT.md) is a condensed 5-minute version.
+
+## 3. Architecture
+
+```mermaid
+graph TD
+    Browser["Browser: React 18 + Vite + Tailwind SPA"] -->|":3000"| Nginx["Nginx (frontend container)"]
+    Nginx -->|"static files"| Browser
+    Nginx -->|"/api/*, /uploads/* (proxy_pass, X-Forwarded-For)"| Express["Express + TypeScript API :4000"]
+    Client["API clients / Swagger"] -->|":4000"| Express
+    Express --> MW["Middleware: auth (cookie or Bearer JWT), RBAC, Zod validation, rate limits, audit log"]
+    MW --> Services["Module services (events, teams, submissions, judging, voting, results, certificates, webhooks...)"]
+    Services --> Engines["Pure engines: normalization, assignment, scoring, Bradley-Terry, voting rules"]
+    Services --> Prisma["Prisma ORM"] --> PG[("PostgreSQL 16 (not published on the host)")]
+    Services --> Uploads["uploads volume"]
+    Services -.->|"signed webhook POSTs"| External["Organizer-configured webhook URLs"]
+```
+
+- **Three containers** (`docker-compose.yml`): `postgres` (internal only), `backend` (port 4000), `frontend`
+  (Nginx on port 3000). The browser only talks to `:3000`; the SPA is built with `VITE_API_URL=/api`, so the app
+  works from any hostname or another machine on the network.
+- **Backend** (`backend/src`): an Express modular monolith. Each folder in `backend/src/modules` has routes,
+  controller and service; the math lives in dependency-free engine files
+  ([normalization.engine.ts](backend/src/modules/normalization/normalization.engine.ts),
+  [assignment.engine.ts](backend/src/modules/assignments/assignment.engine.ts),
+  [scoring.engine.ts](backend/src/modules/scoring/scoring.engine.ts),
+  [bradley-terry.ts](backend/src/modules/pairwise/bradley-terry.ts),
+  [voting.rules.ts](backend/src/modules/voting/voting.rules.ts)) that the services call and the unit tests import.
+- **Express `trust proxy`** is set from `TRUST_PROXY` (Compose: loopback + private ranges), so rate limits, vote
+  IP tracking and the audit log see the real client address rather than the Nginx container.
+- **API**: 70 operations under `/api`, all described in [backend/docs/openapi.yaml](backend/docs/openapi.yaml). A test
+  fails if a route is added without documenting it. [API-SPEC.md](API-SPEC.md) is a shorter overview.
+
+More detail: [ARCHITECTURE.md](ARCHITECTURE.md), [DATA-MODEL.md](DATA-MODEL.md), [JUDGING.md](JUDGING.md).
+
+## 4. How judging works
+
+**Assignment** (`POST /api/events/:id/judges/assign/auto`). For each of `targetPerProject` rounds (default: the
+event's `assignmentsPerProject`, 3), every submitted project gets one more judge: the least-loaded judge who is not
+on the project's team, not already assigned to it and under capacity. Ties are broken with a seeded Mulberry32
+PRNG, so the same seed and data reproduce the same assignment. Loads are near-even (greedy; within ±2 of each other
+in our randomized tests) rather than perfectly balanced. Projects that could not get enough judges are reported.
+
+**Scoring.** A rubric has weighted criteria (fractions, or percentages that must total 100%). A judge's total is
+`Σ (score / maxScore) × weight × 100`, 0-100. Judges can only score projects assigned to them, inside the judging
+window, never their own team's, and only non-draft projects. They can only read their own evaluations.
+
+**Normalization** (`POST /api/events/:id/judging/normalize`) removes judge leniency/harshness:
+
+- `Z_SCORE_FALLBACK` (default): each judge's totals become z-scores and are mapped to mean 70 / sd 15, with z clamped
+  to [-3, 3] and the result to [0, 100]. Judges with fewer than 3 evaluations are shrunk toward the global mean and
+  variance (empirical-Bayes prior, k = 3); a judge who gave identical scores uses the global standard deviation.
+- `MIN_MAX`: each judge's range is rescaled to [0, 100] (global range if the judge's range is zero).
+
+Projects are ranked by mean normalized score, then (ties) highest score on the highest-weighted criterion, then
+lowest disagreement between judges, then earliest submission. Details and formulas: [JUDGING.md](JUDGING.md).
+
+**Pairwise ranking.** Judges can also compare two random projects; `POST /api/events/:id/pairwise/compute` fits a
+Bradley-Terry model with the MM algorithm and reports whether it converged.
+
+## 5. Security
+
+Summary of what is enforced (details in [SECURITY.md](SECURITY.md) and [THREAT-MODEL.md](THREAT-MODEL.md)):
+
+- **Secrets**: no hardcoded secrets; production refuses missing, short (< 32 chars) or known placeholder values.
+  Docker generates random ones on first boot.
+- **Auth**: bcrypt passwords; HTTP-only `SameSite=Lax` session cookie (Secure over HTTPS) backed by a revocable
+  session row; self-registration can only create participants.
+- **Authorization**: role checks on every route plus ownership/assignment checks in the services (see
+  [docs/ROLE-PERMISSION-MATRIX.md](docs/ROLE-PERMISSION-MATRIX.md)).
+- **Uploads**: type detected from file content (JPEG/PNG/WEBP/GIF/PDF only, SVG rejected), server-chosen file name
+  and extension, served with `nosniff`, a sandbox CSP, and as a download unless it is an image.
+- **Input validation**: Zod schemas on every body-consuming route (strict allowlists on update payloads) and on
+  pagination/search query parameters; user-supplied links must be `http(s)`.
+- **Voting integrity**: per-voter limits checked and written in one transaction under an advisory lock; unique
+  indexes block duplicate votes, including a partial index for anonymous (per-IP) votes.
+- **CSV exports**: cells starting with `=`, `+`, `-`, `@`, tab or CR are neutralized against formula injection.
+- **Webhooks**: HMAC-SHA256 signed; private, loopback and cloud-metadata targets rejected; redirects not followed.
+- **Bulk import**: can never create admins; organizers can only import participants and judges.
+
+## 6. Testing
 
 ```bash
 cd backend
-npm test
+npm test                        # unit + security + HTTP tests, no database needed
+
+docker compose -f ../docker-compose.test.yml up -d    # throwaway PostgreSQL on 127.0.0.1:5433
+npm run test:integration        # real-database tests (resets the *_test database each run)
 ```
 
-### Test Coverage Highlights:
-- **`tests/security/business-rule-bypass.test.ts` (19 tests)**: Direct API simulation attempting to bypass deadlines, eligibility limits, track bounds, judge assignments, self-evaluation bans, draft privacy, and results embargo.
-- **`tests/security/rbac.test.ts` (3 tests)**: Role isolation across participant, judge, and organizer/admin roles.
-- **`tests/unit/scoring-validation.test.ts` (12 tests)**: Duplicate criterion rejection, missing criteria detection, out-of-bounds score clamping, and NaN/Infinity guards.
-- **`tests/unit/normalization.test.ts` (7 tests)**: Z-score math, Bayesian prior shrinkage, zero-variance handling, outlier clamping ($\pm 3\sigma$), Min-Max scaling, and 4-tier tie-breaking.
-- **`tests/unit/assignment.test.ts` (3 tests)**: Mulberry32 PRNG determinism, self-conflict exclusion, and judge capacity limits.
-- **`tests/unit/webhook-ssrf-failures.test.ts` (28 tests)**: SSRF defense against private IPs, loopback, cloud metadata endpoints, and redirect manipulation.
+- **`npm test`** runs `tests/unit` (the pure engines, imported from `src/`), `tests/security` (authorization and
+  business-rule bypass attempts against the real services with a mocked Prisma client, upload hardening through the
+  real app) and `tests/api` (HTTP tests that never touch the database, including an OpenAPI coverage check).
+- **`npm run test:integration`** runs `tests/integration` against PostgreSQL. [platform-flow.test.ts](backend/tests/integration/platform-flow.test.ts) drives the full
+  flow over HTTP: register → team → submit → rubric and judges → auto-assign → score → normalize → publish → webhook
+  delivery logged → voting rules (including concurrent votes) → certificate generation and verification (including
+  tamper detection), plus deadline enforcement, privileged-role registration attempts and persistence across a new
+  `PrismaClient`. It refuses to run against a database whose name does not end in `_test`.
+- **CI** ([.github/workflows/ci.yml](.github/workflows/ci.yml)) builds both apps, runs both suites (with a
+  PostgreSQL service), checks that every file path mentioned in the docs exists
+  ([scripts/check-doc-paths.mjs](scripts/check-doc-paths.mjs)), builds the Docker images and smoke-tests the
+  Compose stack including a restart.
 
----
+## 7. Configuration
 
-## 6. Known Limitations & Conscious Scope Cuts
+All variables are optional under Docker; see [`.env.example`](.env.example).
 
-To maintain production stability and high code quality within the hackathon timeline, the following features were intentionally excluded:
+| Variable | Default (Compose) | Purpose |
+|---|---|---|
+| `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | `postgres` / `postgres` / `dogfood` | Database; `DATABASE_URL` is derived from these |
+| `JWT_SECRET`, `COOKIE_SECRET` | generated on first boot | Set to override (≥ 32 random characters) |
+| `CORS_ORIGIN` | `http://localhost:3000` | Extra allowed origins for direct API use (comma-separated) |
+| `TRUST_PROXY` | `loopback, linklocal, uniquelocal` | Express trust-proxy setting |
+| `COOKIE_SECURE` | `auto` | `auto` = Secure only for HTTPS requests; or `true` / `false` |
+| `SEED_DEMO_DATA` | `true` | Seed the demo event when the database is empty |
+| `VITE_API_URL` | `/api` | Build-time API base URL for the frontend |
 
-1. **Native Video Transcoding Server**: Rather than bundling an embedded ffmpeg processing pipeline, submissions accept streaming video URLs (YouTube, Vimeo, Loom, or direct MP4/WebM links).
-2. **Fiat Payment Gateways (Stripe/PayPal)**: Team registration is free and self-contained; ticketing and paid admissions are handled out-of-band.
-3. **In-Browser Code Execution / IDE**: Judging evaluates deployed demos and code repository URLs rather than running untrusted contestant code in sandboxed web containers.
-4. **Real-Time Video Conferencing**: The platform orchestrates rubrics, assignments, and scoring asynchronously; live virtual judging calls are held via external tools (Google Meet / Zoom / Discord).
+To re-expose PostgreSQL on the host for local tools, uncomment the `ports` block of the `postgres` service in
+`docker-compose.yml`. For HTTPS / a custom domain see [docs/CUSTOM_DOMAIN_SETUP.md](docs/CUSTOM_DOMAIN_SETUP.md).
 
----
+## 8. Known limitations
 
-## 7. Self-Hosting in Production
-
-### Production Docker Compose Configuration
-For self-hosting on a public VPS or cloud server:
-
-```yaml
-# Set in .env
-NODE_ENV=production
-DATABASE_URL=postgresql://postgres:<STRONG_PASSWORD>@postgres:5432/dogfood?schema=public
-JWT_SECRET=<MIN_32_CHAR_RANDOM_SECRET>
-COOKIE_SECRET=<MIN_32_CHAR_RANDOM_SECRET>
-CORS_ORIGIN=https://hackathon.yourdomain.com
-CUSTOM_DOMAIN=hackathon.yourdomain.com
-```
-
-Run:
-```bash
-docker compose -f docker-compose.yml up -d
-```
-
-### Production Security Checklist
-- [x] **CSRF / Cookie Security**: HTTP-only, SameSite cookies with signed secrets.
-- [x] **HSTS & Headers**: Strict-Transport-Security enabled automatically when `NODE_ENV=production`.
-- [x] **SSRF Protection**: Webhook dispatcher rejects private IP ranges (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`), IPv6 loopbacks, and cloud metadata services (`169.254.169.254`).
-- [x] **Privilege Dropping**: Docker entrypoint drops root permissions to the `node` user via `su-exec`.
-- [x] **Input Validation**: All REST routes validated via strict Zod schemas.
-
----
+- **Organizers are global.** Any organizer can manage any event; there is no per-event ownership.
+- **Some features are API-only** (no UI yet): rubric editing, adding judges, manual assignment, track/prize
+  management, user role management, project finalization, pairwise ranking computation and vote statistics. All are
+  documented in Swagger.
+- **Certificates** are signed database records verified on `/verify`; no PDF/image is generated. They are signed with
+  `JWT_SECRET`, so changing that secret invalidates existing certificates.
+- **Webhooks** are delivered once (no retry queue) and are auto-disabled after 5 consecutive failures. The SSRF check
+  runs on the URL at registration time; DNS names that later resolve to private addresses are not re-checked.
+- **Event settings** `randomizeGallery` and `hideResultsUntilPublished` are stored but have no effect: the gallery sort
+  is chosen by the viewer, and results are always hidden from non-staff until published.
+- **Team invitations by email** return a token (shown to the leader) rather than sending an email, and the `inviteUrl`
+  in the API response has no matching page. In the UI, members join with the team invite code shown in the Team Hub
+  (the token can be used via `POST /api/teams/join`).
+- **Rate limiting** is in-memory (per backend process). Clients that reach port 4000 directly from a private network
+  can set `X-Forwarded-For`; restrict port 4000 in production if that matters.
+- **Anonymous voting** (eligibility `PUBLIC`) is limited per IP address, which is weak against voters on shared or
+  changing IPs.
 
 ## License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+MIT, see [LICENSE](LICENSE).

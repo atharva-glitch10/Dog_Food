@@ -493,7 +493,9 @@ describe('Backend Business Rule Enforcement & Bypass Tests', () => {
     });
 
     it('BLOCKS a participant from accessing judge evaluations via getEvaluation', async () => {
-      (prisma.judge.findFirst as any).mockResolvedValue(null); // Not a judge
+      // getEvaluation resolves the judge within the project's event
+      (prisma.project.findUnique as any).mockResolvedValue({ eventId: 'event-1' });
+      (prisma.judge.findUnique as any).mockResolvedValue(null); // Not a judge
 
       await expect(
         scoringService.getEvaluation('proj-1', 'participant-user', Role.PARTICIPANT)
@@ -501,7 +503,9 @@ describe('Backend Business Rule Enforcement & Bypass Tests', () => {
     });
 
     it('BLOCKS a judge from viewing evaluations for projects they are not assigned to', async () => {
-      (prisma.judge.findFirst as any).mockResolvedValue({
+      // getEvaluation resolves the judge within the project's event
+      (prisma.project.findUnique as any).mockResolvedValue({ eventId: 'event-1' });
+      (prisma.judge.findUnique as any).mockResolvedValue({
         id: 'judge-1',
         userId: 'judge-user-1',
       });
@@ -751,7 +755,9 @@ describe('Backend Business Rule Enforcement & Bypass Tests', () => {
     });
 
     it('REJECTS a judge attempting to access another judges submitted evaluation', async () => {
-      (prisma.judge.findFirst as any).mockResolvedValue({
+      // getEvaluation resolves the judge within the project's event
+      (prisma.project.findUnique as any).mockResolvedValue({ eventId: 'event-1' });
+      (prisma.judge.findUnique as any).mockResolvedValue({
         id: 'judge-attacker-id',
         userId: 'attacker-user-id',
       });

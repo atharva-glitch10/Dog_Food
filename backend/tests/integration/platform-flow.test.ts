@@ -395,3 +395,20 @@ describe('Persistence (real database)', () => {
     expect(res.status).toBe(200);
   });
 });
+
+describe('Registration cannot self-assign privileged roles (real database)', () => {
+  it.each(['ADMIN', 'ORGANIZER', 'JUDGE'])('rejects self-registration as %s', async (role) => {
+    const email = `self-${role.toLowerCase()}-${runId}@it.test`;
+    const res = await request(app).post('/api/auth/register').send({ email, password: PASSWORD, name: 'Mallory', role });
+    expect(res.status).toBe(400);
+    expect(await prisma.user.findUnique({ where: { email } })).toBeNull();
+  });
+
+  it('creates participants when no role (or PARTICIPANT) is sent', async () => {
+    const res = await request(app)
+      .post('/api/auth/register')
+      .send({ email: `plain-${runId}@it.test`, password: PASSWORD, name: 'Plain', role: 'PARTICIPANT' });
+    expect(res.status).toBe(201);
+    expect(res.body.data.user.role).toBe('PARTICIPANT');
+  });
+});

@@ -140,9 +140,9 @@ export const OrganizerDashboardPage: React.FC = () => {
   const fetchAuditLogs = async () => {
     if (!event) return;
     try {
-      const res: any = await api.get(`/events/${event.id}/audit`);
+      const res: any = await api.get(`/events/${event.id}/audit-logs`, { params: { limit: 100 } });
       if (res.success) {
-        setAuditLogs(res.data);
+        setAuditLogs(res.data.logs);
       }
     } catch (err) {
       console.error(err);

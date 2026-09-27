@@ -52,7 +52,7 @@ sequenceDiagram
     Frontend->>Backend: GET /api/events/:id/judges/my-assignments
     Backend->>Database: SELECT judge_assignments JOIN projects WHERE judgeId = req.user.id
     Database-->>Backend: Assigned Project List
-    Backend-->>Frontend: Projects DTO (Double-blind)
+    Backend-->>Frontend: Assigned projects only
     Judge->>Frontend: Fills Rubric Scores (e.g. 9/10, 8/10) & Submits
     Frontend->>Backend: POST /api/evaluations
     Backend->>Backend: Verify judgingDeadline & compute S_raw = sum((s_m/R_m)*w_m)*100
@@ -79,7 +79,7 @@ sequenceDiagram
     Backend-->>Frontend: 200 OK + text/csv Stream
     Organizer->>Frontend: Clicks "Generate Certificates"
     Frontend->>Backend: POST /api/events/:id/certificates/generate
-    Backend->>Backend: Generate HMAC-SHA256 Signatures & SVG/PDF Certs
+    Backend->>Backend: Generate HMAC-SHA256 signed certificate records
     Backend->>Database: INSERT certificates
     Backend-->>Frontend: 201 Created
 ```

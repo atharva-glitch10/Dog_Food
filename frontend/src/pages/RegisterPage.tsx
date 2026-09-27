@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { UserPlus, KeyRound, Mail, User as UserIcon, AlertCircle, Sparkles } from 'lucide-react';
-import { Role } from '../types/index.ts';
 
 export const RegisterPage: React.FC = () => {
   const { register } = useAuth();
@@ -11,7 +10,6 @@ export const RegisterPage: React.FC = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<Role>('PARTICIPANT');
   const [bio, setBio] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -21,7 +19,7 @@ export const RegisterPage: React.FC = () => {
     setError(null);
     setLoading(true);
     try {
-      await register({ name, email, password, role, bio });
+      await register({ name, email, password, bio });
       navigate('/');
     } catch (err: any) {
       setError(err.message || 'Registration failed.');
@@ -100,18 +98,9 @@ export const RegisterPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-200 block">Account Role</label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value as Role)}
-              className="input-field font-semibold text-xs"
-            >
-              <option value="PARTICIPANT">Participant (Hacker / Builder)</option>
-              <option value="JUDGE">Judge (Evaluator)</option>
-              <option value="ORGANIZER">Organizer (Host)</option>
-            </select>
-          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+            New accounts join as participants. Organizers add judges to an event, and administrators grant organizer access.
+          </p>
 
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-200 block">Bio & Background (Optional)</label>

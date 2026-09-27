@@ -9,8 +9,12 @@ export class ScoringService {
   async getEvaluation(projectId: string, judgeUserId: string, userRole: Role) {
     const isPrivileged = userRole === Role.ORGANIZER || userRole === Role.ADMIN;
 
-    const judge = await prisma.judge.findFirst({
-      where: { userId: judgeUserId },
+    // Resolve the caller's judge record for the project's own event (a user can judge several events)
+    const project = await prisma.project.findUnique({ where: { id: projectId }, select: { eventId: true } });
+    if (!project) throw new AppError('Project not found.', 404, 'PROJECT_NOT_FOUND');
+
+    const judge = await prisma.judge.findUnique({
+      where: { eventId_userId: { eventId: project.eventId, userId: judgeUserId } },
     });
 
     if (!judge && !isPrivileged) {

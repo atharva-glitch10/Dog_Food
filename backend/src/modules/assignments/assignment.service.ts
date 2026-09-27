@@ -23,7 +23,6 @@ export class AssignmentService {
    */
   async autoAssignJudges(eventId: string, options?: { seed?: number; targetPerProject?: number; clearExisting?: boolean }) {
     const seed = options?.seed ?? 42;
-    const targetPerProject = options?.targetPerProject ?? 3;
     const clearExisting = options?.clearExisting ?? true;
 
     const event = await prisma.event.findUnique({
@@ -32,6 +31,9 @@ export class AssignmentService {
     });
 
     if (!event) throw new AppError('Event not found', 404, 'EVENT_NOT_FOUND');
+
+    // Judges per project: explicit request > event setting > 3
+    const targetPerProject = options?.targetPerProject ?? event.settings?.assignmentsPerProject ?? 3;
 
     // 1. Fetch active judges
     const judges = await prisma.judge.findMany({

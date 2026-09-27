@@ -64,6 +64,16 @@ jobs:
       - run: npx tsc --noEmit -p .
       - run: npm run build
 
+  docs:
+    name: Docs (referenced paths exist)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/check-doc-paths.mjs
+
   docker:
     name: Docker images + compose smoke test
     runs-on: ubuntu-latest

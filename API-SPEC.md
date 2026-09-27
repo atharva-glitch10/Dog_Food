@@ -75,7 +75,7 @@ All endpoints are prefixed with `/api`. Responses conform to a standardized JSON
 - `GET /api/events/:eventId/vote/my-votes` - Get list of projects current user voted for.
 - `GET /api/events/:eventId/vote/stats` - `[ORGANIZER, ADMIN]` View vote distributions and flagged abuse clusters.
 
-## 9. Pairwise Ranking (Bonus)
+## 9. Pairwise Ranking
 - `GET /api/events/:eventId/pairwise/pairs` - `[JUDGE]` Fetch next randomized pair of projects for comparison.
 - `POST /api/events/:eventId/pairwise/compare` - `[JUDGE]` Record preference ($A \succ B$, $B \succ A$, or Tie).
 - `POST /api/events/:eventId/pairwise/compute` - `[ORGANIZER, ADMIN]` Compute Bradley-Terry MLE ranking vector.

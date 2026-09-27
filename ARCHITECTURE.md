@@ -142,8 +142,8 @@ backend/
 │   │   ├── rubrics/         # Rubric & criterion configuration, 100% weight validation
 │   │   ├── scoring/         # Raw score evaluation, weighted score math, draft evaluations
 │   │   ├── normalization/   # Z-score normalization, Bayesian shrinkage fallback, outlier clamping
-│   │   ├── pairwise/        # Bradley-Terry pairwise comparison engine (Bonus)
-│   │   ├── voting/          # Community voting engine, rate limiting, duplicate/clustering detection
+│   │   ├── pairwise/        # Bradley-Terry pairwise comparison engine 
+│   │   ├── voting/          # Community voting: eligibility rules, per-voter limits, duplicate prevention
 │   │   ├── results/         # Ranking engine, tie-breaking hierarchy, visibility control
 │   │   ├── exports/         # RFC 4180 CSV export generation, bulk CSV data import
 │   │   ├── certificates/    # Local cryptographic certificate generation and signature verification
@@ -188,5 +188,5 @@ backend/
 1. **Client -> Backend**: All client interaction occurs via RESTful JSON APIs over HTTP.
 2. **Backend -> Database**: Synchronous, parameterized queries via Prisma ORM.
 3. **Background Jobs / Async Operations**:
-   - Webhook deliveries and certificate generation are dispatched via local in-memory async queues with retry backoff.
+   - Webhook deliveries are sent asynchronously after the response (single attempt, logged); certificates are generated synchronously.
 4. **Audit Log Integration**: The `auditLogger` middleware intercepts state-mutating requests (`POST`, `PUT`, `DELETE`), captures the actor identity, request IP, entity type, and delta payload, and commits an immutable record in the `AuditLog` table.

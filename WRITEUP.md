@@ -8,7 +8,7 @@
 
 ## 1. Key Schema & Architectural Decisions
 
-When designing the relational data model for Dogfood ([schema.prisma](file:///c:/Users/RUTUJA%20PATOLE/Dog_Food/backend/prisma/schema.prisma)), our primary constraint was **absolute integrity under concurrent evaluation** without relying on external cloud microservices.
+When designing the relational data model for Dogfood ([schema.prisma](backend/prisma/schema.prisma)), our primary constraint was **absolute integrity under concurrent evaluation** without relying on external cloud microservices.
 
 ### A. First-Class `JudgeAssignment` Relation Table
 Rather than storing assigned projects as an array of IDs on the `Judge` model (`projectIds: String[]`), we established `JudgeAssignment` as a normalized join entity:

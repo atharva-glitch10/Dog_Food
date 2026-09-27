@@ -8,6 +8,7 @@ export const JudgeDashboardPage: React.FC = () => {
   const [assignments, setAssignments] = useState<any[]>([]);
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [accessError, setAccessError] = useState<string | null>(null);
 
   useEffect(() => {
     if (eventSlug) {
@@ -19,11 +20,23 @@ export const JudgeDashboardPage: React.FC = () => {
             setAssignments(assignRes.data);
           }
         }
-      }).finally(() => setLoading(false));
+      })
+        .catch((err: any) => setAccessError(err?.message || 'Could not load your judging assignments.'))
+        .finally(() => setLoading(false));
     }
   }, [eventSlug]);
 
   if (loading) return <div className="text-center py-20 text-slate-400 text-sm">Loading judge assignments...</div>;
+
+  if (accessError) {
+    return (
+      <div className="console-panel p-8 max-w-lg mx-auto my-12 text-center space-y-2">
+        <Shield className="w-8 h-8 text-slate-400 mx-auto" />
+        <h2 className="text-lg font-bold text-slate-900 dark:text-white">Judging queue unavailable</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400">{accessError}</p>
+      </div>
+    );
+  }
 
   const completedCount = assignments.filter((a) => a.isCompleted).length;
   const totalCount = assignments.length;

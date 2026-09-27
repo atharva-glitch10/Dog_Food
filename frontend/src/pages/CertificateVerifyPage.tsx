@@ -1,6 +1,17 @@
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import api from '../services/api.ts';
+import { useAuth } from '../hooks/useAuth.tsx';
 import { ShieldCheck, Search, CheckCircle, XCircle, Award } from 'lucide-react';
+
+interface MyCertificate {
+  id: string;
+  title: string;
+  type: string;
+  verificationCode: string;
+  issuedAt: string;
+  event: { name: string };
+}
 
 export const CertificateVerifyPage: React.FC = () => {
   const [code, setCode] = useState('');
@@ -8,15 +19,21 @@ export const CertificateVerifyPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!code.trim()) return;
+  const { user } = useAuth();
+  const myCertificates = useQuery({
+    queryKey: ['my-certificates', user?.id],
+    queryFn: async () => ((await api.get('/certificates/my-certificates')) as any).data as MyCertificate[],
+    enabled: !!user,
+  });
+
+  const verifyCode = async (value: string) => {
+    if (!value.trim()) return;
     setError(null);
     setResult(null);
     setLoading(true);
 
     try {
-      const res: any = await api.get(`/certificates/verify/${code.trim().toUpperCase()}`);
+      const res: any = await api.get(`/certificates/verify/${encodeURIComponent(value.trim().toUpperCase())}`);
       if (res.success) {
         setResult(res.data);
       }
@@ -25,6 +42,11 @@ export const CertificateVerifyPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await verifyCode(code);
   };
 
   return (
@@ -74,11 +96,24 @@ export const CertificateVerifyPage: React.FC = () => {
         )}
 
         {result && (
-          <div className="p-6 bg-emerald-50/50 dark:bg-emerald-950/20 rounded-2xl border border-emerald-200 dark:border-emerald-800/80 space-y-4">
-            <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300 font-bold text-base">
-              <CheckCircle className="w-5 h-5" />
-              <span>Verified Authentic Certificate</span>
-            </div>
+          <div
+            className={`p-6 rounded-2xl border space-y-4 ${
+              result.isValid
+                ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800/80'
+                : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800'
+            }`}
+          >
+            {result.isValid ? (
+              <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-300 font-bold text-base">
+                <CheckCircle className="w-5 h-5" />
+                <span>Verified Authentic Certificate</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-red-700 dark:text-red-300 font-bold text-base">
+                <XCircle className="w-5 h-5" />
+                <span>Signature mismatch: this certificate record has been altered and is NOT valid</span>
+              </div>
+            )}
 
             <div className="space-y-2 text-sm text-slate-700 dark:text-slate-300">
               <div className="flex justify-between py-1.5 border-b border-slate-200/60 dark:border-slate-800">
@@ -105,6 +140,45 @@ export const CertificateVerifyPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {user && (
+        <div className="console-panel p-6 sm:p-8 space-y-4">
+          <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <Award className="w-5 h-5 text-indigo-500" />
+            <span>Your certificates</span>
+          </h2>
+          {myCertificates.isLoading && <p className="text-sm text-slate-400">Loading...</p>}
+          {myCertificates.data?.length === 0 && (
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              No certificates have been issued to you yet. Organizers issue them from the Organizer Hub.
+            </p>
+          )}
+          <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+            {myCertificates.data?.map((cert) => (
+              <li key={cert.id} className="py-3 flex flex-wrap items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-slate-900 dark:text-white">{cert.title}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {cert.event.name} · issued {new Date(cert.issuedAt).toLocaleDateString()} ·{' '}
+                    <span className="font-mono">{cert.verificationCode}</span>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCode(cert.verificationCode);
+                    verifyCode(cert.verificationCode);
+                  }}
+                  className="btn-outline !py-1.5 !px-3 text-xs"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Verify</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };

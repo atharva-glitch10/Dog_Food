@@ -55,7 +55,7 @@
 | Create / Update Rubric | Denied | Denied | Denied | Allowed | Allowed | Validates criteria weights sum to 1.0 (100%) |
 | Save Draft Evaluation | Denied | Denied | Allowed (Assigned)| Allowed | Allowed | Project must be assigned to judge; `isDraft=true` |
 | Submit Final Evaluation | Denied | Denied | Allowed (Assigned)| Allowed | Allowed | Enforces `judgingDeadline`; locks score |
-| View Other Judges' Scores | Denied | Denied | Denied | Allowed | Allowed | Strict double-blind isolation during judging |
+| View Other Judges' Scores | Denied | Denied | Denied | Allowed | Allowed | Judges only see their own evaluations |
 | **Normalization & Results** |
 | Trigger Normalization | Denied | Denied | Denied | Allowed | Allowed | Computes Z-scores & Bayesian fallbacks |
 | View Draft / Raw Rankings | Denied | Denied | Denied | Allowed | Allowed | Pre-publication results hidden from public |

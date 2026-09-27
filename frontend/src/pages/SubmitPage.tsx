@@ -53,7 +53,9 @@ export const SubmitPage: React.FC = () => {
             }
           }
         }
-      }).finally(() => setLoading(false));
+      })
+        .catch((err: any) => setError(err?.message || 'Could not load your team.'))
+        .finally(() => setLoading(false));
     }
   }, [eventSlug]);
 

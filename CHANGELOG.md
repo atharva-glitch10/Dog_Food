@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.1.0] - 2026-09-27: review fixes
+
+### Docker & self-hosting
+- `docker compose up --build` needs no `.env`: committed Prisma migrations (`migrate deploy`), random secrets generated on first boot and kept in a volume, idempotent seed that only runs on an empty database (`SEED_DEMO_DATA`), seed compiled into the image, OpenAPI spec shipped in the image.
+- Nginx proxies `/api` and `/uploads`; frontend uses `/api`; Express `trust proxy`; session cookie `Secure` follows the request protocol; Postgres no longer published; fonts bundled (no CDN).
+
+### Security
+- See the table in [SECURITY.md](SECURITY.md): privileged self-registration, upload XSS, `javascript:` links, CSV injection, vote races/duplicates, bulk-import privilege escalation, audit-log password leak, mass assignment, missing validation, fallback secrets.
+
+### Fixed
+- Four UI actions called non-existent routes (score submit, publish results, certificates, gallery vote); the audit trail tab called a wrong route; results/evaluation pages showed fabricated data on errors; certificate verification showed "authentic" for tampered records.
+- Webhooks were never dispatched; rubric percentages were not validated; judge lookup ignored the event; `assignmentsPerProject` was ignored.
+
+### Added
+- Organizer UI for webhooks and bulk CSV import; "Your certificates" on the Verify page; complete OpenAPI spec (70 operations) with a coverage test.
+- Pure, tested engines for normalization, assignment, scoring, Bradley-Terry and voting rules; unit tests import real code; real-database integration tests; GitHub Actions CI; doc path checker.
+- Documentation rebuilt from the code; old reports moved to `docs/archive/`.
+
 All notable changes to the **Dogfood** Hackathon Judging and Submission Platform are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -50,7 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ### 3. One-Command Setup & Portability
-- Created zero-configuration startup scripts: [setup.sh](file:///c:/Users/RUTUJA%20PATOLE/Dog_Food/setup.sh) (Linux/macOS) and [setup.bat](file:///c:/Users/RUTUJA%20PATOLE/Dog_Food/setup.bat) (Windows).
+- Created zero-configuration startup scripts: [setup.sh](setup.sh) (Linux/macOS) and [setup.bat](setup.bat) (Windows).
 - Automated `.env` generation from `.env.example` with fallback defaults.
 - Fixed `.env.example` `COOKIE_SECRET` length to exceed the required 32-character production security threshold (preventing production boot crash).
 - Docker Compose orchestration provisioning PostgreSQL 16, Express API with automatic entrypoint migrations and seeding, and Nginx frontend proxy.
@@ -74,5 +92,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - Conflict-of-interest scoring attempts on self-authored projects.
     - Participant unauthorized draft snooping and premature results access.
 - **Fact-Checked Documentation**:
-  - Cross-referenced [WRITEUP.md](file:///c:/Users/RUTUJA%20PATOLE/Dog_Food/WRITEUP.md) against git commit `0620b54` (Bradley-Terry delta convergence, webhook consecutive failure counting, SSRF manual redirect handling, IPv6 loopback filters).
-  - Updated [README.md](file:///c:/Users/RUTUJA%20PATOLE/Dog_Food/README.md) with an explicit plain-language introduction detailing what the platform is and why it is structured this way before the architectural diagram.
+  - Cross-referenced [WRITEUP.md](WRITEUP.md) against git commit `0620b54` (Bradley-Terry delta convergence, webhook consecutive failure counting, SSRF manual redirect handling, IPv6 loopback filters).
+  - Updated [README.md](README.md) with an explicit plain-language introduction detailing what the platform is and why it is structured this way before the architectural diagram.

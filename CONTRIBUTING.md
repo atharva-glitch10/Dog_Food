@@ -33,7 +33,7 @@ We are committed to providing a welcoming, inclusive, and harassment-free enviro
    cd backend
    npm install
    npx prisma generate
-   npx prisma db push
+   npx prisma migrate deploy
    npm run prisma:seed
    npm run dev
 

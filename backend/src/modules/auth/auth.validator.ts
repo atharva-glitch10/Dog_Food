@@ -6,7 +6,14 @@ export const RegisterSchema = z.object({
   email: z.string().email('Invalid email address format'),
   password: z.string().min(8, 'Password must be at least 8 characters long'),
   name: z.string().min(2, 'Name must be at least 2 characters long'),
-  role: z.nativeEnum(Role).optional().default(Role.PARTICIPANT),
+  // Self-registration always creates a PARTICIPANT. Judges are promoted by
+  // organizers (POST /events/:id/judges); organizers/admins by an admin.
+  role: z
+    .literal(Role.PARTICIPANT, {
+      errorMap: () => ({ message: 'Only participant accounts can be self-registered.' }),
+    })
+    .optional()
+    .default(Role.PARTICIPANT),
   bio: z.string().optional(),
 });
 

@@ -152,7 +152,7 @@ In the event that two or more projects have identical normalized scores ($\Delta
 
 ---
 
-## 6. Bradley-Terry Pairwise Ranking Engine (Bonus 2)
+## 6. Bradley-Terry Pairwise Ranking Engine
 
 In pairwise mode, judges compare two projects $A$ and $B$, recording $A \succ B$ (win), $B \succ A$ (loss), or a tie.
 

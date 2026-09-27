@@ -95,7 +95,9 @@ describe('Targeted Adversarial Security Scenarios', () => {
   describe("Scenario 1: Judge A tries to fetch/score Judge B's assigned project by ID substitution", () => {
     it("REJECTS Judge A attempting to GET Judge B's assigned project evaluation", async () => {
       // Judge A is authenticated
-      (prisma.judge.findFirst as any).mockResolvedValue({
+      // getEvaluation resolves the judge within the project's event
+      (prisma.project.findUnique as any).mockResolvedValue({ eventId: 'event-1' });
+      (prisma.judge.findUnique as any).mockResolvedValue({
         id: 'judge-A-id',
         userId: 'user-judge-A',
         eventId: 'event-1',

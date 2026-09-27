@@ -27,7 +27,7 @@ CUSTOM_DOMAIN=hackathon.yourdomain.com
 CORS_ORIGIN=https://hackathon.yourdomain.com,http://localhost:3000
 
 # Client-facing API endpoint
-VITE_API_URL=https://hackathon.yourdomain.com/api
+VITE_API_URL=/api   (default; Nginx proxies /api, so no change is needed for a custom domain)
 ```
 
 ---
