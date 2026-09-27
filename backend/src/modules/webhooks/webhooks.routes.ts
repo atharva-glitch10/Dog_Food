@@ -5,9 +5,19 @@ import { requireAuth } from '../../middleware/requireAuth.js';
 import { requireRole } from '../../middleware/requireRole.js';
 import { logAuditAction } from '../../middleware/auditLogger.js';
 import { Role } from '@prisma/client';
+import { WEBHOOK_EVENT_TYPES } from './webhook.service.js';
+import { sendSuccess } from '../../utils/response.js';
 import { CreateWebhookSchema } from './webhooks.validator.js';
 
 const router = Router();
+
+// Event types a subscription can listen to (drives the organizer UI checklist)
+router.get(
+  '/webhooks/event-types',
+  requireAuth,
+  requireRole([Role.ORGANIZER, Role.ADMIN]),
+  (_req, res) => sendSuccess(res, WEBHOOK_EVENT_TYPES)
+);
 
 router.get(
   '/events/:eventId/webhooks',

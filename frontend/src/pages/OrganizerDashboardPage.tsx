@@ -17,7 +17,11 @@ import {
   Layers,
   History,
   Cpu,
+  Webhook,
+  Upload,
 } from 'lucide-react';
+import { WebhooksPanel } from '../components/organizer/WebhooksPanel.tsx';
+import { BulkImportPanel } from '../components/organizer/BulkImportPanel.tsx';
 
 export const OrganizerDashboardPage: React.FC = () => {
   const { eventSlug } = useParams<{ eventSlug: string }>();
@@ -25,7 +29,9 @@ export const OrganizerDashboardPage: React.FC = () => {
 
   const [event, setEvent] = useState<any>(null);
   const [stats, setStats] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'normalization' | 'assignments' | 'exports' | 'audit'>('overview');
+  const [activeTab, setActiveTab] = useState<
+    'overview' | 'normalization' | 'assignments' | 'exports' | 'webhooks' | 'import' | 'audit'
+  >('overview');
   const [loading, setLoading] = useState(true);
 
   // Auto assignment state
@@ -183,6 +189,8 @@ export const OrganizerDashboardPage: React.FC = () => {
           { id: 'assignments', label: 'Jury Assignment', icon: Shield },
           { id: 'normalization', label: 'Score Normalization', icon: Cpu },
           { id: 'exports', label: 'CSV Exports & Certs', icon: Download },
+          { id: 'webhooks', label: 'Webhooks', icon: Webhook },
+          { id: 'import', label: 'Bulk Import', icon: Upload },
           { id: 'audit', label: 'Audit Trail', icon: History },
         ].map((tab) => {
           const Icon = tab.icon;
@@ -470,6 +478,12 @@ export const OrganizerDashboardPage: React.FC = () => {
         </div>
       )}
 
+      {/* Tab: Webhooks */}
+      {activeTab === 'webhooks' && event && <WebhooksPanel eventId={event.id} />}
+
+      {/* Tab: Bulk CSV Import */}
+      {activeTab === 'import' && event && <BulkImportPanel eventId={event.id} />}
+
       {/* Tab: Audit Trails */}
       {activeTab === 'audit' && (
         <div className="console-panel p-6 sm:p-8 space-y-4">
@@ -501,7 +515,7 @@ export const OrganizerDashboardPage: React.FC = () => {
                     <td className="py-2.5 px-4 font-semibold text-slate-800 dark:text-slate-200">{log.action}</td>
                     <td className="py-2.5 px-4 text-slate-600 dark:text-slate-400">{log.user?.name || 'System / Anon'}</td>
                     <td className="py-2.5 px-4 text-slate-500">{log.entityType} ({log.entityId || 'N/A'})</td>
-                    <td className="py-2.5 px-4 text-slate-400">{log.ipAddress || '127.0.0.1'}</td>
+                    <td className="py-2.5 px-4 text-slate-400">{log.ipAddress || '—'}</td>
                   </tr>
                 ))}
               </tbody>
