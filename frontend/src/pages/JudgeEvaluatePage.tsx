@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../services/api.ts';
 import { Project, Event } from '../types/index.ts';
 import { ArrowLeft, ArrowRight, Save, Send, AlertCircle, CheckCircle2, ExternalLink, Code2, Sparkles, Layers, ChevronDown, ChevronUp, MessageSquare, Check, Shield } from 'lucide-react';
+import { safeHref } from '../utils/safeHref.ts';
 
 export const JudgeEvaluatePage: React.FC = () => {
   const { eventSlug, projectId } = useParams<{ eventSlug: string; projectId: string }>();
@@ -248,7 +249,7 @@ export const JudgeEvaluatePage: React.FC = () => {
           <div className="flex items-center gap-2.5 shrink-0">
             {project.repoUrl && (
               <a
-                href={project.repoUrl}
+                href={safeHref(project.repoUrl)}
                 target="_blank"
                 rel="noreferrer"
                 className="btn-secondary !py-2 !px-3.5 text-xs"
@@ -260,7 +261,7 @@ export const JudgeEvaluatePage: React.FC = () => {
             )}
             {project.demoUrl && (
               <a
-                href={project.demoUrl}
+                href={safeHref(project.demoUrl)}
                 target="_blank"
                 rel="noreferrer"
                 className="btn-primary !py-2 !px-3.5 text-xs shadow-soft"

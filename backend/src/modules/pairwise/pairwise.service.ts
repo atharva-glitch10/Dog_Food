@@ -1,5 +1,6 @@
 import { prisma } from '../../utils/prisma.js';
 import { AppError } from '../../utils/response.js';
+import { rankByBradleyTerry } from './bradley-terry.js';
 
 export class PairwiseService {
   async getRandomPair(eventId: string, judgeUserId: string) {
@@ -130,94 +131,27 @@ export class PairwiseService {
       include: { team: true },
     });
 
-    const projectIds = projects.map((p) => p.id);
-    const n = projectIds.length;
-    const idToIndex = new Map(projectIds.map((id, i) => [id, i]));
-
-    // Comparison matrix N[i][j] and Win vector W[i]
-    const W = new Array(n).fill(0.1); // Small Laplace prior smoothing
-    const N = Array.from({ length: n }, () => new Array(n).fill(0));
-
-    for (const comp of comparisons) {
-      const i = idToIndex.get(comp.projectAId);
-      const j = idToIndex.get(comp.projectBId);
-      if (i === undefined || j === undefined) continue;
-
-      N[i][j] += 1;
-      N[j][i] += 1;
-
-      if (comp.winnerProjectId === comp.projectAId) {
-        W[i] += 1;
-      } else if (comp.winnerProjectId === comp.projectBId) {
-        W[j] += 1;
-      } else {
-        // Tie
-        W[i] += 0.5;
-        W[j] += 0.5;
-      }
-    }
-
-    // MM (Minorization-Maximization) Algorithm for Bradley-Terry MLE
-    let pi = new Array(n).fill(1.0);
-    const maxIterations = 200;
-    const tolerance = 1e-6;
-    let converged = false;
-
-    for (let iter = 0; iter < maxIterations; iter++) {
-      const piNext = new Array(n).fill(0);
-
-      for (let i = 0; i < n; i++) {
-        let denominator = 0;
-        for (let j = 0; j < n; j++) {
-          if (i !== j && N[i][j] > 0) {
-            denominator += N[i][j] / (pi[i] + pi[j]);
-          }
-        }
-        piNext[i] = denominator > 0 ? W[i] / denominator : pi[i];
-      }
-
-      // Normalize pi so sum(pi) = n
-      const sumPi = piNext.reduce((a, b) => a + b, 0);
-      for (let i = 0; i < n; i++) {
-        piNext[i] = (piNext[i] / sumPi) * n;
-      }
-
-      // Check convergence — track actual result
-      let maxDiff = 0;
-      for (let i = 0; i < n; i++) {
-        maxDiff = Math.max(maxDiff, Math.abs(piNext[i] - pi[i]));
-      }
-
-      pi = piNext;
-      if (maxDiff < tolerance) {
-        converged = true;
-        break;
-      }
-    }
-
-    // Convert latent skill parameters to 0-100 scale
-    const maxPi = Math.max(...pi);
-    const minPi = Math.min(...pi);
-    const range = maxPi - minPi || 1;
-
-    const ranked = projects.map((p, idx) => {
-      const skill = pi[idx];
-      const normalizedScore = 50 + ((skill - minPi) / range) * 50;
-      return {
-        projectId: p.id,
-        title: p.title,
-        teamName: p.team.name,
-        latentSkill: parseFloat(skill.toFixed(4)),
-        pairwiseScore: parseFloat(normalizedScore.toFixed(2)),
-      };
-    });
-
-    ranked.sort((a, b) => b.pairwiseScore - a.pairwiseScore);
+    // Bradley-Terry MM fit + [50, 100] scaling (pure engine)
+    const projectsById = new Map(projects.map((p) => [p.id, p]));
+    const { converged, rankings } = rankByBradleyTerry(
+      projects.map((p) => p.id),
+      comparisons
+    );
 
     return {
       totalComparisons: comparisons.length,
-      converged,  // Fixed: was always hardcoded `true`
-      rankings: ranked.map((r, i) => ({ ...r, rank: i + 1 })),
+      converged,
+      rankings: rankings.map((r) => {
+        const project = projectsById.get(r.projectId)!;
+        return {
+          projectId: r.projectId,
+          title: project.title,
+          teamName: project.team.name,
+          latentSkill: r.latentSkill,
+          pairwiseScore: r.pairwiseScore,
+          rank: r.rank,
+        };
+      }),
     };
   }
 }

@@ -18,44 +18,6 @@ describe('Security Hardening & SSRF Protection Tests', () => {
     expect(res.headers['strict-transport-security']).toBeUndefined();
   });
 
-  it('2. SSRF Protection: Webhook creation should reject private and metadata IP ranges', async () => {
-    const orgLogin = await request(app)
-      .post('/api/auth/login')
-      .send({ email: 'organizer@dogfood.local', password: 'Dogfood2026!' });
-    const token = orgLogin.body?.data?.token;
-    if (!token) {
-      // Offline/unseeded database environment: unit SSRF coverage is verified in webhook-ssrf-failures.test.ts (28 tests)
-      return;
-    }
-    const cookie = orgLogin.headers['set-cookie'];
-
-    const eventsRes = await request(app).get('/api/events');
-    const eventId = eventsRes.body.data[0].id;
-
-    // Test loopback target
-    const res1 = await request(app)
-      .post(`/api/events/${eventId}/webhooks`)
-      .set('Authorization', `Bearer ${token}`)
-      .set('Cookie', cookie)
-      .send({
-        targetUrl: 'http://127.0.0.1:8080/hook',
-        events: ['PROJECT_SUBMITTED'],
-      });
-
-    expect(res1.status).toBe(400);
-    expect(res1.body.error.code).toBe('SSRF_PROHIBITED_TARGET');
-
-    // Test cloud metadata target
-    const res2 = await request(app)
-      .post(`/api/events/${eventId}/webhooks`)
-      .set('Authorization', `Bearer ${token}`)
-      .set('Cookie', cookie)
-      .send({
-        targetUrl: 'http://169.254.169.254/latest/meta-data/',
-        events: ['PROJECT_SUBMITTED'],
-      });
-
-    expect(res2.status).toBe(400);
-    expect(res2.body.error.code).toBe('SSRF_PROHIBITED_TARGET');
-  });
+  // Webhook SSRF rejection through the real API (needs a database) lives in
+  // tests/integration/platform-flow.test.ts; URL-level coverage is in tests/unit/webhook-ssrf-failures.test.ts.
 });

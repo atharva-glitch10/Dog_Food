@@ -1,5 +1,6 @@
 import { prisma } from '../../utils/prisma.js';
 import { AppError } from '../../utils/response.js';
+import { checkVoterEligibility, checkVoteAllowance, resolveVoteLimit } from './voting.rules.js';
 import { Prisma, VotingEligibility } from '@prisma/client';
 
 export class VotingService {
@@ -31,31 +32,19 @@ export class VotingService {
       throw new AppError('Project not found or not eligible for voting.', 404, 'PROJECT_NOT_ELIGIBLE');
     }
 
-    // Eligibility checks
+    // Eligibility + self-vote rules (pure)
     const eligibility = event.settings.votingEligibility;
-    if (eligibility === VotingEligibility.VERIFIED_USERS && !userId) {
-      throw new AppError('You must be registered and logged in to vote.', 401, 'AUTH_REQUIRED');
-    }
-
-    if (eligibility === VotingEligibility.PARTICIPANTS_ONLY) {
-      if (!userId) {
-        throw new AppError('Only registered participants can vote.', 401, 'AUTH_REQUIRED');
-      }
-      const isParticipant = await prisma.teamMember.findFirst({
-        where: { userId, team: { eventId } },
-      });
-      if (!isParticipant) {
-        throw new AppError('You must be a participant in this event to vote.', 403, 'NOT_A_PARTICIPANT');
-      }
-    }
-
-    // Anti-Abuse 1: Prevent author from voting for their own project
-    if (userId) {
-      const isAuthor = project.team.members.some((m) => m.userId === userId);
-      if (isAuthor) {
-        throw new AppError('You cannot vote for your own project submission.', 400, 'SELF_VOTE_PROHIBITED');
-      }
-    }
+    const needsParticipantCheck = eligibility === VotingEligibility.PARTICIPANTS_ONLY && !!userId;
+    const isEventParticipant = needsParticipantCheck
+      ? !!(await prisma.teamMember.findFirst({ where: { userId, team: { eventId } } }))
+      : undefined;
+    const eligibilityError = checkVoterEligibility({
+      eligibility,
+      userId,
+      isEventParticipant,
+      projectMemberIds: project.team.members.map((m) => m.userId),
+    });
+    if (eligibilityError) throw eligibilityError;
 
     // Anti-Abuse 2 + 3: per-voter limit and duplicate prevention.
     // The count and insert run in one transaction under a per-voter advisory
@@ -63,7 +52,7 @@ export class VotingService {
     // limit check. Duplicates are also blocked by unique indexes (userId-based
     // and, for anonymous votes, a partial index on ipAddress); a race that
     // reaches the insert surfaces as P2002 and is mapped to DUPLICATE_VOTE.
-    const maxVotes = event.settings.votesPerUser || 3;
+    const maxVotes = resolveVoteLimit(event.settings.votesPerUser);
     // Anonymous voters are identified by IP across all votes from that address.
     const voterFilter = userId ? { userId } : { ipAddress };
     const lockKey = `vote:${eventId}:${userId ? `user:${userId}` : `ip:${ipAddress}`}`;
@@ -72,22 +61,16 @@ export class VotingService {
       return await prisma.$transaction(async (tx) => {
         await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
 
-        const existingVotesCount = await tx.vote.count({ where: { eventId, ...voterFilter } });
-        if (existingVotesCount >= maxVotes) {
-          throw new AppError(
-            `You have reached the maximum allowed limit of ${maxVotes} votes for this event.`,
-            400,
-            'MAX_VOTES_REACHED'
-          );
-        }
-
-        const existingVoteForProject = await tx.vote.findFirst({
-          where: { eventId, projectId, ...voterFilter },
-          select: { id: true },
+        const existingVotes = await tx.vote.findMany({
+          where: { eventId, ...voterFilter },
+          select: { projectId: true },
         });
-        if (existingVoteForProject) {
-          throw new AppError('You have already cast a vote for this project.', 400, 'DUPLICATE_VOTE');
-        }
+        const allowanceError = checkVoteAllowance(
+          existingVotes.map((v) => v.projectId),
+          projectId,
+          maxVotes
+        );
+        if (allowanceError) throw allowanceError;
 
         return tx.vote.create({
           data: {

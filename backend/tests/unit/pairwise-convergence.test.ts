@@ -3,65 +3,22 @@
  * Tests convergence tracking, edge cases, and correctness.
  */
 import { describe, it, expect } from 'vitest';
+import { rankByBradleyTerry } from '../../src/modules/pairwise/bradley-terry.js';
 
-// ─── Pure algorithm extracted for unit testing ───────────────────────────────
 interface Comparison { projectAId: string; projectBId: string; winnerProjectId: string | null }
 
+/** Thin adapter over the real engine: [{ id, score }] best-first, plus the convergence flag. */
 function runBradleyTerry(
   projectIds: string[],
   comparisons: Comparison[],
   maxIterations = 200,
   tolerance = 1e-6
 ): { rankings: { id: string; score: number }[]; converged: boolean } {
-  const n = projectIds.length;
-  const idToIndex = new Map(projectIds.map((id, i) => [id, i]));
-
-  const W = new Array(n).fill(0.1);
-  const N = Array.from({ length: n }, () => new Array(n).fill(0));
-
-  for (const comp of comparisons) {
-    const i = idToIndex.get(comp.projectAId);
-    const j = idToIndex.get(comp.projectBId);
-    if (i === undefined || j === undefined) continue;
-    N[i][j] += 1;
-    N[j][i] += 1;
-    if (comp.winnerProjectId === comp.projectAId) W[i] += 1;
-    else if (comp.winnerProjectId === comp.projectBId) W[j] += 1;
-    else { W[i] += 0.5; W[j] += 0.5; }
-  }
-
-  let pi = new Array(n).fill(1.0);
-  let converged = false;
-
-  for (let iter = 0; iter < maxIterations; iter++) {
-    const piNext = new Array(n).fill(0);
-    for (let i = 0; i < n; i++) {
-      let denominator = 0;
-      for (let j = 0; j < n; j++) {
-        if (i !== j && N[i][j] > 0) denominator += N[i][j] / (pi[i] + pi[j]);
-      }
-      piNext[i] = denominator > 0 ? W[i] / denominator : pi[i];
-    }
-    const sumPi = piNext.reduce((a, b) => a + b, 0);
-    for (let i = 0; i < n; i++) piNext[i] = (piNext[i] / sumPi) * n;
-
-    let maxDiff = 0;
-    for (let i = 0; i < n; i++) maxDiff = Math.max(maxDiff, Math.abs(piNext[i] - pi[i]));
-    pi = piNext;
-    if (maxDiff < tolerance) { converged = true; break; }
-  }
-
-  const maxPi = Math.max(...pi);
-  const minPi = Math.min(...pi);
-  const range = maxPi - minPi || 1;
-
-  const rankings = projectIds.map((id, idx) => ({
-    id,
-    score: 50 + ((pi[idx] - minPi) / range) * 50,
-  }));
-  rankings.sort((a, b) => b.score - a.score);
-
-  return { rankings, converged };
+  const result = rankByBradleyTerry(projectIds, comparisons, { maxIterations, tolerance });
+  return {
+    converged: result.converged,
+    rankings: result.rankings.map((r) => ({ id: r.projectId, score: r.pairwiseScore })),
+  };
 }
 
 // ─── Tests ───────────────────────────────────────────────────────────────────

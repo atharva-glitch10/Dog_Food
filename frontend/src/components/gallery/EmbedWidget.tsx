@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import api from '../../services/api.ts';
 import { Project, Track, Event } from '../../types/index.ts';
 import { Search, ExternalLink, Github, Layers, Filter } from 'lucide-react';
+import { safeHref } from '../../utils/safeHref.ts';
 
 export const EmbedWidget: React.FC = () => {
   const { eventId, eventSlug } = useParams<{ eventId?: string; eventSlug?: string }>();
@@ -152,7 +153,7 @@ export const EmbedWidget: React.FC = () => {
                 <div className="flex items-center gap-2">
                   {proj.repoUrl && (
                     <a
-                      href={proj.repoUrl}
+                      href={safeHref(proj.repoUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-slate-400 hover:text-white transition-colors"
@@ -163,7 +164,7 @@ export const EmbedWidget: React.FC = () => {
                   )}
                   {proj.demoUrl && (
                     <a
-                      href={proj.demoUrl}
+                      href={safeHref(proj.demoUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-slate-400 hover:text-white transition-colors"

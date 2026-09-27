@@ -1,72 +1,81 @@
 import { describe, it, expect } from 'vitest';
+import { VotingEligibility } from '@prisma/client';
+import {
+  checkVoterEligibility,
+  checkVoteAllowance,
+  resolveVoteLimit,
+  DEFAULT_VOTES_PER_USER,
+} from '../../src/modules/voting/voting.rules.js';
 
 describe('Community Voting Anti-Abuse & Integrity Unit Tests', () => {
+  const projectMemberIds = ['user-alice', 'user-bob'];
+
   it('should detect and prevent self-voting when voter is a team member', () => {
-    const project = {
-      id: 'proj-123',
-      team: {
-        members: [{ userId: 'user-alice' }, { userId: 'user-bob' }],
-      },
-    };
+    const err = checkVoterEligibility({
+      eligibility: VotingEligibility.PUBLIC,
+      userId: 'user-alice',
+      projectMemberIds,
+    });
 
-    const votingUserId = 'user-alice';
-    const isAuthor = project.team.members.some((m) => m.userId === votingUserId);
-
-    expect(isAuthor).toBe(true);
     // Should trigger SELF_VOTE_PROHIBITED error
-    const canVote = !isAuthor;
+    expect(err?.code).toBe('SELF_VOTE_PROHIBITED');
+    const canVote = err === null;
     expect(canVote).toBe(false);
   });
 
   it('should prevent non-team members from being flagged as self-voters', () => {
-    const project = {
-      id: 'proj-123',
-      team: {
-        members: [{ userId: 'user-alice' }, { userId: 'user-bob' }],
-      },
-    };
+    const err = checkVoterEligibility({
+      eligibility: VotingEligibility.PUBLIC,
+      userId: 'user-charlie',
+      projectMemberIds,
+    });
 
-    const votingUserId = 'user-charlie';
-    const isAuthor = project.team.members.some((m) => m.userId === votingUserId);
-
-    expect(isAuthor).toBe(false);
+    expect(err).toBeNull();
   });
 
   it('should reject duplicate vote for the exact same project by same user', () => {
-    const existingVotes = [
-      { userId: 'user-1', projectId: 'proj-A' },
-      { userId: 'user-1', projectId: 'proj-B' },
-    ];
-
-    const newVote = { userId: 'user-1', projectId: 'proj-A' };
-    const isDuplicate = existingVotes.some(
-      (v) => v.userId === newVote.userId && v.projectId === newVote.projectId
-    );
-
-    expect(isDuplicate).toBe(true);
+    const existingVotes = ['proj-A', 'proj-B'];
+    const err = checkVoteAllowance(existingVotes, 'proj-A', 3);
+    expect(err?.code).toBe('DUPLICATE_VOTE');
+    expect(checkVoteAllowance(existingVotes, 'proj-C', 3)).toBeNull();
   });
 
   it('should enforce maximum votes per user limit', () => {
     const maxAllowedVotes = 3;
-    const userVotes = [
-      { id: 'v1', projectId: 'proj-1' },
-      { id: 'v2', projectId: 'proj-2' },
-      { id: 'v3', projectId: 'proj-3' },
-    ];
+    const userVotes = ['proj-1', 'proj-2', 'proj-3'];
 
-    const hasReachedLimit = userVotes.length >= maxAllowedVotes;
-    expect(hasReachedLimit).toBe(true);
+    const err = checkVoteAllowance(userVotes, 'proj-4', maxAllowedVotes);
+    expect(err?.code).toBe('MAX_VOTES_REACHED');
+    // The limit is checked before duplicates
+    expect(checkVoteAllowance(userVotes, 'proj-1', maxAllowedVotes)?.code).toBe('MAX_VOTES_REACHED');
+    expect(resolveVoteLimit(0)).toBe(DEFAULT_VOTES_PER_USER);
+    expect(resolveVoteLimit(null)).toBe(3);
+    expect(resolveVoteLimit(5)).toBe(5);
   });
 
   it('should enforce voting eligibility rules (VERIFIED_USERS vs PARTICIPANTS_ONLY)', () => {
-    const voter = { id: 'voter-1', isAuthenticated: false, isParticipant: false };
+    // Anonymous, non-participant voter
+    const anonymous = { userId: undefined, isEventParticipant: false, projectMemberIds };
 
     // When policy is VERIFIED_USERS
-    const verifiedAllowed = voter.isAuthenticated;
-    expect(verifiedAllowed).toBe(false);
+    const verified = checkVoterEligibility({ eligibility: VotingEligibility.VERIFIED_USERS, ...anonymous });
+    expect(verified?.code).toBe('AUTH_REQUIRED');
 
     // When policy is PARTICIPANTS_ONLY
-    const participantAllowed = voter.isAuthenticated && voter.isParticipant;
-    expect(participantAllowed).toBe(false);
+    const participantsOnly = checkVoterEligibility({ eligibility: VotingEligibility.PARTICIPANTS_ONLY, ...anonymous });
+    expect(participantsOnly?.code).toBe('AUTH_REQUIRED');
+
+    // Logged in but not on any team in the event
+    const notParticipant = checkVoterEligibility({
+      eligibility: VotingEligibility.PARTICIPANTS_ONLY,
+      userId: 'user-dan',
+      isEventParticipant: false,
+      projectMemberIds,
+    });
+    expect(notParticipant?.code).toBe('NOT_A_PARTICIPANT');
+    expect(notParticipant?.statusCode).toBe(403);
+
+    // PUBLIC allows anonymous votes
+    expect(checkVoterEligibility({ eligibility: VotingEligibility.PUBLIC, ...anonymous })).toBeNull();
   });
 });

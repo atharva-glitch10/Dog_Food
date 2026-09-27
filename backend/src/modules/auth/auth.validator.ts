@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { httpUrlOrUploadPath } from '../../utils/query.js';
 import { Role } from '@prisma/client';
 
 export const RegisterSchema = z.object({
@@ -17,5 +18,5 @@ export const LoginSchema = z.object({
 export const UpdateProfileSchema = z.object({
   name: z.string().min(2).optional(),
   bio: z.string().optional(),
-  avatarUrl: z.string().url().optional().or(z.literal('')),
+  avatarUrl: httpUrlOrUploadPath().optional().or(z.literal('')),
 });

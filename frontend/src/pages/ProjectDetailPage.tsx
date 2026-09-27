@@ -5,6 +5,7 @@ import { Project } from '../types/index.ts';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { useToast } from '../components/ui/Toast.tsx';
 import { ExternalLink, Github, Users, ThumbsUp, ArrowLeft, Tag, Calendar, CheckCircle2 } from 'lucide-react';
+import { safeHref } from '../utils/safeHref.ts';
 
 export const ProjectDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -89,7 +90,7 @@ export const ProjectDetailPage: React.FC = () => {
           <div className="flex items-center gap-2">
             {project.repoUrl && (
               <a
-                href={project.repoUrl}
+                href={safeHref(project.repoUrl)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-secondary text-sm py-2 px-4 flex items-center gap-2 font-medium"
@@ -100,7 +101,7 @@ export const ProjectDetailPage: React.FC = () => {
             )}
             {project.demoUrl && (
               <a
-                href={project.demoUrl}
+                href={safeHref(project.demoUrl)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-primary text-sm py-2 px-4 flex items-center gap-2 font-medium"

@@ -3,45 +3,20 @@
  * Tests duplicate criteria, missing criteria, out-of-range scores, and invalid values.
  */
 import { describe, it, expect } from 'vitest';
+import { computeWeightedTotal, ScoringCriterion as Criterion, ScoreInput } from '../../src/modules/scoring/scoring.engine.js';
+import { AppError } from '../../src/utils/response.js';
 
-// ─── Pure scoring logic extracted for unit testing ────────────────────────────
+const validateAndComputeScore = computeWeightedTotal;
 
-interface Criterion { id: string; title: string; weight: number; maxScore: number }
-interface ScoreInput { criterionId: string; score: number }
-
-function validateAndComputeScore(criteria: Criterion[], scores: ScoreInput[]): number {
-  const criteriaMap = new Map(criteria.map((c) => [c.id, c]));
-
-  // Check duplicates
-  const submittedIds = scores.map((s) => s.criterionId);
-  const uniqueIds = new Set(submittedIds);
-  if (uniqueIds.size !== submittedIds.length) {
-    throw new Error('DUPLICATE_CRITERION');
+/** Run fn and return the AppError code it throws (the engine's machine-readable error). */
+function thrownCode(fn: () => unknown): string {
+  try {
+    fn();
+  } catch (err) {
+    expect(err).toBeInstanceOf(AppError);
+    return (err as AppError).code;
   }
-
-  // Check all criteria present
-  const missingCriteria = criteria.filter((c) => !uniqueIds.has(c.id)).map((c) => c.title);
-  if (missingCriteria.length > 0) {
-    throw new Error(`MISSING_CRITERIA: ${missingCriteria.join(', ')}`);
-  }
-
-  let weightedTotal = 0;
-  for (const item of scores) {
-    const criterion = criteriaMap.get(item.criterionId);
-    if (!criterion) throw new Error('INVALID_CRITERION');
-
-    if (typeof item.score !== 'number' || !isFinite(item.score)) {
-      throw new Error('INVALID_SCORE');
-    }
-
-    if (item.score < 0 || item.score > criterion.maxScore) {
-      throw new Error(`SCORE_OUT_OF_BOUNDS: ${item.score} for ${criterion.title}`);
-    }
-
-    weightedTotal += (item.score / criterion.maxScore) * criterion.weight * 100;
-  }
-
-  return Math.min(100, Math.max(0, parseFloat(weightedTotal.toFixed(2))));
+  throw new Error('expected function to throw');
 }
 
 // ─── Test criteria fixture ────────────────────────────────────────────────────
@@ -81,7 +56,7 @@ describe('Scoring Validation', () => {
       { criterionId: 'c3', score: 7 },
       { criterionId: 'c4', score: 7 },
     ];
-    expect(() => validateAndComputeScore(CRITERIA, scores)).toThrow('DUPLICATE_CRITERION');
+    expect(thrownCode(() => validateAndComputeScore(CRITERIA, scores))).toBe('DUPLICATE_CRITERION');
   });
 
   it('rejects submission missing a required criterion', () => {
@@ -91,7 +66,7 @@ describe('Scoring Validation', () => {
       // c3 missing
       { criterionId: 'c4', score: 8 },
     ];
-    expect(() => validateAndComputeScore(CRITERIA, scores)).toThrow('MISSING_CRITERIA');
+    expect(thrownCode(() => validateAndComputeScore(CRITERIA, scores))).toBe('MISSING_CRITERIA');
   });
 
   it('rejects score above maxScore', () => {
@@ -99,7 +74,7 @@ describe('Scoring Validation', () => {
       criterionId: c.id,
       score: i === 0 ? 11 : 8, // 11 > 10
     }));
-    expect(() => validateAndComputeScore(CRITERIA, scores)).toThrow('SCORE_OUT_OF_BOUNDS');
+    expect(thrownCode(() => validateAndComputeScore(CRITERIA, scores))).toBe('SCORE_OUT_OF_BOUNDS');
   });
 
   it('rejects negative score', () => {
@@ -107,7 +82,7 @@ describe('Scoring Validation', () => {
       criterionId: c.id,
       score: i === 0 ? -1 : 8,
     }));
-    expect(() => validateAndComputeScore(CRITERIA, scores)).toThrow('SCORE_OUT_OF_BOUNDS');
+    expect(thrownCode(() => validateAndComputeScore(CRITERIA, scores))).toBe('SCORE_OUT_OF_BOUNDS');
   });
 
   it('rejects NaN score', () => {
@@ -115,7 +90,7 @@ describe('Scoring Validation', () => {
       criterionId: c.id,
       score: i === 0 ? NaN : 8,
     }));
-    expect(() => validateAndComputeScore(CRITERIA, scores)).toThrow('INVALID_SCORE');
+    expect(thrownCode(() => validateAndComputeScore(CRITERIA, scores))).toBe('INVALID_SCORE');
   });
 
   it('rejects Infinity score', () => {
@@ -123,7 +98,7 @@ describe('Scoring Validation', () => {
       criterionId: c.id,
       score: i === 0 ? Infinity : 8,
     }));
-    expect(() => validateAndComputeScore(CRITERIA, scores)).toThrow('INVALID_SCORE');
+    expect(thrownCode(() => validateAndComputeScore(CRITERIA, scores))).toBe('INVALID_SCORE');
   });
 
   it('rejects invalid criterion ID', () => {
@@ -135,6 +110,14 @@ describe('Scoring Validation', () => {
     ];
     // Will fail MISSING_CRITERIA for c4 first, but the point is it doesn't pass
     expect(() => validateAndComputeScore(CRITERIA, scores)).toThrow();
+  });
+
+  it('rejects an unknown criterion ID even when every rubric criterion is present', () => {
+    const scores: ScoreInput[] = [
+      ...CRITERIA.map((c) => ({ criterionId: c.id, score: 8 })),
+      { criterionId: 'UNKNOWN', score: 8 },
+    ];
+    expect(thrownCode(() => validateAndComputeScore(CRITERIA, scores))).toBe('INVALID_CRITERION');
   });
 
   it('allows boundary score of exactly maxScore', () => {

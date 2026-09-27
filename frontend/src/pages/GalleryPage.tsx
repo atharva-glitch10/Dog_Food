@@ -5,6 +5,7 @@ import { Project, Track, Event } from '../types/index.ts';
 import { Search, Filter, ThumbsUp, Github, ExternalLink, Sparkles, Layers } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth.tsx';
 import { useToast } from '../components/ui/Toast.tsx';
+import { safeHref } from '../utils/safeHref.ts';
 
 export const GalleryPage: React.FC = () => {
   const { eventSlug } = useParams<{ eventSlug: string }>();
@@ -210,12 +211,12 @@ export const GalleryPage: React.FC = () => {
                 <div className="px-6 py-3.5 bg-slate-50/70 dark:bg-slate-800/40 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-3">
                     {project.repoUrl && (
-                      <a href={project.repoUrl} target="_blank" rel="noopener noreferrer" className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors" title="Repository">
+                      <a href={safeHref(project.repoUrl)} target="_blank" rel="noopener noreferrer" className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors" title="Repository">
                         <Github className="w-4 h-4" />
                       </a>
                     )}
                     {project.demoUrl && (
-                      <a href={project.demoUrl} target="_blank" rel="noopener noreferrer" className="p-1 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" title="Live Demo">
+                      <a href={safeHref(project.demoUrl)} target="_blank" rel="noopener noreferrer" className="p-1 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" title="Live Demo">
                         <ExternalLink className="w-4 h-4" />
                       </a>
                     )}

@@ -1,6 +1,7 @@
 import { prisma } from '../../utils/prisma.js';
 import { AppError } from '../../utils/response.js';
 import { Role } from '@prisma/client';
+import { invalidateUserCache } from '../../middleware/requireAuth.js';
 
 export class JudgesService {
   async getJudgesByEvent(eventId: string) {
@@ -35,6 +36,7 @@ export class JudgesService {
         where: { id: user.id },
         data: { role: Role.JUDGE },
       });
+      invalidateUserCache(user.id);
     }
 
     const existingJudge = await prisma.judge.findUnique({

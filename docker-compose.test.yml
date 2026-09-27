@@ -1,0 +1,21 @@
+# Throwaway PostgreSQL for `npm run test:integration` (backend/).
+#   docker compose -f docker-compose.test.yml up -d
+#   cd backend && npm run test:integration
+# Data lives in tmpfs and disappears when the container stops.
+services:
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: dogfood_postgres_test
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: dogfood_test
+    ports:
+      - "127.0.0.1:5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d dogfood_test"]
+      interval: 2s
+      timeout: 5s
+      retries: 20

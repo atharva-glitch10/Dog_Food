@@ -12,7 +12,9 @@
     "prisma:push": "prisma db push",
     "prisma:seed": "tsx src/seed/demo-seed.ts",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:all": "npm test && npm run test:integration"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../services/api.ts';
 import { Trophy, Medal, ExternalLink, Github, ArrowLeft, Sparkles, TrendingUp, TrendingDown, Minus, Award } from 'lucide-react';
+import { safeHref } from '../utils/safeHref.ts';
 
 export const ResultsPage: React.FC = () => {
   const { eventSlug } = useParams<{ eventSlug: string }>();
@@ -272,7 +273,7 @@ export const ResultsPage: React.FC = () => {
                       <div className="flex items-center justify-end gap-2">
                         {project.repoUrl && (
                           <a
-                            href={project.repoUrl}
+                            href={safeHref(project.repoUrl)}
                             target="_blank"
                             rel="noreferrer"
                             className="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
@@ -283,7 +284,7 @@ export const ResultsPage: React.FC = () => {
                         )}
                         {project.demoUrl && (
                           <a
-                            href={project.demoUrl}
+                            href={safeHref(project.demoUrl)}
                             target="_blank"
                             rel="noreferrer"
                             className="p-1.5 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"

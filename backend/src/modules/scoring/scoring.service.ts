@@ -1,11 +1,9 @@
 import { prisma } from '../../utils/prisma.js';
 import { AppError } from '../../utils/response.js';
+import { computeWeightedTotal, ScoreInput } from './scoring.engine.js';
 import { Role, ProjectStatus, EventStatus } from '@prisma/client';
 
-export interface ScoreInput {
-  criterionId: string;
-  score: number;
-}
+export type { ScoreInput };
 
 export class ScoringService {
   async getEvaluation(projectId: string, judgeUserId: string, userRole: Role) {
@@ -118,61 +116,8 @@ export class ScoringService {
       throw new AppError('Conflict of Interest: You cannot evaluate your own project submission.', 403, 'SELF_EVALUATION_FORBIDDEN');
     }
 
-    // Map criteria for calculation
-    const criteriaMap = new Map(event.rubric.criteria.map((c) => [c.id, c]));
-
-    // Reject duplicate criterion IDs in a single submission
-    const submittedCriterionIds = data.scores.map((s) => s.criterionId);
-    const uniqueIds = new Set(submittedCriterionIds);
-    if (uniqueIds.size !== submittedCriterionIds.length) {
-      throw new AppError(
-        'Duplicate criterion IDs detected in submission. Each criterion must appear exactly once.',
-        400,
-        'DUPLICATE_CRITERION'
-      );
-    }
-
-    // Require all rubric criteria to be present
-    const missingCriteria = event.rubric.criteria
-      .filter((c) => !uniqueIds.has(c.id))
-      .map((c) => c.title);
-    if (missingCriteria.length > 0) {
-      throw new AppError(
-        `Missing required criteria: ${missingCriteria.join(', ')}`,
-        400,
-        'MISSING_CRITERIA'
-      );
-    }
-
-    let weightedTotal = 0;
-    for (const item of data.scores) {
-      const criterion = criteriaMap.get(item.criterionId);
-      if (!criterion) {
-        throw new AppError(`Invalid criterion ID: ${item.criterionId}`, 400, 'INVALID_CRITERION');
-      }
-
-      if (typeof item.score !== 'number' || !isFinite(item.score)) {
-        throw new AppError(
-          `Score for criterion '${criterion.title}' must be a finite number.`,
-          400,
-          'INVALID_SCORE'
-        );
-      }
-
-      if (item.score < 0 || item.score > criterion.maxScore) {
-        throw new AppError(
-          `Score for '${criterion.title}' must be between 0 and ${criterion.maxScore}. Received: ${item.score}`,
-          400,
-          'SCORE_OUT_OF_BOUNDS'
-        );
-      }
-
-      // Weighted contribution = (score / maxScore) * weight * 100
-      const contribution = (item.score / criterion.maxScore) * criterion.weight * 100;
-      weightedTotal += contribution;
-    }
-
-    weightedTotal = Math.min(100, Math.max(0, parseFloat(weightedTotal.toFixed(2))));
+    // Validate scores against the rubric and compute the 0-100 weighted total (pure engine)
+    const weightedTotal = computeWeightedTotal(event.rubric.criteria, data.scores);
 
     const isDraft = Boolean(data.isDraft);
     const isPrivileged = userRole === Role.ORGANIZER || userRole === Role.ADMIN;

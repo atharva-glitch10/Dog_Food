@@ -9,7 +9,8 @@ export const SubmitEvaluationSchema = z.object({
     .array(
       z.object({
         criterionId: z.string().min(1).max(64),
-        score: z.number().finite(),
+        // Type/range checks stay in the scoring engine so it can return INVALID_SCORE / SCORE_OUT_OF_BOUNDS.
+        score: z.any(),
       })
     )
     .max(100),

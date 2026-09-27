@@ -45,3 +45,25 @@ export function paginationSchema(defaultLimit: number, maxLimit: number) {
     limit: intParam(defaultLimit, 1, maxLimit),
   });
 }
+
+/**
+ * Absolute http(s) URL. z.string().url() alone accepts `javascript:` and
+ * `data:` URLs, which become stored XSS when rendered as links.
+ */
+export function httpUrl(message = 'Must be an http(s) URL') {
+  return z
+    .string()
+    .trim()
+    .max(2048)
+    .url(message)
+    .refine((value) => /^https?:\/\//i.test(value), message);
+}
+
+/** An http(s) URL or a path to a file served from /uploads. */
+export function httpUrlOrUploadPath(message = 'Must be an http(s) URL or an /uploads/ path') {
+  return z
+    .string()
+    .trim()
+    .max(2048)
+    .refine((value) => /^https?:\/\//i.test(value) || /^\/uploads\/[\w.-]+$/.test(value), message);
+}

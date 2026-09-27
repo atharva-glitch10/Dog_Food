@@ -1,7 +1,8 @@
 /**
  * Phase 10 Regression Tests — Production Secret Validation
  */
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
+import { validateSecret, KNOWN_INSECURE_SECRETS } from '../../src/config/index.js';
 
 const KNOWN_BAD_SECRETS = [
   'dogfood-insecure-secret-key-change-in-prod-2026',
@@ -10,27 +11,32 @@ const KNOWN_BAD_SECRETS = [
   'secret',
   'changeme',
   'password',
+  // Former docker-compose / .env.example fallbacks
+  'd09f00d2026_jwt_secret_offline_eval_secure_key_32chars_min',
+  'd09f00d2026_cookie_secret_offline_eval_secure_key_32chars',
+  'd09f00d2026_cookie_secret_offline_eval_secure_key_32chars_min',
 ];
 
 const GOOD_SECRET = 'a'.repeat(32); // 32-char secret that is not on the blocklist
 
+/** Same signature as before, now delegating to the real validator in src/config. */
 function simulateRequireSecret(
   envValue: string | undefined,
   fallback: string,
   isProd: boolean,
-  knownBad: Set<string>
+  knownBad: ReadonlySet<string>
 ): string {
-  if (!envValue) {
-    if (isProd) throw new Error('MISSING_SECRET');
-    return fallback;
-  }
-  if (isProd && knownBad.has(envValue)) throw new Error('INSECURE_SECRET');
-  if (isProd && envValue.length < 32) throw new Error('WEAK_SECRET');
-  return envValue;
+  return validateSecret('TEST_SECRET', envValue, fallback, isProd, knownBad);
 }
 
 describe('Production Secret Validation', () => {
-  const knownBad = new Set(KNOWN_BAD_SECRETS);
+  // The product's real blocklist
+  const knownBad = KNOWN_INSECURE_SECRETS;
+
+  it('blocklist contains every known placeholder, including the old compose fallbacks', () => {
+    for (const bad of KNOWN_BAD_SECRETS) expect(knownBad.has(bad)).toBe(true);
+  });
+
 
   it('rejects missing JWT_SECRET in production', () => {
     expect(() => simulateRequireSecret(undefined, 'fallback', true, knownBad))

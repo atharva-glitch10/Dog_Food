@@ -1,30 +1,7 @@
 import { prisma } from '../../utils/prisma.js';
 import { AppError } from '../../utils/response.js';
 import { ProjectStatus } from '@prisma/client';
-
-/**
- * Deterministic 32-bit Pseudo-Random Number Generator (Mulberry32).
- * 
- * WHY MULBERRY32?
- * Mulberry32 provides uniform pseudo-random distributions with a compact 32-bit internal state.
- * Using a deterministic seeded PRNG ensures:
- * 1. Reproducibility: Given the same seed, identical judge-project assignments are produced.
- * 2. Auditability: Contest organizers or third-party adjudicators can independently verify the run.
- * 3. Fairness: Tie-breaking among judges with identical workloads is strictly pseudo-random,
- *    eliminating alphabetical or database-insertion bias.
- */
-class Mulberry32 {
-  private s: number;
-  constructor(seed: number) {
-    this.s = seed >>> 0;
-  }
-  next(): number {
-    let t = (this.s += 0x6d2b79f5);
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  }
-}
+import { greedyAssign } from './assignment.engine.js';
 
 export class AssignmentService {
   /**
@@ -84,54 +61,13 @@ export class AssignmentService {
       throw new AppError('No submitted projects to assign.', 400, 'NO_PROJECTS');
     }
 
-    // 3. Build conflict map: projectId -> Set of prohibited judgeIds
-    const conflictMap = new Map<string, Set<string>>();
-    for (const project of projects) {
-      const prohibitedJudges = new Set<string>();
-      const authorUserIds = new Set(project.team.members.map((m) => m.userId));
-
-      for (const judge of judges) {
-        if (authorUserIds.has(judge.userId)) {
-          prohibitedJudges.add(judge.id);
-        }
-      }
-      conflictMap.set(project.id, prohibitedJudges);
-    }
-
-    // 4. Run deterministic load-balanced round-robin assignment
-    const prng = new Mulberry32(seed);
-    const judgeLoads = new Map<string, number>();
-    const projectAssignments = new Map<string, string[]>();
-
-    for (const j of judges) judgeLoads.set(j.id, 0);
-    for (const p of projects) projectAssignments.set(p.id, []);
-
-    for (let round = 0; round < targetPerProject; round++) {
-      for (const project of projects) {
-        const assigned = new Set(projectAssignments.get(project.id)!);
-        const prohibited = conflictMap.get(project.id) || new Set();
-
-        const candidates = judges.filter(
-          (j) =>
-            !assigned.has(j.id) &&
-            !prohibited.has(j.id) &&
-            judgeLoads.get(j.id)! < j.capacity
-        );
-
-        if (candidates.length === 0) continue;
-
-        // Sort candidates: lowest workload first, PRNG tie-breaker
-        candidates.sort((a, b) => {
-          const loadDiff = judgeLoads.get(a.id)! - judgeLoads.get(b.id)!;
-          if (loadDiff !== 0) return loadDiff;
-          return prng.next() - 0.5;
-        });
-
-        const selected = candidates[0];
-        projectAssignments.get(project.id)!.push(selected.id);
-        judgeLoads.set(selected.id, judgeLoads.get(selected.id)! + 1);
-      }
-    }
+    // 3-4. Conflict-of-interest filtering + deterministic load-balanced round-robin (pure engine)
+    const { projectAssignments, judgeLoads } = greedyAssign(
+      judges.map((j) => ({ id: j.id, userId: j.userId, capacity: j.capacity })),
+      projects.map((p) => ({ id: p.id, authorUserIds: p.team.members.map((m) => m.userId) })),
+      targetPerProject,
+      seed
+    );
 
     // Compute coverage diagnostics
     let fullyCoveredCount = 0;
