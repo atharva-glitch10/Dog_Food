@@ -1,9 +1,11 @@
 import { Router } from 'express';
+import { validateBody } from '../../middleware/validate.js';
 import { tracksPrizesController } from './tracks-prizes.controller.js';
 import { requireAuth } from '../../middleware/requireAuth.js';
 import { requireRole } from '../../middleware/requireRole.js';
 import { logAuditAction } from '../../middleware/auditLogger.js';
 import { Role } from '@prisma/client';
+import { CreateTrackSchema, UpdateTrackSchema, CreatePrizeSchema, UpdatePrizeSchema } from './tracks-prizes.validator.js';
 
 const router = Router();
 
@@ -14,6 +16,7 @@ router.post(
   requireAuth,
   requireRole([Role.ORGANIZER, Role.ADMIN]),
   logAuditAction('TRACK_CREATED', 'Track', undefined, (req) => req.params.eventId),
+  validateBody(CreateTrackSchema),
   tracksPrizesController.createTrack
 );
 router.put(
@@ -21,6 +24,7 @@ router.put(
   requireAuth,
   requireRole([Role.ORGANIZER, Role.ADMIN]),
   logAuditAction('TRACK_UPDATED', 'Track', (req) => req.params.trackId),
+  validateBody(UpdateTrackSchema),
   tracksPrizesController.updateTrack
 );
 router.delete(
@@ -38,6 +42,7 @@ router.post(
   requireAuth,
   requireRole([Role.ORGANIZER, Role.ADMIN]),
   logAuditAction('PRIZE_CREATED', 'Prize', undefined, (req) => req.params.eventId),
+  validateBody(CreatePrizeSchema),
   tracksPrizesController.createPrize
 );
 router.put(
@@ -45,6 +50,7 @@ router.put(
   requireAuth,
   requireRole([Role.ORGANIZER, Role.ADMIN]),
   logAuditAction('PRIZE_UPDATED', 'Prize', (req) => req.params.prizeId),
+  validateBody(UpdatePrizeSchema),
   tracksPrizesController.updatePrize
 );
 router.delete(

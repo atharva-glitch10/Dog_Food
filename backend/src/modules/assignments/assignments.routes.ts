@@ -1,9 +1,11 @@
 import { Router } from 'express';
+import { validateBody } from '../../middleware/validate.js';
 import { assignmentsController } from './assignments.controller.js';
 import { requireAuth } from '../../middleware/requireAuth.js';
 import { requireRole } from '../../middleware/requireRole.js';
 import { logAuditAction } from '../../middleware/auditLogger.js';
 import { Role } from '@prisma/client';
+import { AutoAssignSchema, ManualAssignSchema } from './assignments.validator.js';
 
 const router = Router();
 
@@ -12,6 +14,7 @@ router.post(
   requireAuth,
   requireRole([Role.ORGANIZER, Role.ADMIN]),
   logAuditAction('JUDGE_AUTO_ASSIGNED', 'JudgeAssignment', undefined, (req) => req.params.eventId),
+  validateBody(AutoAssignSchema),
   assignmentsController.autoAssign
 );
 
@@ -20,6 +23,7 @@ router.post(
   requireAuth,
   requireRole([Role.ORGANIZER, Role.ADMIN]),
   logAuditAction('JUDGE_MANUAL_ASSIGNED', 'JudgeAssignment', undefined, (req) => req.params.eventId),
+  validateBody(ManualAssignSchema),
   assignmentsController.manualAssign
 );
 

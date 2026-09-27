@@ -1,9 +1,27 @@
 import { Request, Response, NextFunction } from 'express';
+import multer from 'multer';
+import { Prisma } from '@prisma/client';
 import { AppError, sendError } from '../utils/response.js';
 
 export function errorHandler(err: any, req: Request, res: Response, next: NextFunction) {
   if (err instanceof AppError) {
     return sendError(res, err);
+  }
+
+  // Upload errors (file too large, unexpected field, ...) are client errors
+  if (err instanceof multer.MulterError) {
+    const status = err.code === 'LIMIT_FILE_SIZE' ? 413 : 400;
+    return sendError(res, new AppError(err.message, status, err.code));
+  }
+
+  // Common Prisma request errors are client errors, not 500s
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    if (err.code === 'P2025') {
+      return sendError(res, new AppError('The requested record was not found.', 404, 'NOT_FOUND'));
+    }
+    if (err.code === 'P2002') {
+      return sendError(res, new AppError('A record with these values already exists.', 409, 'CONFLICT'));
+    }
   }
 
   // Handle SyntaxError for bad JSON in request body

@@ -40,7 +40,11 @@ export class ExportsController {
 
   async importBulk(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await bulkImportService.importUsers(req.body.users || []);
+      const dryRun = req.body?.dryRun === true || req.query.dryRun === 'true';
+      const result = await bulkImportService.importUsers(req.body?.users ?? [], {
+        dryRun,
+        importerRole: req.user?.role,
+      });
       return sendSuccess(res, result, 200);
     } catch (err) {
       next(err);

@@ -3,7 +3,7 @@ import { eventsController } from './events.controller.js';
 import { requireAuth, optionalAuth } from '../../middleware/requireAuth.js';
 import { requireRole } from '../../middleware/requireRole.js';
 import { validateBody } from '../../middleware/validate.js';
-import { CreateEventSchema, UpdateEventSchema } from './events.validator.js';
+import { CreateEventSchema, UpdateEventSchema, UpdateEventStatusSchema } from './events.validator.js';
 import { logAuditAction } from '../../middleware/auditLogger.js';
 import { Role } from '@prisma/client';
 
@@ -35,6 +35,7 @@ router.patch(
   requireAuth,
   requireRole([Role.ORGANIZER, Role.ADMIN]),
   logAuditAction('EVENT_STATUS_UPDATED', 'Event', (req) => req.params.id),
+  validateBody(UpdateEventStatusSchema),
   eventsController.updateStatus
 );
 

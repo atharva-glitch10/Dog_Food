@@ -107,7 +107,7 @@ export const OrganizerDashboardPage: React.FC = () => {
     if (!confirm) return;
 
     try {
-      const res: any = await api.post(`/events/${event.id}/publish-results`);
+      const res: any = await api.post(`/events/${event.id}/results/publish`);
       if (res.success) {
         toastSuccess('Official event results published successfully!');
         loadAll();
@@ -120,10 +120,11 @@ export const OrganizerDashboardPage: React.FC = () => {
   const handleGenerateCertificates = async (type: 'PARTICIPANT' | 'JUDGE' | 'WINNER') => {
     if (!event) return;
     try {
-      const res: any = await api.post(`/events/${event.id}/certificates/batch`, { type });
+      const res: any = await api.post(`/events/${event.id}/certificates/generate`, { type });
       if (res.success) {
-        setCertMsg(`Generated ${res.data.issuedCount} cryptographic certificates (${type}).`);
-        toastSuccess(`Successfully issued ${res.data.issuedCount} certificates`);
+        const issuedCount = res.data.certificates?.length ?? 0;
+        setCertMsg(`Generated ${issuedCount} cryptographic certificates (${type}).`);
+        toastSuccess(`Successfully issued ${issuedCount} certificates`);
       }
     } catch (err: any) {
       toastError(err.message || 'Certificate generation failed');

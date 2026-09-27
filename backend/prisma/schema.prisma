@@ -423,6 +423,8 @@ model Vote {
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@unique([eventId, userId, projectId])
+  // Anonymous votes (userId NULL) are additionally unique on (eventId, ipAddress, projectId)
+  // via a partial index created in prisma/migrations/20260927010000_anonymous_vote_unique.
   @@index([eventId, projectId])           // vote tally groupBy
   @@index([eventId, ipAddress, projectId]) // Added: anti-abuse IP-based duplicate check
   @@index([userId])

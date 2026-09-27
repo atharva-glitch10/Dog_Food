@@ -79,7 +79,7 @@ export const GalleryPage: React.FC = () => {
 
     setVotingLoading(projectId);
     try {
-      const res: any = await api.post(`/events/${event.id}/vote`, { projectId });
+      const res: any = await api.post(`/events/${event.id}/vote/${projectId}`);
       if (res.success) {
         setVotedProjects((prev) => new Set([...prev, projectId]));
         toastSuccess('Your community vote has been recorded!');

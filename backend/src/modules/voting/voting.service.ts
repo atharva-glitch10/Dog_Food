@@ -1,6 +1,6 @@
 import { prisma } from '../../utils/prisma.js';
 import { AppError } from '../../utils/response.js';
-import { VotingEligibility, Role } from '@prisma/client';
+import { Prisma, VotingEligibility } from '@prisma/client';
 
 export class VotingService {
   async castVote(
@@ -57,43 +57,54 @@ export class VotingService {
       }
     }
 
-    // Anti-Abuse 2: Check max votes per user / IP
+    // Anti-Abuse 2 + 3: per-voter limit and duplicate prevention.
+    // The count and insert run in one transaction under a per-voter advisory
+    // lock, so concurrent requests from the same voter cannot both pass the
+    // limit check. Duplicates are also blocked by unique indexes (userId-based
+    // and, for anonymous votes, a partial index on ipAddress); a race that
+    // reaches the insert surfaces as P2002 and is mapped to DUPLICATE_VOTE.
     const maxVotes = event.settings.votesPerUser || 3;
-    const existingVotesCount = await prisma.vote.count({
-      where: {
-        eventId,
-        ...(userId ? { userId } : { ipAddress }),
-      },
-    });
+    // Anonymous voters are identified by IP across all votes from that address.
+    const voterFilter = userId ? { userId } : { ipAddress };
+    const lockKey = `vote:${eventId}:${userId ? `user:${userId}` : `ip:${ipAddress}`}`;
 
-    if (existingVotesCount >= maxVotes) {
-      throw new AppError(`You have reached the maximum allowed limit of ${maxVotes} votes for this event.`, 400, 'MAX_VOTES_REACHED');
+    try {
+      return await prisma.$transaction(async (tx) => {
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${lockKey}))`;
+
+        const existingVotesCount = await tx.vote.count({ where: { eventId, ...voterFilter } });
+        if (existingVotesCount >= maxVotes) {
+          throw new AppError(
+            `You have reached the maximum allowed limit of ${maxVotes} votes for this event.`,
+            400,
+            'MAX_VOTES_REACHED'
+          );
+        }
+
+        const existingVoteForProject = await tx.vote.findFirst({
+          where: { eventId, projectId, ...voterFilter },
+          select: { id: true },
+        });
+        if (existingVoteForProject) {
+          throw new AppError('You have already cast a vote for this project.', 400, 'DUPLICATE_VOTE');
+        }
+
+        return tx.vote.create({
+          data: {
+            eventId,
+            projectId,
+            userId: userId || null,
+            ipAddress,
+            userAgent: userAgent || null,
+          },
+        });
+      });
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+        throw new AppError('You have already cast a vote for this project.', 400, 'DUPLICATE_VOTE');
+      }
+      throw err;
     }
-
-    // Anti-Abuse 3: Duplicate vote prevention
-    const existingVoteForProject = await prisma.vote.findFirst({
-      where: {
-        eventId,
-        projectId,
-        ...(userId ? { userId } : { ipAddress }),
-      },
-    });
-
-    if (existingVoteForProject) {
-      throw new AppError('You have already cast a vote for this project.', 400, 'DUPLICATE_VOTE');
-    }
-
-    const vote = await prisma.vote.create({
-      data: {
-        eventId,
-        projectId,
-        userId: userId || null,
-        ipAddress,
-        userAgent: userAgent || null,
-      },
-    });
-
-    return vote;
   }
 
   async getMyVotes(eventId: string, userId?: string, ipAddress?: string) {

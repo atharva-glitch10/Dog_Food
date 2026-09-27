@@ -1,20 +1,37 @@
 import { prisma } from '../../utils/prisma.js';
 import { AppError } from '../../utils/response.js';
 
-export class CsvExportService {
-  private escapeCsvCell(cell: any): string {
-    if (cell === null || cell === undefined) return '""';
-    const str = String(cell);
-    if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
-      return `"${str.replace(/"/g, '""')}"`;
-    }
-    return `"${str}"`;
-  }
+// Cells starting with these characters are interpreted as formulas by Excel,
+// LibreOffice and Google Sheets (CSV/formula injection).
+const FORMULA_TRIGGERS = ['=', '+', '-', '@', '\t', '\r'];
 
+/**
+ * Neutralise spreadsheet formula injection by prefixing a single quote to
+ * user-controlled text that begins with a formula trigger character.
+ * Real numbers (e.g. negative z-scores) are left untouched.
+ */
+export function neutralizeFormula(cell: unknown): string {
+  if (cell === null || cell === undefined) return '';
+  if (typeof cell === 'number' || typeof cell === 'bigint') return String(cell);
+  const str = String(cell);
+  return str.length > 0 && FORMULA_TRIGGERS.includes(str[0]) ? `'${str}` : str;
+}
+
+/** Quote a single CSV cell (RFC 4180) after formula neutralisation. */
+export function escapeCsvCell(cell: unknown): string {
+  if (cell === null || cell === undefined) return '""';
+  return `"${neutralizeFormula(cell).replace(/"/g, '""')}"`;
+}
+
+export function toCsvString(headers: string[], rows: unknown[][]): string {
+  const headerLine = headers.map((h) => escapeCsvCell(h)).join(',');
+  const rowLines = rows.map((row) => row.map((cell) => escapeCsvCell(cell)).join(','));
+  return [headerLine, ...rowLines].join('\r\n');
+}
+
+export class CsvExportService {
   private toCsvString(headers: string[], rows: (string | number | null | undefined)[][]): string {
-    const headerLine = headers.map((h) => this.escapeCsvCell(h)).join(',');
-    const rowLines = rows.map((row) => row.map((cell) => this.escapeCsvCell(cell)).join(','));
-    return [headerLine, ...rowLines].join('\r\n');
+    return toCsvString(headers, rows);
   }
 
   async exportParticipants(eventId: string): Promise<string> {

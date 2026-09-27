@@ -1,9 +1,11 @@
 import { Router } from 'express';
+import { validateBody } from '../../middleware/validate.js';
 import { scoringController } from './scoring.controller.js';
 import { requireAuth } from '../../middleware/requireAuth.js';
 import { requireRole } from '../../middleware/requireRole.js';
 import { logAuditAction } from '../../middleware/auditLogger.js';
 import { Role } from '@prisma/client';
+import { SubmitEvaluationSchema } from './scoring.validator.js';
 
 const router = Router();
 
@@ -18,6 +20,7 @@ router.post(
   requireAuth,
   requireRole([Role.JUDGE, Role.ORGANIZER, Role.ADMIN]),
   logAuditAction('EVALUATION_SUBMITTED', 'Evaluation', (req) => req.body?.projectId, (req) => req.body?.eventId),
+  validateBody(SubmitEvaluationSchema),
   scoringController.submitEvaluation
 );
 

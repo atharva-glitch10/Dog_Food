@@ -2,21 +2,19 @@ import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../../utils/prisma.js';
 import { sendSuccess } from '../../utils/response.js';
 import { ProjectStatus, Prisma } from '@prisma/client';
+import { paginationSchema, optionalStringParam, optionalEnumParam } from '../../utils/query.js';
+
+const GalleryQuerySchema = paginationSchema(12, 50).extend({
+  search: optionalStringParam(200),
+  trackId: optionalStringParam(64),
+  sort: optionalEnumParam(['title', 'date', 'randomized']),
+});
 
 export class GalleryController {
   async getGallery(req: Request, res: Response, next: NextFunction) {
     try {
       const { eventId } = req.params;
-      const { search, trackId, sort, page = '1', limit = '12' } = req.query as {
-        search?: string;
-        trackId?: string;
-        sort?: 'title' | 'date' | 'randomized';
-        page?: string;
-        limit?: string;
-      };
-
-      const pageNum = Math.max(1, parseInt(page, 10));
-      const limitNum = Math.min(50, Math.max(1, parseInt(limit, 10)));
+      const { search, trackId, sort, page: pageNum, limit: limitNum } = GalleryQuerySchema.parse(req.query);
       let resolvedEventId = eventId;
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(eventId);
       if (!isUuid) {

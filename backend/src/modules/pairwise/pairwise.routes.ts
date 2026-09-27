@@ -1,8 +1,10 @@
 import { Router } from 'express';
+import { validateBody } from '../../middleware/validate.js';
 import { pairwiseController } from './pairwise.controller.js';
 import { requireAuth } from '../../middleware/requireAuth.js';
 import { requireRole } from '../../middleware/requireRole.js';
 import { Role } from '@prisma/client';
+import { RecordComparisonSchema } from './pairwise.validator.js';
 
 const router = Router();
 
@@ -17,6 +19,7 @@ router.post(
   '/events/:eventId/pairwise/compare',
   requireAuth,
   requireRole([Role.JUDGE, Role.ORGANIZER, Role.ADMIN]),
+  validateBody(RecordComparisonSchema),
   pairwiseController.recordComparison
 );
 

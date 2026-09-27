@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../../src/app.js';
-import { CsvExportService } from '../../src/modules/exports/csv.service.js';
+import { CsvExportService, escapeCsvCell } from '../../src/modules/exports/csv.service.js';
 
 describe('Judging & Integrity End-to-End Workflow Tests', () => {
   const app = createApp();
@@ -73,7 +73,7 @@ describe('Judging & Integrity End-to-End Workflow Tests', () => {
   });
 
   it('4. should properly escape CSV cells containing quotes, commas, and newlines', () => {
-    const escapeMethod = (csvService as any).escapeCsvCell;
+    const escapeMethod = escapeCsvCell;
 
     expect(escapeMethod('Simple Text')).toBe('"Simple Text"');
     expect(escapeMethod('Text, with comma')).toBe('"Text, with comma"');

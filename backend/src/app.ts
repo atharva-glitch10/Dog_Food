@@ -30,6 +30,7 @@ import webhooksRoutes from './modules/webhooks/webhooks.routes.js';
 import auditRoutes from './modules/audit/audit.routes.js';
 import usersRoutes from './modules/users/users.routes.js';
 import mediaRoutes from './modules/media/media.routes.js';
+import { INLINE_IMAGE_EXTENSIONS } from './modules/media/file-type.js';
 
 export function createApp() {
   const app = express();
@@ -103,7 +104,23 @@ export function createApp() {
   if (!fs.existsSync(uploadsPath)) {
     fs.mkdirSync(uploadsPath, { recursive: true });
   }
-  app.use('/uploads', express.static(uploadsPath));
+  // Uploaded files are user content: never let the browser sniff them into
+  // HTML/JS, sandbox them, and force a download for anything that is not an
+  // allowlisted raster image (e.g. PDFs, or legacy files from older versions).
+  app.use(
+    '/uploads',
+    express.static(uploadsPath, {
+      dotfiles: 'deny',
+      index: false,
+      setHeaders: (res, filePath) => {
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('Content-Security-Policy', "default-src 'none'; img-src 'self'; sandbox");
+        if (!INLINE_IMAGE_EXTENSIONS.has(path.extname(filePath).toLowerCase())) {
+          res.setHeader('Content-Disposition', 'attachment');
+        }
+      },
+    })
+  );
 
   // Health check
   app.get('/api/health', (req, res) => {

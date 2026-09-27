@@ -38,3 +38,7 @@ export const CreateEventSchema = EventBaseSchema.refine((data) => new Date(data.
 export const UpdateEventSchema = EventBaseSchema.partial().extend({
   status: z.nativeEnum(EventStatus).optional(),
 });
+
+export const UpdateEventStatusSchema = z.object({
+  status: z.nativeEnum(EventStatus),
+});

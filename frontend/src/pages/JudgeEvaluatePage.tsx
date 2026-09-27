@@ -17,6 +17,7 @@ export const JudgeEvaluatePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [savedDraft, setSavedDraft] = useState(false);
 
   useEffect(() => {
@@ -69,51 +70,11 @@ export const JudgeEvaluatePage: React.FC = () => {
           }
 
           if (!eVal?.success || !pVal?.success) {
-            const fallbackEvent = {
-              id: 'demo-event',
-              name: 'National Innovation Challenge 2026',
-              slug: eventSlug || 'demo',
-              rubric: {
-                name: 'Standard Hackathon Rubric',
-                criteria: [
-                  { id: 'crit-1', title: 'Impact & Relevance', description: 'Real-world value, problem significance, and community benefit', weight: 0.3, maxScore: 10 },
-                  { id: 'crit-2', title: 'Technical Execution', description: 'Code architecture, test quality, scalability, and system design', weight: 0.3, maxScore: 10 },
-                  { id: 'crit-3', title: 'Innovation & Novelty', description: 'Originality of solution and creative application of technology', weight: 0.2, maxScore: 10 },
-                  { id: 'crit-4', title: 'Design & Presentation', description: 'UX polish, intuitive flow, visual accessibility, and documentation', weight: 0.2, maxScore: 10 },
-                ]
-              }
-            };
-            const fallbackProject = {
-              id: projectId || 'demo-project',
-              title: 'Aegis AI: Autonomous Incident Defense',
-              tagline: 'Self-healing cloud infrastructure and automated mitigation in under 8 seconds.',
-              problemStatement: 'Production incident resolution is plagued by high MTTR, cognitive fatigue, and fragile alerting pipelines that lead to widespread outages.',
-              solutionDescription: 'Aegis AI couples eBPF kernel telemetry with causal reasoning models to pinpoint service degradation, generate deterministic safe rollbacks, and verify health automatically.',
-              technologies: ['React', 'TypeScript', 'Rust', 'Docker', 'eBPF', 'PostgreSQL'],
-              repoUrl: 'https://github.com/aegis-defense/core',
-              demoUrl: 'https://aegis-defense.dev',
-              team: {
-                name: 'Neural Nexus',
-                members: [
-                  { id: 'm1', user: { name: 'Aarav Sharma' }, role: 'LEADER' },
-                  { id: 'm2', user: { name: 'Priya Patel' }, role: 'MEMBER' },
-                  { id: 'm3', user: { name: 'Rohan Deshmukh' }, role: 'MEMBER' },
-                ]
-              },
-              track: { name: 'AI & Cloud Infrastructure', colorHex: '#6366f1' }
-            };
-            setEvent((prev: any) => prev || fallbackEvent);
-            setProject((prev: any) => prev || fallbackProject);
-            setScores((prev) => {
-              if (Object.keys(prev).length > 0) return prev;
-              return { 'crit-1': 8, 'crit-2': 9, 'crit-3': 7, 'crit-4': 8 };
-            });
-            setAssignments([
-              { id: 'a1', isCompleted: true, project: { id: 'p0', title: 'MedPulse Diagnostic AI' } },
-              { id: 'a2', isCompleted: false, project: fallbackProject },
-              { id: 'a3', isCompleted: false, project: { id: 'p2', title: 'EcoTrack Carbon Ledger' } },
-              { id: 'a4', isCompleted: false, project: { id: 'p3', title: 'CivicVoice Multilingual' } },
-            ]);
+            setLoadError(
+              (eventSettled.status === 'rejected' && (eventSettled.reason as any)?.message) ||
+                (projSettled.status === 'rejected' && (projSettled.reason as any)?.message) ||
+                'Could not load this project for evaluation.'
+            );
           }
         })
         .catch((err) => {
@@ -150,7 +111,9 @@ export const JudgeEvaluatePage: React.FC = () => {
     }));
 
     try {
-      const res: any = await api.post(`/evaluations/project/${project.id}`, {
+      const res: any = await api.post('/evaluations', {
+        eventId: event.id,
+        projectId: project.id,
         scores: scoresPayload,
         feedback,
         isDraft,
@@ -182,14 +145,14 @@ export const JudgeEvaluatePage: React.FC = () => {
     );
   }
 
-  if (!project || !event) {
+  if (loadError || !project || !event) {
     return (
       <div className="max-w-xl mx-auto py-20 text-center space-y-4">
         <div className="console-panel p-8 space-y-4">
           <AlertCircle className="w-8 h-8 text-rose-500 mx-auto" />
           <h2 className="text-lg font-bold text-slate-900 dark:text-white">Project Not Found</h2>
           <p className="text-sm text-slate-500 font-sans">
-            The target project was not found in your assigned evaluation queue.
+            {loadError || 'The target project was not found in your assigned evaluation queue.'}
           </p>
           <Link to={`/dashboard/judge/${eventSlug}`} className="btn-secondary mt-2">
             Return to Queue

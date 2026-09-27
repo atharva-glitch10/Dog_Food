@@ -8,84 +8,19 @@ export const ResultsPage: React.FC = () => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   useEffect(() => {
     if (eventSlug) {
       api.get(`/events/${eventSlug}/results`)
         .then((res: any) => {
-          if (res.success && res.data?.rankings?.length > 0) {
-            setData(res.data);
-          } else {
-            throw new Error('No rankings from event endpoint');
-          }
+          if (res.success) setData(res.data);
         })
-        .catch(async () => {
-          try {
-            const fallback: any = await api.get(`/results/${eventSlug}`);
-            if (fallback.success && fallback.data?.rankings?.length > 0) {
-              setData(fallback.data);
-              return;
-            }
-          } catch (err) {
-            // fallback
+        .catch((err: any) => {
+          // RESULTS_NOT_PUBLISHED is the normal "pending" state; anything else is a real error.
+          if (err?.code !== 'RESULTS_NOT_PUBLISHED') {
+            setErrorMessage(err?.message || 'Could not load results.');
           }
-
-          // Provide demo rankings fallback
-          setData({
-            event: {
-              name: 'National Innovation Challenge 2026',
-              slug: eventSlug,
-            },
-            rankings: [
-              {
-                id: 'p1',
-                rank: 1,
-                title: 'Aegis AI: Autonomous Incident Defense',
-                tagline: 'Self-healing cloud infrastructure and automated mitigation in under 8 seconds.',
-                team: { name: 'Neural Nexus' },
-                track: { name: 'AI & Cloud Infrastructure' },
-                technologies: ['React', 'TypeScript', 'Rust', 'Docker', 'eBPF'],
-                normalizedScore: 94.6,
-                rawScore: 92.0,
-                evaluationsCount: 4,
-              },
-              {
-                id: 'p2',
-                rank: 2,
-                title: 'MedPulse Diagnostic AI',
-                tagline: 'Point-of-care ultrasound diagnostic analysis for rural clinics.',
-                team: { name: 'BioHealth Labs' },
-                track: { name: 'Healthcare & Biotech' },
-                technologies: ['Python', 'PyTorch', 'FastAPI', 'React'],
-                normalizedScore: 91.2,
-                rawScore: 89.5,
-                evaluationsCount: 4,
-              },
-              {
-                id: 'p3',
-                rank: 3,
-                title: 'EcoTrack Carbon Ledger',
-                tagline: 'Cryptographic supply chain verification for carbon credits.',
-                team: { name: 'GreenLedger' },
-                track: { name: 'Sustainability & Climate' },
-                technologies: ['Solidity', 'Go', 'Next.js', 'PostgreSQL'],
-                normalizedScore: 88.4,
-                rawScore: 86.8,
-                evaluationsCount: 4,
-              },
-              {
-                id: 'p4',
-                rank: 4,
-                title: 'CivicVoice Multilingual',
-                tagline: 'Local governance accessibility with speech-to-speech dialects.',
-                team: { name: 'BhashaBridge' },
-                track: { name: 'Civic Tech' },
-                technologies: ['Whisper', 'TypeScript', 'Node.js'],
-                normalizedScore: 85.1,
-                rawScore: 84.0,
-                evaluationsCount: 3,
-              },
-            ]
-          });
         })
         .finally(() => setLoading(false));
     }
@@ -109,10 +44,11 @@ export const ResultsPage: React.FC = () => {
           <Trophy className="w-6 h-6" />
         </div>
         <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-          Results Pending Publication
+          {errorMessage ? 'Results Unavailable' : 'Results Pending Publication'}
         </h2>
         <p className="text-sm text-slate-500 font-sans leading-relaxed">
-          Judging evaluations are currently underway. Final normalized standings will be revealed once officially published by the organizers.
+          {errorMessage ||
+            'Judging evaluations are currently underway. Final normalized standings will be revealed once officially published by the organizers.'}
         </p>
         <Link to={`/gallery/${eventSlug}`} className="btn-secondary text-sm inline-flex items-center gap-2">
           <span>View Project Gallery</span>

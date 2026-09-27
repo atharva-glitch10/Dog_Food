@@ -163,9 +163,34 @@ async function countConsecutiveFailures(subscriptionId: string): Promise<number>
   return consecutive;
 }
 
+/**
+ * Domain actions that are delivered to webhook subscribers. They are emitted
+ * from the audit-log hook (middleware/auditLogger.ts) after a successful
+ * response, using the same action names as the audit trail.
+ */
+export const WEBHOOK_EVENT_TYPES = [
+  'TEAM_CREATED',
+  'TEAM_JOINED',
+  'PROJECT_SUBMITTED',
+  'PROJECT_FINALIZED',
+  'EVALUATION_SUBMITTED',
+  'SCORES_NORMALIZED',
+  'RESULTS_PUBLISHED',
+  'VOTE_CAST',
+  'CERTIFICATES_GENERATED',
+  'EVENT_STATUS_UPDATED',
+] as const;
+
+export type WebhookEventType = (typeof WEBHOOK_EVENT_TYPES)[number];
+
+/** Only the last 4 characters of a signing secret are shown after creation. */
+function maskSecret(secret: string): string {
+  return `••••${secret.slice(-4)}`;
+}
+
 export class WebhookService {
   async getSubscriptions(eventId: string) {
-    return prisma.webhookSubscription.findMany({
+    const subs = await prisma.webhookSubscription.findMany({
       where: { eventId },
       include: {
         deliveries: {
@@ -182,9 +207,10 @@ export class WebhookService {
         },
       },
     });
+    return subs.map((sub) => ({ ...sub, secret: maskSecret(sub.secret) }));
   }
 
-  async createSubscription(eventId: string, data: { targetUrl: string; events: string[] }) {
+  async createSubscription(eventId: string, data: { targetUrl: string; events: WebhookEventType[] }) {
     validateWebhookUrl(data.targetUrl);
 
     const event = await prisma.event.findUnique({ where: { id: eventId } });
@@ -203,6 +229,8 @@ export class WebhookService {
   }
 
   async deleteSubscription(subscriptionId: string) {
+    const existing = await prisma.webhookSubscription.findUnique({ where: { id: subscriptionId }, select: { id: true } });
+    if (!existing) throw new AppError('Webhook subscription not found', 404, 'WEBHOOK_NOT_FOUND');
     return prisma.webhookSubscription.delete({ where: { id: subscriptionId } });
   }
 

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../../utils/prisma.js';
 import { sendSuccess, AppError } from '../../utils/response.js';
 import { Role } from '@prisma/client';
+import { invalidateUserCache } from '../../middleware/requireAuth.js';
 
 export class UsersController {
   async getAllUsers(req: Request, res: Response, next: NextFunction) {
@@ -36,6 +37,7 @@ export class UsersController {
         data: { role },
         select: { id: true, email: true, name: true, role: true },
       });
+      invalidateUserCache(updated.id);
       return sendSuccess(res, updated, 200);
     } catch (err) {
       next(err);
@@ -52,6 +54,7 @@ export class UsersController {
         data: { isActive: !user.isActive },
         select: { id: true, email: true, name: true, isActive: true },
       });
+      invalidateUserCache(updated.id);
       return sendSuccess(res, updated, 200);
     } catch (err) {
       next(err);
